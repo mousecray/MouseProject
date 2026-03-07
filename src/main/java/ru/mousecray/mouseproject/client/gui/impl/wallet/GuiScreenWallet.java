@@ -62,7 +62,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         long       maxCoinValue = 1_000_000;
         MPFontSize fontSize     = MPFontSize.NORMAL;
 
-        // Кнопка закрытия
+        //Кнопка закрытия
         MPGuiCloseButton closeButton = getElementCache().getOrCreate(
                 "close_button", MPGuiCloseButton.class,
                 () -> new MPGuiCloseButton(
@@ -73,9 +73,10 @@ public class GuiScreenWallet extends MPGuiScreen {
         );
         addButton(closeButton, null, AnchorPosition.TOP_RIGHT, GuiVector.ZERO);
 
+        //Заглушка, проверяем есть ли кошелёк
         if (walletPipe == null) return;
 
-        // Заголовок
+        //Заголовок
         MPGuiStaticLabel titleLabel = getElementCache().getOrCreate(
                 "title_label", MPGuiStaticLabel.class,
                 () -> new MPGuiStaticLabel(MPGuiString.simple(walletStack.getDisplayName()), fontRenderer,
@@ -86,15 +87,14 @@ public class GuiScreenWallet extends MPGuiScreen {
         );
         addLabel(titleLabel, null, AnchorPosition.TOP_LEFT, GuiVector.ZERO);
 
-        float panelWidth         = 108f;
+        float panelWidth         = 114f;
         float buttonTakePutYSize = 13.0f;
         float buttonTakePutGap   = 10f;
 
-        // --- Кэшируемые кнопки действий ---
         MPGuiActionButton takeAction = getElementCache().getOrCreate(
                 "take_action", MPGuiActionButton.class,
                 () -> new MPGuiActionButton(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.take"),
-                        new GuiShape(0, 0, panelWidth, 14),
+                        new GuiShape(0, 0, panelWidth, 12),
                         TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize, event -> { }
                 ),
                 t -> {
@@ -106,7 +106,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         MPGuiActionButton putAction = getElementCache().getOrCreate(
                 "put_action", MPGuiActionButton.class,
                 () -> new MPGuiActionButton(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.put"),
-                        new GuiShape(0, 0, panelWidth, 14),
+                        new GuiShape(0, 0, panelWidth, 12),
                         TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize, event -> { }
                 ),
                 t -> {
@@ -166,22 +166,14 @@ public class GuiScreenWallet extends MPGuiScreen {
                 }
         );
 
-        // --- Кэширование панелей управления (чтобы не было GC-спайков при ресайзе) ---
-        MPGuiSimplePanel controlsLeft = getElementCache().getOrCreate(
-                "controls_left", MPGuiSimplePanel.class,
-                () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 60)),
+        // --- ПАНЕЛЬ УПРАВЛЕНИЯ ---
+        MPGuiSimplePanel controls = getElementCache().getOrCreate(
+                "controls_panel", MPGuiSimplePanel.class,
+                () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 67)),
                 t -> t.setLayoutType(LayoutType.LINEAR_VERTICAL),
                 t -> t.getChildren().clear()
         );
-        addPanel(controlsLeft, null, AnchorPosition.BOTTOM_LEFT, GuiVector.ZERO);
-
-        MPGuiSimplePanel controlsRight = getElementCache().getOrCreate(
-                "controls_right", MPGuiSimplePanel.class,
-                () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 60)),
-                t -> t.setLayoutType(LayoutType.LINEAR_VERTICAL),
-                t -> t.getChildren().clear()
-        );
-        addPanel(controlsRight, null, AnchorPosition.BOTTOM_RIGHT, GuiVector.ZERO);
+        addPanel(controls, null, AnchorPosition.TOP_LEFT, new GuiVector(0, 133));
 
         MPGuiSimplePanel row1 = getElementCache().getOrCreate(
                 "row1_panel", MPGuiSimplePanel.class,
@@ -196,7 +188,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         row1.addChild(createDynamicButton("btn_-1", "-1", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1, 1))), null, null, null);
         row1.addChild(createDynamicButton("btn_-10", "-10", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 10, 1))), null, null, null);
         row1.addChild(createDynamicButton("btn_-50", "-50", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 50, 1))), null, null, null);
-        controlsLeft.addChild(row1, new GuiMargin(0, 0, 2, 0), null, null);
+        controls.addChild(row1, null, null, null); // Убраны отступы чтобы всё плотно и красиво влезло в 67 высоты
 
         MPGuiSimplePanel row2 = getElementCache().getOrCreate(
                 "row2_panel", MPGuiSimplePanel.class,
@@ -211,27 +203,28 @@ public class GuiScreenWallet extends MPGuiScreen {
         row2.addChild(createDynamicButton("btn_-100", "-100", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 100, 1))), null, null, null);
         row2.addChild(createDynamicButton("btn_-500", "-500", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 500, 1))), null, null, null);
         row2.addChild(createDynamicButton("btn_-1K", "-1K", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1000, 1))), null, null, null);
-        controlsLeft.addChild(row2, new GuiMargin(0, 0, 4, 0), null, null);
+        controls.addChild(row2, null, null, null);
 
         MPGuiSimplePanel fieldSliderStack = getElementCache().getOrCreate(
                 "field_slider_stack", MPGuiSimplePanel.class,
-                () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 28)),
-                t -> t.setLayoutType(LayoutType.LINEAR_VERTICAL),
+                () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 18)),
+                t -> t.setLayoutType(LayoutType.FREE),
                 t -> t.getChildren().clear()
         );
-        controlsLeft.addChild(fieldSliderStack, null, null, null);
+        controls.addChild(fieldSliderStack, null, null, null);
 
-        fieldSliderStack.addChild(fieldTakePut, new GuiMargin(0, 0, 4, 0), null, null);
-        fieldSliderStack.addChild(slider, null, null, null);
+        fieldSliderStack.addChild(fieldTakePut, null, AnchorPosition.TOP_LEFT, null);
+        fieldSliderStack.addChild(slider, null, AnchorPosition.TOP_LEFT, new GuiVector(0, buttonTakePutYSize * 1.2f - 9));
 
-        controlsRight.addChild(takeAction, new GuiMargin(12, 0, 6, 0), null, null);
-        controlsRight.addChild(putAction, null, null, null);
+        controls.addChild(takeAction, null, null, null);
+        controls.addChild(putAction, null, null, null);
 
-        // --- МОНЕТЫ: Используем Grid Panel и строгое кэширование ---
+        // --- МОНЕТЫ ---
         float coinW        = 14.9f;
         float coinH        = 23f;
         int   slot_count_x = 7;
         float COLUMN_GAP   = 6f;
+        float colWidth     = slot_count_x * coinW; // ~104.3
 
         Map<Integer, List<CoinValue>> activeGroups = new HashMap<>();
 
@@ -272,7 +265,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                 t -> t.setLayoutType(LayoutType.FREE),
                 t -> t.getChildren().clear()
         );
-        addPanel(coinsContainer, null, AnchorPosition.TOP_LEFT, new GuiVector(0, 15));
+        addPanel(coinsContainer, null, AnchorPosition.TOP_LEFT, new GuiVector(4, 15));
 
         if (activeGroups.isEmpty()) {
             MPGuiStaticLabel emptyLabel = getElementCache().getOrCreate(
@@ -285,11 +278,11 @@ public class GuiScreenWallet extends MPGuiScreen {
             List<Map.Entry<Integer, List<CoinValue>>> groupsList = new ArrayList<>(activeGroups.entrySet());
 
             for (int col = 0; col < 2; col++) {
-                float colX = col * (panelWidth + COLUMN_GAP);
+                float colX = col * (colWidth + COLUMN_GAP);
 
                 MPGuiSimplePanel columnPanel = getElementCache().getOrCreate(
                         "column_panel_" + col, MPGuiSimplePanel.class,
-                        () -> new MPGuiSimplePanel(new GuiShape(colX, 0, panelWidth, 115)),
+                        () -> new MPGuiSimplePanel(new GuiShape(colX, 0, colWidth, 115)),
                         t -> t.setLayoutType(LayoutType.LINEAR_VERTICAL),
                         t -> {
                             t.setElementShape(t.getElementShape().withX(colX));
@@ -326,7 +319,7 @@ public class GuiScreenWallet extends MPGuiScreen {
 
                     MPGuiSimplePanel groupPanel = getElementCache().getOrCreate(
                             "group_panel_" + idx, MPGuiSimplePanel.class,
-                            () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, groupH)),
+                            () -> new MPGuiSimplePanel(new GuiShape(0, 0, colWidth, groupH)),
                             t -> t.setLayoutType(LayoutType.LINEAR_VERTICAL),
                             t -> {
                                 t.setElementShape(t.getElementShape().withHeight(groupH));
@@ -337,7 +330,7 @@ public class GuiScreenWallet extends MPGuiScreen {
 
                     MPGuiSimplePanel titlePanel = getElementCache().getOrCreate(
                             "title_panel_" + idx, MPGuiSimplePanel.class,
-                            () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 12)),
+                            () -> new MPGuiSimplePanel(new GuiShape(0, 0, colWidth, 12)),
                             t -> t.setLayoutType(LayoutType.ANCHOR),
                             t -> t.getChildren().clear()
                     );
@@ -346,7 +339,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                     MPGuiStaticLabel groupTitle = getElementCache().getOrCreate(
                             "group_title_" + idx, MPGuiStaticLabel.class,
                             () -> new MPGuiStaticLabel(MPGuiString.localized(groupLabelKey.$()), fontRenderer,
-                                    new GuiShape(0, 0, panelWidth - 15, 10), 14737632, fontSize),
+                                    new GuiShape(0, 0, colWidth - 15, 10), 14737632, fontSize),
                             null, t -> t.setGuiString(MPGuiString.localized(groupLabelKey.$())), null
                     );
                     titlePanel.addChild(groupTitle, null, AnchorPosition.MIDDLE_LEFT, null);
@@ -361,10 +354,9 @@ public class GuiScreenWallet extends MPGuiScreen {
                     );
                     titlePanel.addChild(selectAll, null, AnchorPosition.MIDDLE_RIGHT, null);
 
-                    // Сетка монет (Обновляем её размер динамически через добавленный setGridSize)
                     MPGuiGridPanel coinsGrid = getElementCache().getOrCreate(
                             "coins_grid_" + idx, MPGuiGridPanel.class,
-                            () -> new MPGuiGridPanel(new GuiShape(0, 0, panelWidth, rowsNum.$() * coinH), rowsNum.$(), slot_count_x),
+                            () -> new MPGuiGridPanel(new GuiShape(0, 0, colWidth, rowsNum.$() * coinH), rowsNum.$(), slot_count_x),
                             t -> t.setGaps(0, 0),
                             t -> {
                                 t.setGridSize(rowsNum.$(), slot_count_x);

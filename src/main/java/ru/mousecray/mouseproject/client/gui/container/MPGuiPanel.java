@@ -70,7 +70,6 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         children.add(child);
         childMargins.put(child, margin != null ? margin : new GuiMargin(0));
 
-        // Теперь якоря и оффсеты сохраняем всегда (они нужны и для грида, и для Anchor-компоновки)
         childAnchors.put(child, anchorPosition);
         childOffsets.put(child, offset != null ? offset : GuiVector.ZERO);
 
@@ -81,21 +80,17 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         }
     }
 
-    @Nullable
     protected GuiMargin getChildMargin(MPGuiElement<?> child) {
         return childMargins.getOrDefault(child, new GuiMargin(0));
     }
 
-    @Nullable
     protected AnchorPosition getChildAnchor(MPGuiElement<?> child) {
         return childAnchors.get(child);
     }
 
-    @Nullable
     protected GuiVector getChildOffset(MPGuiElement<?> child) {
         return childOffsets.getOrDefault(child, GuiVector.ZERO);
     }
-    // -------------------------------------------------------------
 
     @Override public void setId(int id) { this.id = id; }
 
@@ -133,15 +128,18 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
         if (calculatedElementShape.width() <= 0 || calculatedElementShape.height() <= 0) return;
 
-        if (layoutType == LayoutType.LINEAR_HORIZONTAL) layoutLinearHorizontal(parentDefaultSize, calculatedElementShape);
-        else if (layoutType == LayoutType.LINEAR_VERTICAL) layoutLinearVertical(parentDefaultSize, calculatedElementShape);
-        else if (layoutType == LayoutType.ANCHOR) layoutAnchor(parentDefaultSize, calculatedElementShape);
-        else layoutFree(parentDefaultSize, calculatedElementShape);
+        // Передаем parentContentSize (размер экрана), а не inner.size() (свой размер), чтобы масштаб сохранялся
+        if (layoutType == LayoutType.LINEAR_HORIZONTAL)
+            layoutLinearHorizontal(parentDefaultSize, parentContentSize, calculatedElementShape);
+        else if (layoutType == LayoutType.LINEAR_VERTICAL)
+            layoutLinearVertical(parentDefaultSize, parentContentSize, calculatedElementShape);
+        else if (layoutType == LayoutType.ANCHOR) layoutAnchor(parentDefaultSize, parentContentSize, calculatedElementShape);
+        else layoutFree(parentDefaultSize, parentContentSize, calculatedElementShape);
     }
 
-    private void layoutFree(IGuiVector parentDefaultSize, MutableGuiShape inner) {
+    private void layoutFree(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
         for (MPGuiElement<?> child : children) {
-            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            measureChildWithMargin(parentDefaultSize, parentContentSize, child, getChildMargin(child), marginTemp, measureTemp);
             float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
             float childW = measureTemp.x();
@@ -149,32 +147,32 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
             float posX = child.getScaleRules().isFixedHorizontal()
                     ? child.getElementShape().x()
-                    : calculateFlowComponentX(parentDefaultSize, inner.size(), child.getElementShape().x());
+                    : calculateFlowComponentX(parentDefaultSize, parentContentSize, child.getElementShape().x());
 
             float posY = child.getScaleRules().isFixedVertical()
                     ? child.getElementShape().y()
-                    : calculateFlowComponentY(parentDefaultSize, inner.size(), child.getElementShape().y());
+                    : calculateFlowComponentY(parentDefaultSize, parentContentSize, child.getElementShape().y());
 
             childAvailableTemp.withX(inner.x() + ml + posX);
             childAvailableTemp.withY(inner.y() + mt + posY);
             childAvailableTemp.withWidth(childW);
             childAvailableTemp.withHeight(childH);
 
-            child.calculate(parentDefaultSize, inner.size(), childAvailableTemp);
+            child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
         }
     }
 
-    private void layoutLinearHorizontal(IGuiVector parentDefaultSize, MutableGuiShape inner) {
+    private void layoutLinearHorizontal(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
         float fixedSum  = 0f;
         int   fillCount = 0;
 
         for (MPGuiElement<?> child : children) {
-            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            measureChildWithMargin(parentDefaultSize, parentContentSize, child, getChildMargin(child), marginTemp, measureTemp);
             float ml = marginTemp[0], mr = marginTemp[2];
 
             if (child.getScaleRules().isParentHorizontal()) {
                 fillCount++;
-                fixedSum += ml + mr; // Для элементов-филлеров бронируем место только под отступы
+                fixedSum += ml + mr;
             } else {
                 float prefW = measureTemp.x();
                 fixedSum += prefW + ml + mr;
@@ -186,7 +184,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
         float curX = inner.x();
         for (MPGuiElement<?> child : children) {
-            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            measureChildWithMargin(parentDefaultSize, parentContentSize, child, getChildMargin(child), marginTemp, measureTemp);
             float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
             float childAvailH = inner.height() - mt - mb;
@@ -195,11 +193,11 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             if (child.getScaleRules().isParentHorizontal()) {
                 childW = fillW;
             } else {
-                child.measurePreferred(parentDefaultSize, inner.size(), Float.MAX_VALUE, childAvailH, measureTemp);
+                child.measurePreferred(parentDefaultSize, parentContentSize, Float.MAX_VALUE, childAvailH, measureTemp);
                 childW = measureTemp.x();
             }
 
-            child.measurePreferred(parentDefaultSize, inner.size(), childW, childAvailH, measureTemp);
+            child.measurePreferred(parentDefaultSize, parentContentSize, childW, childAvailH, measureTemp);
             float childH = measureTemp.y();
 
             childAvailableTemp.withX(curX + ml);
@@ -207,18 +205,18 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             childAvailableTemp.withWidth(childW);
             childAvailableTemp.withHeight(childH);
 
-            child.calculate(parentDefaultSize, inner.size(), childAvailableTemp);
+            child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
 
             curX += ml + childW + mr;
         }
     }
 
-    private void layoutLinearVertical(IGuiVector parentDefaultSize, MutableGuiShape inner) {
+    private void layoutLinearVertical(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
         float fixedSum  = 0f;
         int   fillCount = 0;
 
         for (MPGuiElement<?> child : children) {
-            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            measureChildWithMargin(parentDefaultSize, parentContentSize, child, getChildMargin(child), marginTemp, measureTemp);
             float mt = marginTemp[1], mb = marginTemp[3];
 
             if (child.getScaleRules().isParentVertical()) {
@@ -235,7 +233,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
         float curY = inner.y();
         for (MPGuiElement<?> child : children) {
-            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            measureChildWithMargin(parentDefaultSize, parentContentSize, child, getChildMargin(child), marginTemp, measureTemp);
             float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
             float childAvailW = inner.width() - ml - mr;
@@ -244,11 +242,11 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             if (child.getScaleRules().isParentVertical()) {
                 childH = fillH;
             } else {
-                child.measurePreferred(parentDefaultSize, inner.size(), childAvailW, Float.MAX_VALUE, measureTemp);
+                child.measurePreferred(parentDefaultSize, parentContentSize, childAvailW, Float.MAX_VALUE, measureTemp);
                 childH = measureTemp.y();
             }
 
-            child.measurePreferred(parentDefaultSize, inner.size(), childAvailW, childH, measureTemp);
+            child.measurePreferred(parentDefaultSize, parentContentSize, childAvailW, childH, measureTemp);
             float childW = measureTemp.x();
 
             childAvailableTemp.withX(inner.x() + ml);
@@ -256,15 +254,15 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             childAvailableTemp.withWidth(childW);
             childAvailableTemp.withHeight(childH);
 
-            child.calculate(parentDefaultSize, inner.size(), childAvailableTemp);
+            child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
 
             curY += mt + childH + mb;
         }
     }
 
-    private void layoutAnchor(IGuiVector parentDefaultSize, MutableGuiShape inner) {
+    private void layoutAnchor(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
         for (MPGuiElement<?> child : children) {
-            measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            measureChildWithMargin(parentDefaultSize, parentContentSize, child, getChildMargin(child), marginTemp, measureTemp);
             float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
             float childW = measureTemp.x();
@@ -276,8 +274,8 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             AnchorPosition anchor = childAnchors.get(child);
             if (anchor != null) {
                 GuiVector offset  = childOffsets.getOrDefault(child, GuiVector.ZERO);
-                float     offsetX = calculateFlowComponentX(parentDefaultSize, inner.size(), offset.x());
-                float     offsetY = calculateFlowComponentY(parentDefaultSize, inner.size(), offset.y());
+                float     offsetX = calculateFlowComponentX(parentDefaultSize, parentContentSize, offset.x());
+                float     offsetY = calculateFlowComponentY(parentDefaultSize, parentContentSize, offset.y());
 
                 switch (anchor) {
                     case TOP_LEFT:
@@ -324,7 +322,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             childAvailableTemp.withWidth(childW);
             childAvailableTemp.withHeight(childH);
 
-            child.calculate(parentDefaultSize, inner.size(), childAvailableTemp);
+            child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
         }
     }
 
@@ -333,45 +331,42 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
     }
 
+    @Override public void onUpdate0(Minecraft mc, int mouseX, int mouseY)                                            {
+                                                                                                                         for (MPGuiElement<?> child : children)
+                                                                                                                             child.onUpdate0(mc, mouseX, mouseY);
+                                                                                                                     }
     @Override
-    public void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
-        for (MPGuiElement<?> child : children) child.onUpdate0(mc, mouseX, mouseY);
-    }
-
+    public void onMouseEnter0(Minecraft mc, int mouseX, int mouseY)                                                  {
+                                                                                                                         MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
+                                                                                                                         if (hovered != null)
+                                                                                                                             hovered.onMouseEnter0(mc, mouseX, mouseY);
+                                                                                                                     }
     @Override
-    public void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null) hovered.onMouseEnter0(mc, mouseX, mouseY);
-    }
-
+    public void onMouseLeave0(Minecraft mc, int mouseX, int mouseY)                                                  {
+                                                                                                                         MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
+                                                                                                                         if (hovered != null)
+                                                                                                                             hovered.onMouseLeave0(mc, mouseX, mouseY);
+                                                                                                                     }
     @Override
-    public void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null) hovered.onMouseLeave0(mc, mouseX, mouseY);
-    }
-
+    public void onMousePressed0(Minecraft mc, int mouseX, int mouseY)                                                {
+                                                                                                                         MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
+                                                                                                                         if (hovered != null)
+                                                                                                                             hovered.onMousePressed0(mc, mouseX, mouseY);
+                                                                                                                     }
     @Override
-    public void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null) hovered.onMousePressed0(mc, mouseX, mouseY);
-    }
-
-    @Override
-    public void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null) hovered.onMouseReleased0(mc, mouseX, mouseY);
-    }
-
+    public void onMouseReleased0(Minecraft mc, int mouseX, int mouseY)                                               {
+                                                                                                                         MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
+                                                                                                                         if (hovered != null)
+                                                                                                                             hovered.onMouseReleased0(mc, mouseX, mouseY);
+                                                                                                                     }
     @Override
     public void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null) hovered.onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
-    }
-
+                                                                                                                         MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
+                                                                                                                         if (hovered != null)
+                                                                                                                             hovered.onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
+                                                                                                                     }
     @Override
-    public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) {
-        return calculatedElementShape.contains(mouseX, mouseY);
-    }
+    public boolean mouseHover(Minecraft mc, int mouseX, int mouseY)                                                  { return calculatedElementShape.contains(mouseX, mouseY); }
 
     @Override @Nullable
     public MPGuiElement<?> findTopHovered(Minecraft mc, int mouseX, int mouseY) {
@@ -385,36 +380,31 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     }
 
     @Override
-    public void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        drawPanelBackground(mc, mouseX, mouseY, partialTicks);
-        for (MPGuiElement<?> child : children) child.onDrawBackground(mc, mouseX, mouseY, partialTicks);
-    }
-
+    public void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks)       {
+                                                                                                     drawPanelBackground(mc, mouseX, mouseY, partialTicks);
+                                                                                                     for (MPGuiElement<?> child : children)
+                                                                                                         child.onDrawBackground(mc, mouseX, mouseY, partialTicks);
+                                                                                                 }
     protected void drawPanelBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiTexture texture = texturePack.getCalculatedTexture(getActionState(), getPersistentState());
-        if (texture != null) {
-            texture.draw(
-                    mc,
-                    calculatedElementShape.x(), calculatedElementShape.y(),
-                    calculatedElementShape.width(), calculatedElementShape.height()
-            );
-        }
-    }
-
+                                                                                                     MPGuiTexture texture = texturePack.getCalculatedTexture(getActionState(), getPersistentState());
+                                                                                                     if (texture != null)
+                                                                                                         texture.draw(mc, calculatedElementShape.x(), calculatedElementShape.y(), calculatedElementShape.width(), calculatedElementShape.height());
+                                                                                                 }
     @Override
-    public void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (MPGuiElement<?> child : children) child.onDrawForeground(mc, mouseX, mouseY, partialTicks);
-    }
-
+    public void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks)       {
+                                                                                                     for (MPGuiElement<?> child : children)
+                                                                                                         child.onDrawForeground(mc, mouseX, mouseY, partialTicks);
+                                                                                                 }
     @Override
-    public void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (MPGuiElement<?> child : children) child.onDrawText(mc, mouseX, mouseY, partialTicks);
-    }
-
+    public void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks)             {
+                                                                                                     for (MPGuiElement<?> child : children)
+                                                                                                         child.onDrawText(mc, mouseX, mouseY, partialTicks);
+                                                                                                 }
     @Override
-    public void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (MPGuiElement<?> child : children) child.onDrawLast(mc, mouseX, mouseY, partialTicks);
-    }
+    public void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks)             {
+                                                                                                     for (MPGuiElement<?> child : children)
+                                                                                                         child.onDrawLast(mc, mouseX, mouseY, partialTicks);
+                                                                                                 }
 
     public void collectElements() {
         for (MPGuiElement<?> child : children) {
@@ -428,6 +418,8 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     @Override
     public void offsetCalculatedShape(float dx, float dy) {
         calculatedElementShape.offset(dx, dy);
-        for (MPGuiElement<?> child : children) child.offsetCalculatedShape(dx, dy);
+        for (MPGuiElement<?> child : children) {
+            child.offsetCalculatedShape(dx, dy);
+        }
     }
 }

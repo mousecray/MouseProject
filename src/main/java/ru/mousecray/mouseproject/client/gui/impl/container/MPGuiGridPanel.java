@@ -13,9 +13,9 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
 import java.util.Map;
 
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
 @SideOnly(Side.CLIENT)
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
     private final Map<MPGuiElement<?>, GridPos> childGridPos = new HashMap<>();
 
@@ -32,15 +32,11 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
         super(elementShape);
         gridRows = Math.max(1, rows);
         gridCols = Math.max(1, cols);
-        // Отключаем стандартные LayoutType, так как GridPanel обрабатывает свои элементы иначе
         setLayoutType(LayoutType.FREE);
     }
 
-    @Override public MPGuiGridPanel self() { return this; }
-
-    public MPGuiGridPanel setGaps(float gapX, float gapY) {
-        gridGapX = gapX;
-        gridGapY = gapY;
+    @Override
+    public MPGuiGridPanel self() {
         return this;
     }
 
@@ -50,9 +46,17 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
         return this;
     }
 
+    public MPGuiGridPanel setGaps(float gapX, float gapY) {
+        gridGapX = gapX;
+        gridGapY = gapY;
+        return this;
+    }
+
     public void addChild(MPGuiElement<?> child, @Nullable GuiMargin margin, @Nullable AnchorPosition anchorPosition, @Nullable GuiVector offset, @Nullable GridPos gridPos) {
         super.addChild(child, margin, anchorPosition, offset);
-        if (gridPos != null) childGridPos.put(child, gridPos);
+        if (gridPos != null) {
+            childGridPos.put(child, gridPos);
+        }
     }
 
     @Override
@@ -62,14 +66,18 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
         MutableGuiShape inner = getCalculatedElementShape();
         if (inner.width() <= 0 || inner.height() <= 0) return;
 
-        layoutGrid(parentDefaultSize, inner);
+        layoutGrid(parentDefaultSize, parentContentSize, inner);
     }
 
-    private void layoutGrid(IGuiVector parentDefaultSize, MutableGuiShape inner) {
+    private void layoutGrid(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
         if (gridRows <= 0 || gridCols <= 0) return;
 
-        float availW = inner.width() - gridGapX * (gridCols - 1);
-        float availH = inner.height() - gridGapY * (gridRows - 1);
+        // Масштабируем отступы корректно относительно глобального размера экрана
+        float scaledGapX = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, gridGapX);
+        float scaledGapY = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, gridGapY);
+
+        float availW = inner.width() - scaledGapX * (gridCols - 1);
+        float availH = inner.height() - scaledGapY * (gridRows - 1);
 
         float cellW = Math.max(0, availW / gridCols);
         float cellH = Math.max(0, availH / gridRows);
@@ -81,18 +89,19 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
             int     rs  = pos.rowSpan;
             int     cs  = pos.colSpan;
 
-            float cellAreaX = inner.x() + c * (cellW + gridGapX);
-            float cellAreaY = inner.y() + r * (cellH + gridGapY);
-            float cellAreaW = cellW * cs + gridGapX * (cs - 1);
-            float cellAreaH = cellH * rs + gridGapY * (rs - 1);
+            float cellAreaX = inner.x() + c * (cellW + scaledGapX);
+            float cellAreaY = inner.y() + r * (cellH + scaledGapY);
+            float cellAreaW = cellW * cs + scaledGapX * (cs - 1);
+            float cellAreaH = cellH * rs + scaledGapY * (rs - 1);
 
-            GuiRenderHelper.measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
+            // Передаем parentContentSize вместо inner.size(), чтобы дочерние элементы не ужимались
+            GuiRenderHelper.measureChildWithMargin(parentDefaultSize, parentContentSize, child, getChildMargin(child), marginTemp, measureTemp);
             float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
             float childAvailW = Math.max(0, cellAreaW - ml - mr);
             float childAvailH = Math.max(0, cellAreaH - mt - mb);
 
-            child.measurePreferred(parentDefaultSize, inner.size(), childAvailW, childAvailH, measureTemp);
+            child.measurePreferred(parentDefaultSize, parentContentSize, childAvailW, childAvailH, measureTemp);
             float childW = measureTemp.x();
             float childH = measureTemp.y();
 
@@ -102,8 +111,8 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
             AnchorPosition anchor = getChildAnchor(child);
             if (anchor != null) {
                 GuiVector offset  = getChildOffset(child);
-                float     offsetX = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, inner.size(), offset.x());
-                float     offsetY = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, inner.size(), offset.y());
+                float     offsetX = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, offset.x());
+                float     offsetY = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, offset.y());
 
                 switch (anchor) {
                     case TOP_LEFT:
@@ -150,7 +159,8 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
             childAvailableTemp.withWidth(childW);
             childAvailableTemp.withHeight(childH);
 
-            child.calculate(parentDefaultSize, inner.size(), childAvailableTemp);
+            // Передаем parentContentSize для сохранения правильного скейла
+            child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
         }
     }
 }
