@@ -6,6 +6,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @SideOnly(Side.CLIENT)
 public class MPGuiElementCache {
@@ -23,6 +25,28 @@ public class MPGuiElementCache {
             }
         }
         return null;
+    }
+
+    public <T extends MPGuiElement<T>> T getOrCreate(String key, Class<T> type, Supplier<T> typeSupplier, Consumer<T> createAction, Consumer<T> existAction, Consumer<T> finalAction) {
+        T t = get(key, type);
+        if (t == null) {
+            put(key, t = typeSupplier.get());
+            if (createAction != null) createAction.accept(t);
+        } else if (existAction != null) existAction.accept(t);
+        if (finalAction != null) finalAction.accept(t);
+        return t;
+    }
+
+    public <T extends MPGuiElement<T>> T getOrCreate(String key, Class<T> type, Supplier<T> typeSupplier, Consumer<T> createAction, Consumer<T> finalAction) {
+        return getOrCreate(key, type, typeSupplier, createAction, null, finalAction);
+    }
+
+    public <T extends MPGuiElement<T>> T getOrCreate(String key, Class<T> type, Supplier<T> typeSupplier, Consumer<T> createAction) {
+        return getOrCreate(key, type, typeSupplier, createAction, null);
+    }
+
+    public <T extends MPGuiElement<T>> T getOrCreate(String key, Class<T> type, Supplier<T> typeSupplier) {
+        return getOrCreate(key, type, typeSupplier, null);
     }
 
     public <T extends MPGuiElement<T>> void put(String key, T element) {
