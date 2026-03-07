@@ -19,7 +19,6 @@ import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiSlider;
 import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
-import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -202,17 +201,12 @@ public abstract class MPGuiScreen extends GuiScreen {
 
     protected void resetGui() {
         currentElementID = 0;
+        //noinspection rawtypes
         rootPanel = new MPGuiPanel(new GuiShape(0, 0, guiDefaultSize.x(), guiDefaultSize.y())) {
             @Override
             public MPGuiPanel self() {
                 return this;
             }
-
-            @Override
-            public void setGuiString(MPGuiString guiString) { }
-
-            @Override
-            public MPGuiString getGuiString() { return MPGuiString.simple(""); }
         };
         rootPanel.setLayoutType(LayoutType.ANCHOR);
         rootPanel.setScreen(this);
