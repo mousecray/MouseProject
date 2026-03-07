@@ -19,10 +19,10 @@ import java.util.Map;
 public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
     private final Map<MPGuiElement<?>, GridPos> childGridPos = new HashMap<>();
 
-    private final int   gridRows;
-    private final int   gridCols;
-    private       float gridGapX = 0f;
-    private       float gridGapY = 0f;
+    private int   gridRows;
+    private int   gridCols;
+    private float gridGapX = 0f;
+    private float gridGapY = 0f;
 
     private final MutableGuiShape  childAvailableTemp = new MutableGuiShape();
     private final MutableGuiVector measureTemp        = new MutableGuiVector();
@@ -41,6 +41,12 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
     public MPGuiGridPanel setGaps(float gapX, float gapY) {
         gridGapX = gapX;
         gridGapY = gapY;
+        return this;
+    }
+
+    public MPGuiGridPanel setGridSize(int rows, int cols) {
+        gridRows = Math.max(1, rows);
+        gridCols = Math.max(1, cols);
         return this;
     }
 
