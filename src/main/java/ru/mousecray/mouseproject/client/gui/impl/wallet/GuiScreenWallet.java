@@ -221,9 +221,11 @@ public class GuiScreenWallet extends MPGuiScreen {
                         false);
             }
         }
+        @SuppressWarnings("Convert2MethodRef") //Исправление для ошибки в javac. Компилятор проблемы не видит,
+        // но передать ссылку на конструктор в лямбду для нестатического внутреннего класса нельзя
         WalletSlider slider = getElementCache().getOrCreate(
                 "wallet_slider", WalletSlider.class,
-                WalletSlider::new,
+                () -> new WalletSlider(),
                 t -> t.onChange(value -> fieldTakePut.setNumberText(value == 0 ? 1 : (long) value * maxCoinValue / 100))
         );
         fieldSliderStack.addChild(slider, null, AnchorPosition.TOP_LEFT, new GuiVector(0, buttonTakePutYSize * 1.2f - 9));
