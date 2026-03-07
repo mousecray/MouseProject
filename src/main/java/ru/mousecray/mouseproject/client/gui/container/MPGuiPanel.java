@@ -70,10 +70,9 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         children.add(child);
         childMargins.put(child, margin != null ? margin : new GuiMargin(0));
 
-        if (layoutType == LayoutType.ANCHOR) {
-            childAnchors.put(child, anchorPosition);
-            childOffsets.put(child, offset != null ? offset : GuiVector.ZERO);
-        }
+        // Теперь якоря и оффсеты сохраняем всегда (они нужны и для грида, и для Anchor-компоновки)
+        childAnchors.put(child, anchorPosition);
+        childOffsets.put(child, offset != null ? offset : GuiVector.ZERO);
 
         child.setParent(self());
         if (screen != null) {
@@ -81,6 +80,22 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             child.setId(screen.genNextElementID());
         }
     }
+
+    @Nullable
+    protected GuiMargin getChildMargin(MPGuiElement<?> child) {
+        return childMargins.getOrDefault(child, new GuiMargin(0));
+    }
+
+    @Nullable
+    protected AnchorPosition getChildAnchor(MPGuiElement<?> child) {
+        return childAnchors.get(child);
+    }
+
+    @Nullable
+    protected GuiVector getChildOffset(MPGuiElement<?> child) {
+        return childOffsets.getOrDefault(child, GuiVector.ZERO);
+    }
+    // -------------------------------------------------------------
 
     @Override public void setId(int id) { this.id = id; }
 
@@ -155,12 +170,15 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
         for (MPGuiElement<?> child : children) {
             measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
-            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
+            float ml = marginTemp[0], mr = marginTemp[2];
 
-            float prefW = measureTemp.x();
-
-            if (child.getScaleRules().isParentHorizontal()) fillCount++;
-            fixedSum += prefW + ml + mr;
+            if (child.getScaleRules().isParentHorizontal()) {
+                fillCount++;
+                fixedSum += ml + mr; // Для элементов-филлеров бронируем место только под отступы
+            } else {
+                float prefW = measureTemp.x();
+                fixedSum += prefW + ml + mr;
+            }
         }
 
         float remaining = inner.width() - fixedSum;
@@ -174,8 +192,9 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             float childAvailH = inner.height() - mt - mb;
 
             float childW;
-            if (child.getScaleRules().isParentHorizontal()) childW = fillW;
-            else {
+            if (child.getScaleRules().isParentHorizontal()) {
+                childW = fillW;
+            } else {
                 child.measurePreferred(parentDefaultSize, inner.size(), Float.MAX_VALUE, childAvailH, measureTemp);
                 childW = measureTemp.x();
             }
@@ -200,12 +219,15 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
         for (MPGuiElement<?> child : children) {
             measureChildWithMargin(parentDefaultSize, inner.size(), child, getChildMargin(child), marginTemp, measureTemp);
-            float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
+            float mt = marginTemp[1], mb = marginTemp[3];
 
-            float prefH = measureTemp.y();
-
-            if (child.getScaleRules().isParentVertical()) fillCount++;
-            fixedSum += prefH + mt + mb;
+            if (child.getScaleRules().isParentVertical()) {
+                fillCount++;
+                fixedSum += mt + mb;
+            } else {
+                float prefH = measureTemp.y();
+                fixedSum += prefH + mt + mb;
+            }
         }
 
         float remaining = inner.height() - fixedSum;
@@ -219,8 +241,9 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             float childAvailW = inner.width() - ml - mr;
 
             float childH;
-            if (child.getScaleRules().isParentVertical()) childH = fillH;
-            else {
+            if (child.getScaleRules().isParentVertical()) {
+                childH = fillH;
+            } else {
                 child.measurePreferred(parentDefaultSize, inner.size(), childAvailW, Float.MAX_VALUE, measureTemp);
                 childH = measureTemp.y();
             }
@@ -303,10 +326,6 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
             child.calculate(parentDefaultSize, inner.size(), childAvailableTemp);
         }
-    }
-
-    private GuiMargin getChildMargin(MPGuiElement<?> child) {
-        return childMargins.getOrDefault(child, new GuiMargin(0));
     }
 
     @Override
@@ -409,8 +428,6 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     @Override
     public void offsetCalculatedShape(float dx, float dy) {
         calculatedElementShape.offset(dx, dy);
-        for (MPGuiElement<?> child : children) {
-            child.offsetCalculatedShape(dx, dy);
-        }
+        for (MPGuiElement<?> child : children) child.offsetCalculatedShape(dx, dy);
     }
 }

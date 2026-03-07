@@ -53,7 +53,6 @@ public class GuiScreenWallet extends MPGuiScreen {
 
     @Override
     public void initGui() {
-        super.initGui();
         resetGui();
         Keyboard.enableRepeatEvents(true);
 
@@ -77,7 +76,6 @@ public class GuiScreenWallet extends MPGuiScreen {
         if (walletPipe == null) return;
 
         // Title
-
         MPGuiStaticLabel titleLabel = getElementCache().getOrCreate(
                 "title_label", MPGuiStaticLabel.class,
                 () -> new MPGuiStaticLabel(MPGuiString.simple(walletStack.getDisplayName()), fontRenderer,
@@ -383,7 +381,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                                         new GuiShape(colInRow * W, 11 + row * H, W, H),
                                         fontSize, coinValue, e -> { }
                                 ),
-                                null,
+                                t -> t.setScaleRules(new GuiScaleRules()),
                                 t -> {
                                     t.setElementShape(t.getElementShape().withX(colInRow * W).withY(11 + row * H));
                                     t.setCount(coinValue);
@@ -396,6 +394,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                 }
             }
         }
+        super.initGui();
     }
 
     private MPGuiDefaultButton createSimpleButton(String key, String text, MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiDefaultButton>> onClick) {
