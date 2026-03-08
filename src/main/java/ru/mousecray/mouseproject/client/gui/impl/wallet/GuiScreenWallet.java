@@ -156,7 +156,8 @@ public class GuiScreenWallet extends MPGuiScreen {
                         new GuiVector(6.68f, 11), 0, 100, false);
             }
         }
-        @SuppressWarnings("Convert2MethodRef")
+        @SuppressWarnings("Convert2MethodRef") //Исправление для ошибки в javac. Компилятор проблемы не видит,
+        // но передать ссылку на конструктор в лямбду для нестатического внутреннего класса нельзя
         WalletSlider slider = getElementCache().getOrCreate(
                 "wallet_slider", WalletSlider.class,
                 () -> new WalletSlider(),
@@ -166,7 +167,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                 }
         );
 
-        // --- ПАНЕЛЬ УПРАВЛЕНИЯ ---
+        //Панель управления
         MPGuiSimplePanel controls = getElementCache().getOrCreate(
                 "controls_panel", MPGuiSimplePanel.class,
                 () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 67)),
@@ -175,6 +176,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         );
         addPanel(controls, null, AnchorPosition.TOP_LEFT, new GuiVector(0, 133));
 
+        //Ряд кнопок +1, +10, +50, -1, -10, -50
         MPGuiSimplePanel row1 = getElementCache().getOrCreate(
                 "row1_panel", MPGuiSimplePanel.class,
                 () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize)),
@@ -188,8 +190,9 @@ public class GuiScreenWallet extends MPGuiScreen {
         row1.addChild(createDynamicButton("btn_-1", "-1", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1, 1))), null, null, null);
         row1.addChild(createDynamicButton("btn_-10", "-10", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 10, 1))), null, null, null);
         row1.addChild(createDynamicButton("btn_-50", "-50", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 50, 1))), null, null, null);
-        controls.addChild(row1, null, null, null); // Убраны отступы чтобы всё плотно и красиво влезло в 67 высоты
+        controls.addChild(row1, null, null, null);
 
+        //Ряд кнопок +100, +500, +1K, -100, -500, -1K
         MPGuiSimplePanel row2 = getElementCache().getOrCreate(
                 "row2_panel", MPGuiSimplePanel.class,
                 () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize)),
@@ -205,6 +208,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         row2.addChild(createDynamicButton("btn_-1K", "-1K", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1000, 1))), null, null, null);
         controls.addChild(row2, null, null, null);
 
+        //Поле и слайдер
         MPGuiSimplePanel fieldSliderStack = getElementCache().getOrCreate(
                 "field_slider_stack", MPGuiSimplePanel.class,
                 () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 18)),
@@ -219,12 +223,12 @@ public class GuiScreenWallet extends MPGuiScreen {
         controls.addChild(takeAction, null, null, null);
         controls.addChild(putAction, null, null, null);
 
-        // --- МОНЕТЫ ---
+        //Монеты
         float coinW        = 14.9f;
         float coinH        = 23f;
         int   slot_count_x = 7;
         float COLUMN_GAP   = 6f;
-        float colWidth     = slot_count_x * coinW; // ~104.3
+        float colWidth     = slot_count_x * coinW; //~104.3
 
         Map<Integer, List<CoinValue>> activeGroups = new HashMap<>();
 
