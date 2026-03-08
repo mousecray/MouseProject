@@ -227,7 +227,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         float coinW        = 14.9f;
         float coinH        = 23f;
         int   slot_count_x = 7;
-        float COLUMN_GAP   = 6f;
+        float COLUMN_GAP   = 12f;
         float CELL_GAP     = 6f;
         float colWidth     = slot_count_x * coinW; //~104.3
 
@@ -267,7 +267,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         MPGuiSimpleScrollPanel coinsContainer = getElementCache().getOrCreate(
                 "coins_container", MPGuiSimpleScrollPanel.class,
                 () -> new MPGuiSimpleScrollPanel(new GuiShape(0, 0, 222, 115)),
-                t -> t.setLayoutType(LayoutType.FREE),
+                t -> t.setLayoutType(LayoutType.ANCHOR),
                 t -> t.getChildren().clear()
         );
         addPanel(coinsContainer, null, AnchorPosition.TOP_LEFT, new GuiVector(4, 15));
@@ -334,7 +334,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                                 t.getChildren().clear();
                             }
                     );
-                    columnPanel.addChild(groupPanel, new GuiMargin(0, 0, 8, 8f), null, null);
+                    columnPanel.addChild(groupPanel, new GuiMargin(0, 0, 8f, 8f), null, null);
 
                     MPGuiSimplePanel titlePanel = getElementCache().getOrCreate(
                             "title_panel_" + idx, MPGuiSimplePanel.class,
@@ -342,7 +342,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                             t -> t.setLayoutType(LayoutType.ANCHOR),
                             t -> t.getChildren().clear()
                     );
-                    groupPanel.addChild(titlePanel, null, null, null);
+                    groupPanel.addChild(titlePanel, new GuiMargin(0, 3f), null, null);
 
                     MPGuiStaticLabel groupTitle = getElementCache().getOrCreate(
                             "group_title_" + idx, MPGuiStaticLabel.class,
@@ -360,7 +360,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                                     new GuiShape(240, 0, 8, 8), fontSize, e -> { }
                             )
                     );
-                    titlePanel.addChild(selectAll, null, AnchorPosition.MIDDLE_RIGHT, null);
+                    titlePanel.addChild(selectAll, null, AnchorPosition.TOP_RIGHT, null);
 
                     MPGuiGridPanel coinsGrid = getElementCache().getOrCreate(
                             "coins_grid_" + idx, MPGuiGridPanel.class,
