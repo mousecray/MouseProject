@@ -228,6 +228,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         float coinH        = 23f;
         int   slot_count_x = 7;
         float COLUMN_GAP   = 6f;
+        float CELL_GAP     = 6f;
         float colWidth     = slot_count_x * coinW; //~104.3
 
         Map<Integer, List<CoinValue>> activeGroups = new HashMap<>();
@@ -361,7 +362,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                     MPGuiGridPanel coinsGrid = getElementCache().getOrCreate(
                             "coins_grid_" + idx, MPGuiGridPanel.class,
                             () -> new MPGuiGridPanel(new GuiShape(0, 0, colWidth, rowsNum.$() * coinH), rowsNum.$(), slot_count_x),
-                            t -> t.setGaps(0, 0),
+                            t -> t.setGaps(0, CELL_GAP),
                             t -> {
                                 t.setGridSize(rowsNum.$(), slot_count_x);
                                 t.setElementShape(t.getElementShape().withHeight(rowsNum.$() * coinH));
