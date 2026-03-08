@@ -288,7 +288,10 @@ public class GuiScreenWallet extends MPGuiScreen {
                 MPGuiSimplePanel columnPanel = getElementCache().getOrCreate(
                         "column_panel_" + col, MPGuiSimplePanel.class,
                         () -> new MPGuiSimplePanel(new GuiShape(colX, 0, colWidth, 115)),
-                        t -> t.setLayoutType(LayoutType.LINEAR_VERTICAL),
+                        t -> {
+                            t.setLayoutType(LayoutType.LINEAR_VERTICAL);
+                            t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT));
+                        },
                         t -> {
                             t.setElementShape(t.getElementShape().withX(colX));
                             t.getChildren().clear();
@@ -331,7 +334,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                                 t.getChildren().clear();
                             }
                     );
-                    columnPanel.addChild(groupPanel, new GuiMargin(0, 0, 8, 0), null, null);
+                    columnPanel.addChild(groupPanel, new GuiMargin(0, 0, 8, 8f), null, null);
 
                     MPGuiSimplePanel titlePanel = getElementCache().getOrCreate(
                             "title_panel_" + idx, MPGuiSimplePanel.class,

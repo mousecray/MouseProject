@@ -8,6 +8,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.client.gui.MPGuiButton;
+import ru.mousecray.mouseproject.client.gui.dim.GuiScaleRules;
+import ru.mousecray.mouseproject.client.gui.dim.GuiScaleType;
 import ru.mousecray.mouseproject.client.gui.dim.GuiShape;
 import ru.mousecray.mouseproject.client.gui.dim.GuiVector;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
@@ -16,6 +18,7 @@ import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.StateColorContainer;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexture;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
 import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
@@ -26,6 +29,7 @@ import java.util.function.Consumer;
 @SideOnly(Side.CLIENT)
 public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
     private final Consumer<MPGuiMouseClickEvent<MPGuiCheckButton>> onClick;
+    private final float                                            boxOriginalWidth;
 
     public MPGuiCheckButton(
             MPGuiString text,
@@ -35,7 +39,12 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
             MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiCheckButton>> onClick) {
         super(
                 text.get(),
-                elementShape.grow(-fontRenderer.getStringWidth(text.get()) - 1, 0, 0, 0),
+                new GuiShape(
+                        elementShape.x(),
+                        elementShape.y(),
+                        fontRenderer.getStringWidth(text.get()) + 2f + elementShape.width(),
+                        Math.max(elementShape.height(), fontRenderer.FONT_HEIGHT)
+                ),
                 MPGuiTexturePack.Builder
                         .create(texture, textureSize, textureShape.pos(), textureShape.size())
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
@@ -49,6 +58,8 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
                         .build(),
                 SoundEvents.UI_BUTTON_CLICK, fontSize
         );
+        boxOriginalWidth = elementShape.width();
+        setScaleRules(new GuiScaleRules(GuiScaleType.ORIGIN_VERTICAL));
         this.onClick = onClick;
         setGuiString(text);
         colorContainer = StateColorContainer.Builder
@@ -73,7 +84,12 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
             MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiCheckButton>> onClick) {
         super(
                 text,
-                elementShape.grow(-fontRenderer.getStringWidth(text) - 1, 0, 0, 0),
+                new GuiShape(
+                        elementShape.x(),
+                        elementShape.y(),
+                        fontRenderer.getStringWidth(text) + 2f + elementShape.width(),
+                        Math.max(elementShape.height(), fontRenderer.FONT_HEIGHT)
+                ),
                 MPGuiTexturePack.Builder
                         .create(texture, textureSize, textureShape.pos(), textureShape.size())
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
@@ -87,6 +103,8 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
                         .build(),
                 SoundEvents.UI_BUTTON_CLICK, fontSize
         );
+        boxOriginalWidth = elementShape.width();
+        setScaleRules(new GuiScaleRules(GuiScaleType.ORIGIN_VERTICAL));
         this.onClick = onClick;
         colorContainer = StateColorContainer.Builder
                 .create(14737632)
@@ -112,6 +130,24 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
     }
 
     @Override
+    protected void drawButtonBackgroundLayer(MPGuiTickEvent<MPGuiCheckButton> event) {
+        MPGuiTexture texture = getTexturePack().getCalculatedTexture(actionState, persistentState);
+        if (texture != null) {
+            float scaleY  = calculatedElementShape.height() / Math.max(1f, elementShape.height());
+            float curBoxW = boxOriginalWidth * scaleY;
+
+            float boxX = calculatedElementShape.x() + calculatedElementShape.width() - curBoxW;
+            float boxY = calculatedElementShape.y();
+
+            texture.draw(
+                    event.getMc(),
+                    boxX, boxY,
+                    curBoxW, calculatedElementShape.height()
+            );
+        }
+    }
+
+    @Override
     protected void drawButtonTextLayer(@Nonnull MPGuiTickEvent<MPGuiCheckButton> event) {
         if (displayString != null) {
             FontRenderer fontrenderer = event.getMc().fontRenderer;
@@ -127,7 +163,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
             GlStateManager.scale(scale, scale, 1.0F);
             GuiRenderHelper.drawString(
                     fontrenderer, displayString,
-                    (calculatedElementShape.x() - fontrenderer.getStringWidth(displayString) - 1) * inverseScale + calculatedTextOffsetTemp.x() * inverseScale,
+                    (calculatedElementShape.x()) * inverseScale + calculatedTextOffsetTemp.x() * inverseScale,
                     calculatedElementShape.y() * inverseScale + calculatedElementShape.height() * inverseScale / 2f - (fontrenderer.FONT_HEIGHT) / 2f + calculatedTextOffsetTemp.y() * inverseScale,
                     color, fontSize != MPFontSize.SMALL
             );
