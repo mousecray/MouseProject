@@ -31,8 +31,5 @@ public class MPGuiStaticLabel extends MPGuiLabel<MPGuiStaticLabel> {
         this(text, fontRenderer, elementShape, color, fontSize, null);
     }
 
-    @Override
-    public void onClick(MPGuiMouseClickEvent<MPGuiStaticLabel> event) {
-        // Static label usually does nothing on click
-    }
+    @Override public void onClick(MPGuiMouseClickEvent<MPGuiStaticLabel> event) { }
 }

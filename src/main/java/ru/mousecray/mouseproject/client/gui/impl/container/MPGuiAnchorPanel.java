@@ -32,7 +32,7 @@ public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
     @Override
     protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
         for (MPGuiElement<?> child : children) {
-            // 1. Вручную считаем отступы, масштабируя их от экрана
+            //1. Вручную считаем отступы, масштабируя их от экрана
             GuiMargin margin = getChildMargin(child);
             marginTemp[0] = calculateFlowComponentX(parentDefaultSize, parentContentSize, margin.getLeft());
             marginTemp[1] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getTop());
@@ -40,11 +40,11 @@ public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
             marginTemp[3] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getBottom());
             float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
-            // 2. Доступное пространство - это размер ПАНЕЛИ (inner)
+            //2. Доступное пространство - это размер ПАНЕЛИ (inner)
             float childAvailW = Math.max(0, inner.width() - ml - mr);
             float childAvailH = Math.max(0, inner.height() - mt - mb);
 
-            // 3. Вычисляем предпочтительный размер элемента (учитывает FLOW, PARENT, ORIGIN, FIXED)
+            //3. Вычисляем предпочтительный размер элемента (учитывает FLOW, PARENT, ORIGIN, FIXED)
             child.measurePreferred(parentDefaultSize, parentContentSize, childAvailW, childAvailH, measureTemp);
             float childW = measureTemp.x();
             float childH = measureTemp.y();
@@ -55,11 +55,11 @@ public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
             AnchorPosition anchor = childAnchors.getOrDefault(child, AnchorPosition.TOP_LEFT);
             GuiVector      offset = getChildOffset(child);
 
-            // 4. Смещения (offset) масштабируются ВСЕГДА
+            //4. Смещения (offset) масштабируются ВСЕГДА
             float offsetX = calculateFlowComponentX(parentDefaultSize, parentContentSize, offset.x());
             float offsetY = calculateFlowComponentY(parentDefaultSize, parentContentSize, offset.y());
 
-            // 5. Позиционирование по якорю
+            //5. Позиционирование по якорю
             switch (anchor) {
                 case TOP_LEFT:
                     childX += offsetX;

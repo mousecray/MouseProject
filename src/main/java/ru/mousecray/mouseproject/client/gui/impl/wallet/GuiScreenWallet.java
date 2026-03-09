@@ -167,14 +167,14 @@ public class GuiScreenWallet extends MPGuiScreen {
 
         MPGuiLinearPanel controls = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "controls_panel", MPGuiLinearPanel.class,
-                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, 67), LinearOrientation.VERTICAL),
+                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, 67), LinearPanelOrientation.VERTICAL),
                 t -> t.getChildren().clear()
         );
         addPanel(controls, null, AnchorPosition.TOP_LEFT, new GuiVector(0, 133));
 
         MPGuiLinearPanel row1 = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "row1_panel", MPGuiLinearPanel.class,
-                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize), LinearOrientation.HORIZONTAL),
+                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize), LinearPanelOrientation.HORIZONTAL),
                 t -> t.getChildren().clear()
         );
         row1.addChild(createDynamicButton("btn_+1", "+1", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1, 1))), null, null);
@@ -188,7 +188,7 @@ public class GuiScreenWallet extends MPGuiScreen {
 
         MPGuiLinearPanel row2 = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "row2_panel", MPGuiLinearPanel.class,
-                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize), LinearOrientation.HORIZONTAL),
+                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize), LinearPanelOrientation.HORIZONTAL),
                 t -> t.getChildren().clear()
         );
         row2.addChild(createDynamicButton("btn_+100", "+100", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 100, 1))), null, null);
@@ -281,7 +281,7 @@ public class GuiScreenWallet extends MPGuiScreen {
 
                 MPGuiLinearPanel columnPanel = MPGuiElementCache.INSTANCE.getOrCreate(
                         this, "column_panel_" + col, MPGuiLinearPanel.class,
-                        () -> new MPGuiLinearPanel(new GuiShape(colX, 0, colWidth, 115), LinearOrientation.VERTICAL),
+                        () -> new MPGuiLinearPanel(new GuiShape(colX, 0, colWidth, 115), LinearPanelOrientation.VERTICAL),
                         t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT)),
                         t -> {
                             t.setElementShape(t.getElementShape().withX(colX));
@@ -318,7 +318,7 @@ public class GuiScreenWallet extends MPGuiScreen {
 
                     MPGuiLinearPanel groupPanel = MPGuiElementCache.INSTANCE.getOrCreate(
                             this, "group_panel_" + idx, MPGuiLinearPanel.class,
-                            () -> new MPGuiLinearPanel(new GuiShape(0, 0, colWidth, groupH), LinearOrientation.VERTICAL),
+                            () -> new MPGuiLinearPanel(new GuiShape(0, 0, colWidth, groupH), LinearPanelOrientation.VERTICAL),
                             t -> {
                                 t.setElementShape(t.getElementShape().withHeight(groupH));
                                 t.getChildren().clear();

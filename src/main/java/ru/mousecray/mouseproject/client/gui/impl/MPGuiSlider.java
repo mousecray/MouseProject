@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 @SideOnly(Side.CLIENT)
 public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     private final MPGuiButton<?> knob;
+    private final MPGuiButton<?> track;
 
     private       int value;
     private final int min, max, range;
@@ -55,9 +56,9 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
             }
         }
 
-        TrackButton track = new TrackButton();
+        track = new TrackButton();
         track.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT));
-        addChild(track, null, null, null);
+        addChild(track); //Добавляем через базовый метод без отступов и смещений
 
         class KnobButton extends MPGuiButton<KnobButton> {
             public KnobButton() {
@@ -83,7 +84,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         KnobButton knobBtn = new KnobButton();
         knob = knobBtn;
         knobBtn.setScaleRules(new GuiScaleRules(GuiScaleType.FIXED));
-        addChild(knobBtn, null, null, null);
+        addChild(knobBtn);
 
         setValue(min);
     }
@@ -93,6 +94,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         float trackLength = isVertical
                 ? inner.height() - knob.getCalculatedElementShape().height()
                 : inner.width() - knob.getCalculatedElementShape().width();
+
         if (trackLength <= 0) return;
 
         float rel = isVertical
@@ -124,13 +126,8 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         }
     }
 
-    public void onClick(Consumer<MPGuiMouseClickEvent<T>> consumer) {
-        onClick = consumer;
-    }
-
-    public void onDrag(Consumer<MPGuiMouseDragEvent<T>> consumer) {
-        onDrag = consumer;
-    }
+    public void onClick(Consumer<MPGuiMouseClickEvent<T>> consumer) { onClick = consumer; }
+    public void onDrag(Consumer<MPGuiMouseDragEvent<T>> consumer)   { onDrag = consumer; }
 
     public T onChange(Consumer<Integer> consumer) {
         onDrag(e -> consumer.accept(getValue()));
@@ -153,8 +150,24 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     public float getProgress()  { return progress; }
     public boolean isVertical() { return isVertical; }
 
+    /**
+     * Специфичный для слайдера алгоритм компоновки
+     */
+    @Override
+    protected void layoutChildren(@Nonnull IGuiVector parentDefaultSize, @Nonnull IGuiVector parentContentSize, @Nonnull MutableGuiShape inner) {
+        //1. Компонуем трек (Track). У него правило PARENT, поэтому даем ему всё доступное пространство inner
+        childAvailableTemp.withShape(inner);
+        track.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
+
+        //2. Компонуем ползунок (Knob). Вызываем метод, который установит ему нужные координаты по прогрессу
+        recalculateKnobPosition();
+    }
+
     private void recalculateKnobPosition() {
         MutableGuiShape inner = getCalculatedElementShape();
+        if (inner.width() <= 0 || inner.height() <= 0) return;
+
+        //Берем базовый размер ползунка (он FIXED, так что берем из ElementShape)
         float trackLength = isVertical
                 ? inner.height() - knob.getElementShape().height()
                 : inner.width() - knob.getElementShape().width();
@@ -169,26 +182,30 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
                 ? (inner.width() - knob.getElementShape().width()) / 2f
                 : (inner.height() - knob.getElementShape().height()) / 2f;
 
-        MutableGuiShape knobShape = knob.getElementShape();
-        if (isVertical) knobShape.withX(knobSecondary).withY(knobPrimary);
-        else knobShape.withX(knobPrimary).withY(knobSecondary);
+        //Рассчитываем итоговую позицию ползунка относительно панели
+        float knobX = inner.x() + (isVertical ? knobSecondary : knobPrimary);
+        float knobY = inner.y() + (isVertical ? knobPrimary : knobSecondary);
 
+        childAvailableTemp.withX(knobX).withY(knobY)
+                .withWidth(knob.getElementShape().width())
+                .withHeight(knob.getElementShape().height());
+
+        //Применяем рассчитанную форму
         if (lastParentDefaultSize != null && lastParentContentSize != null) {
-            knob.calculate(lastParentDefaultSize, lastParentContentSize, inner);
+            knob.calculate(lastParentDefaultSize, lastParentContentSize, childAvailableTemp);
         } else {
             knob.calculate(new GuiVector(inner.width(), inner.height()),
                     new GuiVector(inner.width(), inner.height()),
-                    inner);
+                    childAvailableTemp);
         }
     }
 
     @Override
-    public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        super.calculate(parentDefaultSize, parentContentSize, available);
-
+    public void calculate(@Nonnull IGuiVector parentDefaultSize, @Nonnull IGuiVector parentContentSize, @Nonnull IGuiShape available) {
         lastParentDefaultSize = parentDefaultSize;
         lastParentContentSize = parentContentSize;
 
-        recalculateKnobPosition();
+        //Вызов super.calculate запустит наш layoutChildren, который корректно скомпонует трек и ползунок
+        super.calculate(parentDefaultSize, parentContentSize, available);
     }
 }

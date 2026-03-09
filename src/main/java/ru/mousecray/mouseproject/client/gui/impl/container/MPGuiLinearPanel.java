@@ -15,18 +15,18 @@ import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.*;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class MPGuiLinearPanel extends MPGuiPanel<MPGuiLinearPanel> {
-    private LinearOrientation linearOrientation;
+    private LinearPanelOrientation linearOrientation;
 
-    public MPGuiLinearPanel(GuiShape elementShape, LinearOrientation linearOrientation) {
+    public MPGuiLinearPanel(GuiShape elementShape, LinearPanelOrientation linearOrientation) {
         super(elementShape);
         this.linearOrientation = linearOrientation;
     }
 
-    public void setOrientation(LinearOrientation linearOrientation) { this.linearOrientation = linearOrientation; }
+    public void setOrientation(LinearPanelOrientation linearOrientation) { this.linearOrientation = linearOrientation; }
 
     @Override
     protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
-        if (linearOrientation == LinearOrientation.HORIZONTAL) layoutHorizontal(parentDefaultSize, parentContentSize, inner);
+        if (linearOrientation == LinearPanelOrientation.HORIZONTAL) layoutHorizontal(parentDefaultSize, parentContentSize, inner);
         else layoutVertical(parentDefaultSize, parentContentSize, inner);
     }
 

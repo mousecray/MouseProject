@@ -22,7 +22,7 @@ public class MPGuiFreePanel extends MPGuiPanel<MPGuiFreePanel> {
     @Override
     protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
         for (MPGuiElement<?> child : children) {
-            // 1. Отступы
+            //1. Отступы
             GuiMargin margin = getChildMargin(child);
             marginTemp[0] = calculateFlowComponentX(parentDefaultSize, parentContentSize, margin.getLeft());
             marginTemp[1] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getTop());
@@ -30,7 +30,7 @@ public class MPGuiFreePanel extends MPGuiPanel<MPGuiFreePanel> {
             marginTemp[3] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getBottom());
             float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
-            // 2. PARENT заполняет панель
+            //2. PARENT заполняет панель
             float childAvailW = Math.max(0, inner.width() - ml - mr);
             float childAvailH = Math.max(0, inner.height() - mt - mb);
 
@@ -38,11 +38,11 @@ public class MPGuiFreePanel extends MPGuiPanel<MPGuiFreePanel> {
             float childW = measureTemp.x();
             float childH = measureTemp.y();
 
-            // 3. Координаты X/Y подчиняются scaleRules (isFixed)
+            //3. Координаты X/Y подчиняются scaleRules (isFixed)
             float posX = child.getScaleRules().isFixedHorizontal() ? child.getElementShape().x() : calculateFlowComponentX(parentDefaultSize, parentContentSize, child.getElementShape().x());
             float posY = child.getScaleRules().isFixedVertical() ? child.getElementShape().y() : calculateFlowComponentY(parentDefaultSize, parentContentSize, child.getElementShape().y());
 
-            // 4. Оффсеты масштабируются
+            //4. Оффсеты масштабируются
             GuiVector offset  = getChildOffset(child);
             float     offsetX = calculateFlowComponentX(parentDefaultSize, parentContentSize, offset.x());
             float     offsetY = calculateFlowComponentY(parentDefaultSize, parentContentSize, offset.y());
