@@ -51,6 +51,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     private             boolean                  hovered;
 
     protected final MutableGuiShape elementShape = new MutableGuiShape(), calculatedElementShape = new MutableGuiShape();
+    protected final MutableGuiShape calculatedInnerShape = new MutableGuiShape();
 
     protected MPGuiString guiString = MPGuiString.simple("");
 
@@ -127,11 +128,29 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        GuiRenderHelper.calculateFlowComponentShapeWithPad(parentDefaultSize, parentContentSize, available, calculatedElementShape, elementShape, scaleRules, padding);
+        GuiRenderHelper.calculateFlowComponentShape(calculatedElementShape, parentDefaultSize, parentContentSize, elementShape, scaleRules, available);
+
+        GuiPadding pad  = getPadding();
+        float      padL = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getLeft());
+        float      padT = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getTop());
+        float      padR = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getRight());
+        float      padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getBottom());
+
+        calculatedInnerShape.withShape(calculatedElementShape);
+        calculatedInnerShape.grow(padL, padT, -padL - padR, -padT - padB);
+
         x = (int) calculatedElementShape.x();
         y = (int) calculatedElementShape.y();
         width = (int) calculatedElementShape.width();
         height = (int) calculatedElementShape.height();
+    }
+
+    @Override
+    public void offsetCalculatedShape(float dx, float dy) {
+        calculatedElementShape.offset(dx, dy);
+        calculatedInnerShape.offset(dx, dy);
+        x = (int) calculatedElementShape.x();
+        y = (int) calculatedElementShape.y();
     }
 
     @Override
@@ -159,7 +178,8 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         visible = state != null;
     }
 
-    @Override public final void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
+    @Override
+    public final void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
         if (++partialTick >= 20) partialTick = 0;
         if (tickDown >= 0) ++tickDown;
 
@@ -175,7 +195,8 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         }
     }
 
-    @Override public final void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
+    @Override
+    public final void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
             if (persistentState == null
@@ -187,7 +208,8 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         }
     }
 
-    @Override public final void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
+    @Override
+    public final void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
             if (actionState == GuiButtonActionState.HOVER) applyActionState(null);
@@ -196,7 +218,8 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         }
     }
 
-    @Override public final void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
+    @Override
+    public final void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
         MPGuiEventFactory.pushMouseClickEvent(releaseEvent, self(), mc, mouseX, mouseY);
         onAnyEventFire(releaseEvent);
         if (!releaseEvent.isCancelled()) {
@@ -214,13 +237,15 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         }
     }
 
-    @Override public void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
+    @Override
+    public void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
         MPGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
         onAnyEventFire(dragEvent);
         if (!dragEvent.isCancelled()) onMouseDragged(dragEvent);
     }
 
-    @Override public final void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
+    @Override
+    public final void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
         MPGuiEventFactory.pushMouseClickEvent(pressEvent, self(), mc, mouseX, mouseY);
         onAnyEventFire(pressEvent);
         if (!pressEvent.isCancelled()) {
@@ -261,7 +286,8 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
 
     protected void onAnyEventFire(MPGuiEvent<T> event) { }
 
-    @Override public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) {
+    @Override
+    public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) {
         return mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
     }
 
@@ -297,25 +323,29 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         onPlaySound0(Minecraft.getMinecraft(), Minecraft.getMinecraft().getSoundHandler(), soundClick, SoundSourceType.PRESS);
     }
 
-    @Override public final void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override
+    public final void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         MPGuiEventFactory.pushTickEvent(drawBGEvent, self(), mc, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawBGEvent);
         if (persistentState != null && !drawBGEvent.isCancelled()) drawLabelBackgroundLayer(drawBGEvent);
     }
 
-    @Override public final void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override
+    public final void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         MPGuiEventFactory.pushTickEvent(drawFGEvent, self(), mc, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawFGEvent);
         if (persistentState != null && !drawFGEvent.isCancelled()) drawLabelForegroundLayer(drawFGEvent);
     }
 
-    @Override public final void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override
+    public final void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         MPGuiEventFactory.pushTickEvent(drawTextEvent, self(), mc, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawTextEvent);
         if (persistentState != null && !drawTextEvent.isCancelled()) drawLabelTextLayer(drawTextEvent);
     }
 
-    @Override public final void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override
+    public final void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         MPGuiEventFactory.pushTickEvent(drawLastEvent, self(), mc, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawLastEvent);
         if (persistentState != null && !drawLastEvent.isCancelled()) drawLabelLastLayer(drawLastEvent);
@@ -340,7 +370,10 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         if (!visible) return;
 
         GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.tryBlendFuncSeparate(
+                GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
+        );
 
         int color = colorContainer.getCalculatedColor(actionState, persistentState, 0);
 
@@ -351,7 +384,12 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
             inverseScale = 1.0F / scale;
         }
 
-        float centerY = (y + height / 2f) * inverseScale;
+        float innerX = calculatedInnerShape.x();
+        float innerY = calculatedInnerShape.y();
+        float innerW = calculatedInnerShape.width();
+        float innerH = calculatedInnerShape.height();
+
+        float centerY = (innerY + innerH / 2f) * inverseScale;
         float j       = centerY - labels.size() * (fontRenderer.FONT_HEIGHT + 1) * inverseScale / 2f;
 
         GlStateManager.pushMatrix();
@@ -360,10 +398,13 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
 
         GlStateManager.scale(scale, scale, 1.0F);
         for (int k = 0; k < labels.size(); ++k) {
+            float lineY = j + k * (fontRenderer.FONT_HEIGHT + 1) * inverseScale;
             if (centered) {
-                GuiRenderHelper.drawCenteredString(fontRenderer, labels.get(k), x * inverseScale + width * inverseScale / 2f, j + k * (fontRenderer.FONT_HEIGHT + 1) * inverseScale, color, true);
+                GuiRenderHelper.drawCenteredString(
+                        fontRenderer, labels.get(k), (innerX + innerW / 2f) * inverseScale, lineY, color, true
+                );
             } else {
-                GuiRenderHelper.drawString(fontRenderer, labels.get(k), x * inverseScale, j + k * (fontRenderer.FONT_HEIGHT + 1) * inverseScale, color, true);
+                GuiRenderHelper.drawString(fontRenderer, labels.get(k), innerX * inverseScale, lineY, color, true);
             }
         }
         GlStateManager.popMatrix();
@@ -373,12 +414,5 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     public GuiLabel setCentered() {
         centered = true;
         return this;
-    }
-
-    @Override
-    public void offsetCalculatedShape(float dx, float dy) {
-        calculatedElementShape.offset(dx, dy);
-        x = (int) calculatedElementShape.x();
-        y = (int) calculatedElementShape.y();
     }
 }

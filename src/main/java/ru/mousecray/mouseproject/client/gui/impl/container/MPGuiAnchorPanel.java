@@ -103,4 +103,9 @@ public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
             child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
         }
     }
+
+    @Override
+    protected void onChildrenCleared() {
+        childAnchors.clear();
+    }
 }

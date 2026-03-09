@@ -134,4 +134,10 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
             child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
         }
     }
+
+    @Override
+    protected void onChildrenCleared() {
+        childAnchors.clear();
+        childGridPos.clear();
+    }
 }

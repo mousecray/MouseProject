@@ -6,8 +6,8 @@ import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.MPGuiScreen;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class MPGuiElementCache {
     public static final MPGuiElementCache INSTANCE = new MPGuiElementCache();
 
-    private final Map<String, WeakReference<MPGuiElement<?>>> cache = new WeakHashMap<>();
+    private final Map<String, WeakReference<MPGuiElement<?>>> cache = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public <T extends MPGuiElement<T>> T get(MPGuiScreen screen, String key, Class<T> type) {

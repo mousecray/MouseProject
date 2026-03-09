@@ -51,7 +51,8 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     private final   MPGuiSoundEvent<T>     soundEvent     = new MPGuiSoundEvent<>();
     protected final MutableGuiShape        elementShape   = new MutableGuiShape(),
             calculatedElementShape                        = new MutableGuiShape();
-    protected final MPFontSize fontSize;
+    protected final MutableGuiShape calculatedInnerShape = new MutableGuiShape();
+    protected final MPFontSize      fontSize;
 
     protected StateColorContainer colorContainer = StateColorContainer.Builder
             .create(14737632)
@@ -105,11 +106,29 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        GuiRenderHelper.calculateFlowComponentShapeWithPad(parentDefaultSize, parentContentSize, available, calculatedElementShape, elementShape, scaleRules, padding);
+        GuiRenderHelper.calculateFlowComponentShape(calculatedElementShape, parentDefaultSize, parentContentSize, elementShape, scaleRules, available);
+
+        GuiPadding pad  = getPadding();
+        float      padL = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getLeft());
+        float      padT = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getTop());
+        float      padR = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getRight());
+        float      padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getBottom());
+
+        calculatedInnerShape.withShape(calculatedElementShape);
+        calculatedInnerShape.grow(padL, padT, -padL - padR, -padT - padB);
+
         x = (int) calculatedElementShape.x();
         y = (int) calculatedElementShape.y();
         width = (int) calculatedElementShape.width();
         height = (int) calculatedElementShape.height();
+    }
+
+    @Override
+    public void offsetCalculatedShape(float dx, float dy) {
+        calculatedElementShape.offset(dx, dy);
+        calculatedInnerShape.offset(dx, dy);
+        x = (int) calculatedElementShape.x();
+        y = (int) calculatedElementShape.y();
     }
 
     @Override
@@ -444,14 +463,19 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             inverseScale = 1.0F / scale;
         }
 
-        FontRenderer fontRenderer    = event.getMc().fontRenderer;
-        int          textColor       = colorContainer.getCalculatedColor(actionState, persistentState, 0);
-        String       visibleText     = getText();
-        int          cursorPos       = getCursorPosition() - lineScrollOffset;
-        float        textX           = (x + width / 35f) * inverseScale;
-        float        textY           = y * inverseScale + height * inverseScale / 2f * inverseScale - (fontRenderer.FONT_HEIGHT + 2) * inverseScale / 2f * inverseScale;
-        int          selectionEndPos = getSelectionEnd() - lineScrollOffset;
+        FontRenderer fontRenderer = event.getMc().fontRenderer;
+        int          textColor    = colorContainer.getCalculatedColor(actionState, persistentState, 0);
+        String       visibleText  = getText();
+        int          cursorPos    = getCursorPosition() - lineScrollOffset;
 
+        float innerX = calculatedInnerShape.x();
+        float innerY = calculatedInnerShape.y();
+        float innerH = calculatedInnerShape.height();
+
+        float textX = innerX * inverseScale;
+        float textY = (innerY + innerH / 2f) * inverseScale - (fontRenderer.FONT_HEIGHT / 2f);
+
+        int selectionEndPos = getSelectionEnd() - lineScrollOffset;
 
         GlStateManager.pushMatrix();
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
@@ -461,9 +485,13 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
         String text = getText();
         if (text != null && text.isEmpty() && placeholder.get() != null && !placeholder.get().isEmpty()) {
-            GuiRenderHelper.drawString(fontRenderer, placeholder.get(), textX, textY, PLACEHOLDER_TEXT_COLOR, fontSize != MPFontSize.SMALL);
+            GuiRenderHelper.drawString(
+                    fontRenderer, placeholder.get(), textX, textY, PLACEHOLDER_TEXT_COLOR,
+                    fontSize != MPFontSize.SMALL
+            );
         }
 
+        if (selectionEndPos < 0) selectionEndPos = 0;
         if (selectionEndPos > visibleText.length()) selectionEndPos = visibleText.length();
 
         boolean showCursor    = isFocused() && partialTick % 20 < 10 && cursorPos >= 0 && cursorPos <= visibleText.length();
@@ -474,24 +502,36 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             String textBeforeCursor = cursorPos >= 0 && cursorPos <= visibleText.length()
                     ? visibleText.substring(0, cursorPos)
                     : visibleText;
-            cursorX = fontRenderer.getStringWidth(textBeforeCursor) + textX;
+            cursorX = textX + fontRenderer.getStringWidth(textBeforeCursor);
         }
 
+        float maxTextWidth = calculatedInnerShape.width() * inverseScale;
+
         if (cursorPos < 0) cursorX = textX;
-        else if (cursorPos > visibleText.length()) cursorX = textX + getWidth();
+        else if (cursorPos > visibleText.length()) cursorX = textX + maxTextWidth;
         else if (isCursorAtEnd) cursorX--;
 
         if (showCursor) {
             if (isCursorAtEnd) {
-                GuiRenderHelper.drawRect(cursorX, textY - 1, cursorX + 1, textY + 1 + fontRenderer.FONT_HEIGHT, CURSOR_RECT_COLOR);
+                GuiRenderHelper.drawRect(
+                        cursorX, textY - 1, cursorX + 1, textY + 1 + fontRenderer.FONT_HEIGHT, CURSOR_RECT_COLOR
+                );
             } else {
-                GuiRenderHelper.drawString(fontRenderer, "|", cursorX, textY, textColor, fontSize != MPFontSize.SMALL);
+                GuiRenderHelper.drawString(
+                        fontRenderer, "|", cursorX, textY, textColor, fontSize != MPFontSize.SMALL
+                );
             }
         }
 
         if (selectionEndPos != cursorPos) {
             float selectionEndX = textX + fontRenderer.getStringWidth(visibleText.substring(0, selectionEndPos));
-            drawSelectionBox(cursorX, textY - 1, selectionEndX - 1, textY + 1 + fontRenderer.FONT_HEIGHT);
+
+            float maxX = (calculatedInnerShape.x() + calculatedInnerShape.width()) * inverseScale;
+
+            drawSelectionBox(
+                    cursorX, textY - 1, selectionEndX - 1,
+                    textY + 1 + fontRenderer.FONT_HEIGHT, textX, maxX
+            );
         }
 
         GlStateManager.popMatrix();
@@ -523,10 +563,17 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
         FontRenderer fontRenderer = event.getMc().fontRenderer;
         int          textColor    = colorContainer.getCalculatedColor(actionState, persistentState, 0);
-        String       visibleText  = fontRenderer.trimStringToWidth(getText().substring(lineScrollOffset), getWidth());
-        float        textX        = (x + width / 35f) * inverseScale;
-        float        textY        = y * inverseScale + height * inverseScale / 2f * inverseScale - (fontRenderer.FONT_HEIGHT + 2) * inverseScale / 2f * inverseScale;
-        int          cursorPos    = getCursorPosition() - lineScrollOffset;
+
+        float innerX = calculatedInnerShape.x();
+        float innerY = calculatedInnerShape.y();
+        float innerH = calculatedInnerShape.height();
+
+        int    maxInnerWidth = (int) (calculatedInnerShape.width() * inverseScale);
+        String visibleText   = fontRenderer.trimStringToWidth(getText().substring(lineScrollOffset), maxInnerWidth);
+
+        float textX     = innerX * inverseScale;
+        float textY     = (innerY + innerH / 2f) * inverseScale - (fontRenderer.FONT_HEIGHT / 2f);
+        int   cursorPos = getCursorPosition() - lineScrollOffset;
 
         if (!visibleText.isEmpty()) {
             GlStateManager.pushMatrix();
@@ -537,16 +584,21 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             String textBeforeCursor = cursorPos >= 0 && cursorPos <= visibleText.length()
                     ? visibleText.substring(0, cursorPos)
                     : visibleText;
-            float currentX = GuiRenderHelper.drawString(fontRenderer, textBeforeCursor, textX, textY, textColor, fontSize != MPFontSize.SMALL);
+            float currentX = GuiRenderHelper.drawString(
+                    fontRenderer, textBeforeCursor, textX, textY, textColor, fontSize != MPFontSize.SMALL
+            );
 
             if (cursorPos >= 0 && cursorPos < visibleText.length()) {
-                GuiRenderHelper.drawString(fontRenderer, visibleText.substring(cursorPos), currentX, textY, textColor, fontSize != MPFontSize.SMALL);
+                GuiRenderHelper.drawString(
+                        fontRenderer, visibleText.substring(cursorPos), currentX, textY, textColor,
+                        fontSize != MPFontSize.SMALL
+                );
             }
             GlStateManager.popMatrix();
         }
     }
 
-    private void drawSelectionBox(float startX, float startY, float endX, float endY) {
+    private void drawSelectionBox(float startX, float startY, float endX, float endY, float minX, float maxX) {
         if (startX < endX) {
             float i = startX;
             startX = endX;
@@ -559,8 +611,10 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             endY = j;
         }
 
-        if (endX > x + width) endX = x + width;
-        if (startX > x + width) startX = x + width;
+        if (endX > maxX) endX = maxX;
+        if (startX > maxX) startX = maxX;
+        if (endX < minX) endX = minX;
+        if (startX < minX) startX = minX;
 
         Tessellator   tessellator   = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
@@ -649,12 +703,5 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             }
         }
         return "";
-    }
-
-    @Override
-    public void offsetCalculatedShape(float dx, float dy) {
-        calculatedElementShape.offset(dx, dy);
-        x = (int) calculatedElementShape.x();
-        y = (int) calculatedElementShape.y();
     }
 }

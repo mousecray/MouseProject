@@ -295,20 +295,6 @@ public class GuiRenderHelper {
         target.offset(available.x(), available.y());
     }
 
-    public static void calculateFlowComponentShapeWithPad(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available, MutableGuiShape calculatedElementShape, MutableGuiShape elementShape, GuiScaleRules scaleRules, GuiPadding padding) {
-        calculateFlowComponentShape(
-                calculatedElementShape,
-                parentDefaultSize, parentContentSize, elementShape, scaleRules, available
-        );
-
-        float padL = calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getLeft());
-        float padT = calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getTop());
-        float padR = calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getRight());
-        float padB = calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getBottom());
-
-        calculatedElementShape.grow(padL, padT, -padL - padR, -padT - padB);
-    }
-
     public static void measureChildWithMargin(
             IGuiVector parentDefaultSize, IGuiVector innerSize,
             MPGuiElement<?> child, GuiMargin margin,

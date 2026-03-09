@@ -24,7 +24,7 @@ import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.*;
+import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.measurePreferredWithScaleRules;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -45,6 +45,7 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
     private final MPGuiSoundEvent<T>     soundEvent = new MPGuiSoundEvent<>();
 
     protected final MutableGuiShape elementShape, calculatedElementShape = new MutableGuiShape();
+    protected final MutableGuiShape  calculatedInnerShape     = new MutableGuiShape();
     protected final MutableGuiVector calculatedTextOffsetTemp = new MutableGuiVector();
     protected final MPFontSize       fontSize;
 
@@ -315,6 +316,11 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
             float scale    = fontSize.getScale() * textScaleMultiplayer;
             float invScale = 1.0F / scale;
 
+            float innerX = calculatedInnerShape.x();
+            float innerY = calculatedInnerShape.y();
+            float innerW = calculatedInnerShape.width();
+            float innerH = calculatedInnerShape.height();
+
             GlStateManager.pushMatrix();
             GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
             GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
@@ -323,8 +329,8 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
 
             GuiRenderHelper.drawCenteredString(
                     fr, text,
-                    (calculatedElementShape.x() + calculatedElementShape.width() / 2f) * invScale + calculatedTextOffsetTemp.x() * invScale,
-                    (calculatedElementShape.y() + calculatedElementShape.height() / 2f) * invScale - (fr.FONT_HEIGHT / 2f) + calculatedTextOffsetTemp.y() * invScale,
+                    (innerX + innerW / 2f) * invScale + calculatedTextOffsetTemp.x() * invScale,
+                    (innerY + innerH / 2f) * invScale - (fr.FONT_HEIGHT / 2f) + calculatedTextOffsetTemp.y() * invScale,
                     color,
                     fontSize != MPFontSize.SMALL
             );
@@ -378,10 +384,24 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        calculateFlowComponentShapeWithPad(parentDefaultSize, parentContentSize, available, calculatedElementShape, elementShape, scaleRules, padding);
+        GuiRenderHelper.calculateFlowComponentShape(
+                calculatedElementShape, parentDefaultSize, parentContentSize,
+                elementShape, scaleRules, available
+        );
+
+        GuiPadding pad  = getPadding();
+        float      padL = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getLeft());
+        float      padT = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getTop());
+        float      padR = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getRight());
+        float      padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getBottom());
+
+        calculatedInnerShape.withShape(calculatedElementShape);
+        calculatedInnerShape.grow(padL, padT, -padL - padR, -padT - padB);
 
         if (textOffset != null) {
-            calculateFlowComponentVector(calculatedTextOffsetTemp, parentDefaultSize, parentContentSize, textOffset);
+            GuiRenderHelper.calculateFlowComponentVector(
+                    calculatedTextOffsetTemp, parentDefaultSize, parentContentSize, textOffset
+            );
         } else calculatedTextOffsetTemp.withX(0).withY(0);
 
         x = (int) calculatedElementShape.x();
@@ -391,17 +411,18 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
     }
 
     @Override
+    public void offsetCalculatedShape(float dx, float dy) {
+        calculatedElementShape.offset(dx, dy);
+        calculatedInnerShape.offset(dx, dy);
+        x = (int) calculatedElementShape.x();
+        y = (int) calculatedElementShape.y();
+    }
+
+    @Override
     public void measurePreferred(
             IGuiVector parentDefaultSize, IGuiVector parentContentSize,
             float suggestedX, float suggestedY, MutableGuiVector result
     ) {
         measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
-    }
-
-    @Override
-    public void offsetCalculatedShape(float dx, float dy) {
-        calculatedElementShape.offset(dx, dy);
-        x = (int) calculatedElementShape.x();
-        y = (int) calculatedElementShape.y();
     }
 }

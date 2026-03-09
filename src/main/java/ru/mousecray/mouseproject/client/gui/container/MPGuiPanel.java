@@ -10,6 +10,7 @@ import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.MPGuiScreen;
 import ru.mousecray.mouseproject.client.gui.MPGuiTextField;
 import ru.mousecray.mouseproject.client.gui.dim.*;
+import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexture;
@@ -25,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.calculateFlowComponentShapeWithPad;
-import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.measurePreferredWithScaleRules;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -117,16 +116,31 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        calculateFlowComponentShapeWithPad(parentDefaultSize, parentContentSize, available, calculatedElementShape, elementShape, scaleRules, padding);
+        GuiRenderHelper.calculateFlowComponentShape(
+                calculatedElementShape,
+                parentDefaultSize, parentContentSize, elementShape, scaleRules, available
+        );
+
         if (calculatedElementShape.width() <= 0 || calculatedElementShape.height() <= 0) return;
-        layoutChildren(parentDefaultSize, parentContentSize, calculatedElementShape);
+
+        //2. Масштабируем отступы
+        float padL = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getLeft());
+        float padT = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getTop());
+        float padR = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getRight());
+        float padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getBottom());
+
+        //3. Создаем ВНУТРЕННЮЮ область (уже сжатую паддингом) и передаем её детям
+        childAvailableTemp.withShape(calculatedElementShape);
+        childAvailableTemp.grow(padL, padT, -padL - padR, -padT - padB);
+
+        layoutChildren(parentDefaultSize, parentContentSize, childAvailableTemp);
     }
 
     protected abstract void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner);
 
     @Override
     public void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result) {
-        measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
+        GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
     }
 
     @Override public void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
@@ -224,4 +238,13 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         calculatedElementShape.offset(dx, dy);
         for (MPGuiElement<?> child : children) child.offsetCalculatedShape(dx, dy);
     }
+
+    public void removeAllChildren() {
+        children.clear();
+        childMargins.clear();
+        childOffsets.clear();
+        onChildrenCleared();
+    }
+
+    protected void onChildrenCleared() { }
 }

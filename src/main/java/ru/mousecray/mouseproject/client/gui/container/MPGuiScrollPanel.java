@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.MPGuiScreen;
 import ru.mousecray.mouseproject.client.gui.dim.*;
+import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
@@ -19,7 +20,6 @@ import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.calculateFlowComponentShapeWithPad;
 import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.measurePreferredWithScaleRules;
 
 @SideOnly(Side.CLIENT)
@@ -65,7 +65,10 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        calculateFlowComponentShapeWithPad(parentDefaultSize, parentContentSize, available, calculatedElementShape, elementShape, scaleRules, new GuiPadding(0));
+        GuiRenderHelper.calculateFlowComponentShape(
+                calculatedElementShape, parentDefaultSize, parentContentSize,
+                elementShape, scaleRules, available
+        );
 
         if (content != null) {
             MutableGuiShape contentAvail = calculatedElementShape.toMutable();

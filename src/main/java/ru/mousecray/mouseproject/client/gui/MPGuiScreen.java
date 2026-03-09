@@ -281,11 +281,14 @@ public abstract class MPGuiScreen extends GuiScreen {
     protected void onClickLabel(MPGuiLabel<?> label)                 { }
 
     public void bake() {
-        rootPanel.calculate(guiDefaultSize, guiContentShape.size(), guiContentShape);
-        buttonList.clear();
-        labelList.clear();
-        textFieldList.clear();
-        rootPanel.collectElements();
+        if (rootPanel != null) {
+            rootPanel.calculate(guiDefaultSize, guiContentShape.size(), guiContentShape);
+
+            buttonList.clear();
+            labelList.clear();
+            textFieldList.clear();
+            rootPanel.collectElements();
+        }
     }
 
     @Override
