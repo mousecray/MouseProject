@@ -58,11 +58,10 @@ public class GuiScreenWallet extends MPGuiScreen {
         resetGui();
         Keyboard.enableRepeatEvents(true);
 
-        MPFontSize fontSize = MPFontSize.NORMAL;
-
         super.initGui();
 
-        long maxCoinValue = 1_000_000;
+        long       maxCoinValue = 1_000_000;
+        MPFontSize fontSize     = MPFontSize.NORMAL;
 
         MPGuiCloseButton closeButton = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "close_button", MPGuiCloseButton.class,

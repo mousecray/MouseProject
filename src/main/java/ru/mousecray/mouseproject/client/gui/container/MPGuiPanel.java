@@ -206,9 +206,14 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     }
 
     public void collectElements() {
+        if (screen == null) return;
+
         for (MPGuiElement<?> child : children) {
             if (child instanceof MPGuiPanel) ((MPGuiPanel<?>) child).collectElements();
-            else if (child instanceof GuiButton) screen.getButtonList().add((GuiButton) child);
+            else if (child instanceof MPGuiScrollPanel) {
+                MPGuiPanel<?> content = ((MPGuiScrollPanel<?>) child).getContent();
+                if (content != null) content.collectElements();
+            } else if (child instanceof GuiButton) screen.getButtonList().add((GuiButton) child);
             else if (child instanceof GuiLabel) screen.getLabelList().add((GuiLabel) child);
             else if (child instanceof MPGuiTextField<?>) screen.getFieldsList().add((MPGuiTextField<?>) child);
         }
