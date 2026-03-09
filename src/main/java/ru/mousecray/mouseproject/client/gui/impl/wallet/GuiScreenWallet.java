@@ -12,9 +12,7 @@ import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.impl.*;
-import ru.mousecray.mouseproject.client.gui.impl.container.MPGuiGridPanel;
-import ru.mousecray.mouseproject.client.gui.impl.container.MPGuiSimplePanel;
-import ru.mousecray.mouseproject.client.gui.impl.container.MPGuiSimpleScrollPanel;
+import ru.mousecray.mouseproject.client.gui.impl.container.*;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
@@ -62,7 +60,6 @@ public class GuiScreenWallet extends MPGuiScreen {
         long       maxCoinValue = 1_000_000;
         MPFontSize fontSize     = MPFontSize.NORMAL;
 
-        //Кнопка закрытия
         MPGuiCloseButton closeButton = getElementCache().getOrCreate(
                 "close_button", MPGuiCloseButton.class,
                 () -> new MPGuiCloseButton(
@@ -73,10 +70,8 @@ public class GuiScreenWallet extends MPGuiScreen {
         );
         addButton(closeButton, null, AnchorPosition.TOP_RIGHT, GuiVector.ZERO);
 
-        //Заглушка, проверяем есть ли кошелёк
         if (walletPipe == null) return;
 
-        //Заголовок
         MPGuiStaticLabel titleLabel = getElementCache().getOrCreate(
                 "title_label", MPGuiStaticLabel.class,
                 () -> new MPGuiStaticLabel(MPGuiString.simple(walletStack.getDisplayName()), fontRenderer,
@@ -156,8 +151,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                         new GuiVector(6.68f, 11), 0, 100, false);
             }
         }
-        @SuppressWarnings("Convert2MethodRef") //Исправление для ошибки в javac. Компилятор проблемы не видит,
-        // но передать ссылку на конструктор в лямбду для нестатического внутреннего класса нельзя
+        @SuppressWarnings("Convert2MethodRef")
         WalletSlider slider = getElementCache().getOrCreate(
                 "wallet_slider", WalletSlider.class,
                 () -> new WalletSlider(),
@@ -167,63 +161,54 @@ public class GuiScreenWallet extends MPGuiScreen {
                 }
         );
 
-        //Панель управления
-        MPGuiSimplePanel controls = getElementCache().getOrCreate(
-                "controls_panel", MPGuiSimplePanel.class,
-                () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 67)),
-                t -> t.setLayoutType(LayoutType.LINEAR_VERTICAL),
+        MPGuiLinearPanel controls = getElementCache().getOrCreate(
+                "controls_panel", MPGuiLinearPanel.class,
+                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, 67), LinearOrientation.VERTICAL),
                 t -> t.getChildren().clear()
         );
         addPanel(controls, null, AnchorPosition.TOP_LEFT, new GuiVector(0, 133));
 
-        //Ряд кнопок +1, +10, +50, -1, -10, -50
-        MPGuiSimplePanel row1 = getElementCache().getOrCreate(
-                "row1_panel", MPGuiSimplePanel.class,
-                () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize)),
-                t -> t.setLayoutType(LayoutType.LINEAR_HORIZONTAL),
+        MPGuiLinearPanel row1 = getElementCache().getOrCreate(
+                "row1_panel", MPGuiLinearPanel.class,
+                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize), LinearOrientation.HORIZONTAL),
                 t -> t.getChildren().clear()
         );
-        row1.addChild(createDynamicButton("btn_+1", "+1", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1, 1))), null, null, null);
-        row1.addChild(createDynamicButton("btn_+10", "+10", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 10, 1))), null, null, null);
-        row1.addChild(createDynamicButton("btn_+50", "+50", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 50, 1))), null, null, null);
-        row1.addChild(createSpacer("row1_spacer", buttonTakePutGap), null, null, null);
-        row1.addChild(createDynamicButton("btn_-1", "-1", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1, 1))), null, null, null);
-        row1.addChild(createDynamicButton("btn_-10", "-10", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 10, 1))), null, null, null);
-        row1.addChild(createDynamicButton("btn_-50", "-50", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 50, 1))), null, null, null);
-        controls.addChild(row1, null, null, null);
+        row1.addChild(createDynamicButton("btn_+1", "+1", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1, 1))), null, null);
+        row1.addChild(createDynamicButton("btn_+10", "+10", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 10, 1))), null, null);
+        row1.addChild(createDynamicButton("btn_+50", "+50", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 50, 1))), null, null);
+        row1.addChild(createSpacer("row1_spacer", buttonTakePutGap), null, null);
+        row1.addChild(createDynamicButton("btn_-1", "-1", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1, 1))), null, null);
+        row1.addChild(createDynamicButton("btn_-10", "-10", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 10, 1))), null, null);
+        row1.addChild(createDynamicButton("btn_-50", "-50", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 50, 1))), null, null);
+        controls.addChild(row1, null, null);
 
-        //Ряд кнопок +100, +500, +1K, -100, -500, -1K
-        MPGuiSimplePanel row2 = getElementCache().getOrCreate(
-                "row2_panel", MPGuiSimplePanel.class,
-                () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize)),
-                t -> t.setLayoutType(LayoutType.LINEAR_HORIZONTAL),
+        MPGuiLinearPanel row2 = getElementCache().getOrCreate(
+                "row2_panel", MPGuiLinearPanel.class,
+                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize), LinearOrientation.HORIZONTAL),
                 t -> t.getChildren().clear()
         );
-        row2.addChild(createDynamicButton("btn_+100", "+100", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 100, 1))), null, null, null);
-        row2.addChild(createDynamicButton("btn_+500", "+500", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 500, 1))), null, null, null);
-        row2.addChild(createDynamicButton("btn_+1K", "+1K", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1000, 1))), null, null, null);
-        row2.addChild(createSpacer("row2_spacer", buttonTakePutGap), null, null, null);
-        row2.addChild(createDynamicButton("btn_-100", "-100", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 100, 1))), null, null, null);
-        row2.addChild(createDynamicButton("btn_-500", "-500", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 500, 1))), null, null, null);
-        row2.addChild(createDynamicButton("btn_-1K", "-1K", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1000, 1))), null, null, null);
-        controls.addChild(row2, null, null, null);
+        row2.addChild(createDynamicButton("btn_+100", "+100", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 100, 1))), null, null);
+        row2.addChild(createDynamicButton("btn_+500", "+500", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 500, 1))), null, null);
+        row2.addChild(createDynamicButton("btn_+1K", "+1K", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1000, 1))), null, null);
+        row2.addChild(createSpacer("row2_spacer", buttonTakePutGap), null, null);
+        row2.addChild(createDynamicButton("btn_-100", "-100", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 100, 1))), null, null);
+        row2.addChild(createDynamicButton("btn_-500", "-500", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 500, 1))), null, null);
+        row2.addChild(createDynamicButton("btn_-1K", "-1K", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1000, 1))), null, null);
+        controls.addChild(row2, null, null);
 
-        //Поле и слайдер
-        MPGuiSimplePanel fieldSliderStack = getElementCache().getOrCreate(
-                "field_slider_stack", MPGuiSimplePanel.class,
-                () -> new MPGuiSimplePanel(new GuiShape(0, 0, panelWidth, 18)),
-                t -> t.setLayoutType(LayoutType.FREE),
+        MPGuiFreePanel fieldSliderStack = getElementCache().getOrCreate(
+                "field_slider_stack", MPGuiFreePanel.class,
+                () -> new MPGuiFreePanel(new GuiShape(0, 0, panelWidth, 18)),
                 t -> t.getChildren().clear()
         );
-        controls.addChild(fieldSliderStack, null, null, null);
+        controls.addChild(fieldSliderStack, null, null);
 
-        fieldSliderStack.addChild(fieldTakePut, null, AnchorPosition.TOP_LEFT, null);
-        fieldSliderStack.addChild(slider, null, AnchorPosition.TOP_LEFT, new GuiVector(0, buttonTakePutYSize * 1.2f - 9));
+        fieldSliderStack.addChild(fieldTakePut, null, null);
+        fieldSliderStack.addChild(slider, null, new GuiVector(0, buttonTakePutYSize * 1.2f - 9));
 
-        controls.addChild(takeAction, null, null, null);
-        controls.addChild(putAction, null, null, null);
+        controls.addChild(takeAction, null, null);
+        controls.addChild(putAction, null, null);
 
-        //Монеты
         float coinW        = 14.9f;
         float coinH        = 23f;
         int   slot_count_x = 7;
@@ -264,11 +249,16 @@ public class GuiScreenWallet extends MPGuiScreen {
                 .filter(cv -> cv != null && cv.getValue() > 0).collect(Collectors.toList());
         if (!otherSlots.isEmpty()) activeGroups.put(3, otherSlots);
 
+        MPGuiAnchorPanel coinsAnchorContent = getElementCache().getOrCreate(
+                "coins_anchor_content", MPGuiAnchorPanel.class,
+                () -> new MPGuiAnchorPanel(new GuiShape(0, 0, 222, 115)),
+                t -> t.getChildren().clear()
+        );
+
         MPGuiSimpleScrollPanel coinsContainer = getElementCache().getOrCreate(
                 "coins_container", MPGuiSimpleScrollPanel.class,
                 () -> new MPGuiSimpleScrollPanel(new GuiShape(0, 0, 222, 115)),
-                t -> t.setLayoutType(LayoutType.ANCHOR),
-                t -> t.getChildren().clear()
+                t -> t.setContent(coinsAnchorContent)
         );
         addPanel(coinsContainer, null, AnchorPosition.TOP_LEFT, new GuiVector(4, 15));
 
@@ -278,26 +268,23 @@ public class GuiScreenWallet extends MPGuiScreen {
                     () -> new MPGuiStaticLabel(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.label.empty"),
                             fontRenderer, new GuiShape(0, 0, 80, 10), 14737632, fontSize)
             );
-            coinsContainer.addChild(emptyLabel, null, AnchorPosition.TOP_LEFT, new GuiVector(2, 0));
+            coinsAnchorContent.addChild(emptyLabel, null, AnchorPosition.TOP_LEFT, new GuiVector(2, 0));
         } else {
             List<Map.Entry<Integer, List<CoinValue>>> groupsList = new ArrayList<>(activeGroups.entrySet());
 
             for (int col = 0; col < 2; col++) {
                 float colX = col * (colWidth + COLUMN_GAP);
 
-                MPGuiSimplePanel columnPanel = getElementCache().getOrCreate(
-                        "column_panel_" + col, MPGuiSimplePanel.class,
-                        () -> new MPGuiSimplePanel(new GuiShape(colX, 0, colWidth, 115)),
-                        t -> {
-                            t.setLayoutType(LayoutType.LINEAR_VERTICAL);
-                            t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT));
-                        },
+                MPGuiLinearPanel columnPanel = getElementCache().getOrCreate(
+                        "column_panel_" + col, MPGuiLinearPanel.class,
+                        () -> new MPGuiLinearPanel(new GuiShape(colX, 0, colWidth, 115), LinearOrientation.VERTICAL),
+                        t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT)),
                         t -> {
                             t.setElementShape(t.getElementShape().withX(colX));
                             t.getChildren().clear();
                         }
                 );
-                coinsContainer.addChild(columnPanel, null, AnchorPosition.TOP_LEFT, new GuiVector(colX, 0));
+                coinsAnchorContent.addChild(columnPanel, null, AnchorPosition.TOP_LEFT, new GuiVector(colX, 0));
 
                 for (int row = 0; row < 2; row++) {
                     int idx = col * 2 + row;
@@ -325,24 +312,22 @@ public class GuiScreenWallet extends MPGuiScreen {
                     if (rowsNum.$() == 0) rowsNum.$(1);
                     float groupH = 14 + rowsNum.$() * coinH;
 
-                    MPGuiSimplePanel groupPanel = getElementCache().getOrCreate(
-                            "group_panel_" + idx, MPGuiSimplePanel.class,
-                            () -> new MPGuiSimplePanel(new GuiShape(0, 0, colWidth, groupH)),
-                            t -> t.setLayoutType(LayoutType.LINEAR_VERTICAL),
+                    MPGuiLinearPanel groupPanel = getElementCache().getOrCreate(
+                            "group_panel_" + idx, MPGuiLinearPanel.class,
+                            () -> new MPGuiLinearPanel(new GuiShape(0, 0, colWidth, groupH), LinearOrientation.VERTICAL),
                             t -> {
                                 t.setElementShape(t.getElementShape().withHeight(groupH));
                                 t.getChildren().clear();
                             }
                     );
-                    columnPanel.addChild(groupPanel, new GuiMargin(0, 0, 8f, 8f), null, null);
+                    columnPanel.addChild(groupPanel, new GuiMargin(0, 0, 8f, 8f), null);
 
-                    MPGuiSimplePanel titlePanel = getElementCache().getOrCreate(
-                            "title_panel_" + idx, MPGuiSimplePanel.class,
-                            () -> new MPGuiSimplePanel(new GuiShape(0, 0, colWidth, 12)),
-                            t -> t.setLayoutType(LayoutType.ANCHOR),
+                    MPGuiAnchorPanel titlePanel = getElementCache().getOrCreate(
+                            "title_panel_" + idx, MPGuiAnchorPanel.class,
+                            () -> new MPGuiAnchorPanel(new GuiShape(0, 0, colWidth, 12)),
                             t -> t.getChildren().clear()
                     );
-                    groupPanel.addChild(titlePanel, new GuiMargin(0, 3f), null, null);
+                    groupPanel.addChild(titlePanel, new GuiMargin(0, 3f), null);
 
                     MPGuiStaticLabel groupTitle = getElementCache().getOrCreate(
                             "group_title_" + idx, MPGuiStaticLabel.class,
@@ -372,7 +357,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                                 t.getChildren().clear();
                             }
                     );
-                    groupPanel.addChild(coinsGrid, new GuiMargin(2, 0, 0, 0), null, null);
+                    groupPanel.addChild(coinsGrid, new GuiMargin(2, 0, 0, 0), null);
 
                     int slotIndex = 0;
                     for (CoinValue coinValue : groupSlots.getValue()) {
@@ -405,22 +390,18 @@ public class GuiScreenWallet extends MPGuiScreen {
                         new GuiShape(0, 0, 10, 13.0f), TEXTURES, TEXTURES_SIZE,
                         new GuiShape(80, 200, 10, 10), fontSize, onClick
                 ),
-                t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL)),
-                t -> { },
-                null
+                t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL))
         );
     }
 
-    private MPGuiSimplePanel createSpacer(String key, float width) {
+    private MPGuiFreePanel createSpacer(String key, float width) {
         return getElementCache().getOrCreate(
-                key, MPGuiSimplePanel.class,
-                () -> new MPGuiSimplePanel(new GuiShape(0, 0, width, 1))
+                key, MPGuiFreePanel.class,
+                () -> new MPGuiFreePanel(new GuiShape(0, 0, width, 1))
         );
     }
 
-    private void sendWalletToServer() {
-
-    }
+    private void sendWalletToServer() { }
 
     @Override
     public void onGuiClosed() {

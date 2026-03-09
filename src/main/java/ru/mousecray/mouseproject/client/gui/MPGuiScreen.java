@@ -16,8 +16,10 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Mouse;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
+import ru.mousecray.mouseproject.client.gui.container.MPGuiScrollPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiSlider;
+import ru.mousecray.mouseproject.client.gui.impl.container.MPGuiAnchorPanel;
 import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 
 import javax.annotation.Nullable;
@@ -44,7 +46,8 @@ public abstract class MPGuiScreen extends GuiScreen {
     protected GuiShape guiShape, guiContentShape;
     protected GuiVector guiBound;
     protected GuiVector guiDefaultSize, guiDefaultBound;
-    private       MPGuiPanel<?>     rootPanel;
+
+    private       MPGuiAnchorPanel  rootPanel;
     private final MPGuiElementCache elementCache = new MPGuiElementCache();
 
     protected MPGuiScreen(GuiVector guiDefaultSize, GuiVector guiDefaultBound) {
@@ -75,7 +78,7 @@ public abstract class MPGuiScreen extends GuiScreen {
             focusedTextField.onKeyTyped0(typedChar, keyCode);
             handled = true;
         }
-        if (!handled) super.keyTyped(typedChar, keyCode); //Стандартная обработка, если не в поле
+        if (!handled) super.keyTyped(typedChar, keyCode);
     }
 
     @Override
@@ -141,47 +144,38 @@ public abstract class MPGuiScreen extends GuiScreen {
 
     protected void drawContent(float partialTicks, int mouseX, int mouseY) { }
 
-    protected <T extends MPGuiTextField<T>> T addTextField(T field) {
-        return addTextField(field, null, null, null);
-    }
-
+    protected <T extends MPGuiTextField<T>> T addTextField(T field)        { return addTextField(field, null, null, null); }
     protected <T extends MPGuiTextField<T>> T addTextField(T field, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
         rootPanel.addChild(field, margin, anchor, offset);
         return field;
     }
 
-    protected <T extends MPGuiLabel<T>> T addLabel(T label) {
-        return addLabel(label, null, null, null);
-    }
-
+    protected <T extends MPGuiLabel<T>> T addLabel(T label) { return addLabel(label, null, null, null); }
     protected <T extends MPGuiLabel<T>> T addLabel(T label, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
         rootPanel.addChild(label, margin, anchor, offset);
         return label;
     }
 
-    protected <T extends MPGuiSlider<T>> T addSlider(T slider) {
-        return addSlider(slider, null, null, null);
-    }
-
+    protected <T extends MPGuiSlider<T>> T addSlider(T slider) { return addSlider(slider, null, null, null); }
     protected <T extends MPGuiSlider<T>> T addSlider(T slider, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
         rootPanel.addChild(slider, margin, anchor, offset);
         return slider;
     }
 
-    protected <T extends MPGuiButton<T>> T addButton(T button) {
-        return addButton(button, null, null, null);
-    }
-
+    protected <T extends MPGuiButton<T>> T addButton(T button) { return addButton(button, null, null, null); }
     protected <T extends MPGuiButton<T>> T addButton(T button, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
         rootPanel.addChild(button, margin, anchor, offset);
         return button;
     }
 
-    protected <T extends MPGuiPanel<T>> T addPanel(T panel) {
-        return addPanel(panel, null, null, null);
+    protected <T extends MPGuiPanel<T>> T addPanel(T panel) { return addPanel(panel, null, null, null); }
+    protected <T extends MPGuiPanel<T>> T addPanel(T panel, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
+        rootPanel.addChild(panel, margin, anchor, offset);
+        return panel;
     }
 
-    protected <T extends MPGuiPanel<T>> T addPanel(T panel, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
+    protected <T extends MPGuiScrollPanel<T>> T addPanel(T panel) { return addPanel(panel, null, null, null); }
+    protected <T extends MPGuiScrollPanel<T>> T addPanel(T panel, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
         rootPanel.addChild(panel, margin, anchor, offset);
         return panel;
     }
@@ -196,19 +190,11 @@ public abstract class MPGuiScreen extends GuiScreen {
     }
 
     public int genNextElementID()              { return ++currentElementID; }
-
     public MPGuiElementCache getElementCache() { return elementCache; }
 
     protected void resetGui() {
         currentElementID = 0;
-        //noinspection rawtypes
-        rootPanel = new MPGuiPanel(new GuiShape(0, 0, guiDefaultSize.x(), guiDefaultSize.y())) {
-            @Override
-            public MPGuiPanel self() {
-                return this;
-            }
-        };
-        rootPanel.setLayoutType(LayoutType.ANCHOR);
+        rootPanel = new MPGuiAnchorPanel(new GuiShape(0, 0, guiDefaultSize.x(), guiDefaultSize.y()));
         rootPanel.setScreen(this);
         rootPanel.setScaleRules(new GuiScaleRules(GuiScaleType.FLOW));
         buttonList.clear();
@@ -229,8 +215,7 @@ public abstract class MPGuiScreen extends GuiScreen {
                 MPGuiButton<?> guibutton = (MPGuiButton<?>) buttonList.get(i);
                 if (guibutton.mousePressed(mc, mouseX, mouseY)) {
                     net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Pre event = new net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Pre(this, guibutton, buttonList);
-                    if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event))
-                        break;
+                    if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event)) break;
                     GuiButton button = event.getButton();
                     if (button instanceof MPGuiButton) guibutton = ((MPGuiButton<?>) button);
                     else break;
@@ -300,9 +285,7 @@ public abstract class MPGuiScreen extends GuiScreen {
     protected void onClickTextField(MPGuiTextField<?> field)         { }
     protected void onClickLabel(MPGuiLabel<?> label)                 { }
 
-    public void bake() {
-
-    }
+    public void bake()                                               { }
 
     @Override
     public void setWorldAndResolution(Minecraft mc, int width, int height) {
@@ -336,7 +319,6 @@ public abstract class MPGuiScreen extends GuiScreen {
         Minecraft mc             = Minecraft.getMinecraft();
         int       buttonListSize = buttonList.size();
 
-        //noinspection ForLoopReplaceableByForEach
         for (int k = 0; k < buttonListSize; ++k) {
             MPGuiButton rdButton = (MPGuiButton) buttonList.get(k);
             rdButton.onUpdate0(mc, i, j);
@@ -359,7 +341,6 @@ public abstract class MPGuiScreen extends GuiScreen {
         }
 
         int textFieldListSize = textFieldList.size();
-        //noinspection ForLoopReplaceableByForEach
         for (int k = 0; k < textFieldListSize; ++k) {
             MPGuiTextField rdField = (MPGuiTextField) textFieldList.get(k);
             rdField.onUpdate0(mc, i, j);
@@ -382,7 +363,6 @@ public abstract class MPGuiScreen extends GuiScreen {
         }
 
         int labelListSize = labelList.size();
-        //noinspection ForLoopReplaceableByForEach
         for (int k = 0; k < labelListSize; ++k) {
             MPGuiLabel rdLabel = (MPGuiLabel) labelList.get(k);
             rdLabel.onUpdate0(mc, i, j);

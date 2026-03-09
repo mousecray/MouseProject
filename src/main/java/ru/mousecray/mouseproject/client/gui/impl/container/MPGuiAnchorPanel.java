@@ -12,85 +12,54 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.*;
+import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.calculateFlowComponentX;
+import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.calculateFlowComponentY;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
-    private static final GridPos GRID_POS_ZERO = new GridPos(0, 0);
+public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
 
     private final Map<MPGuiElement<?>, AnchorPosition> childAnchors = new HashMap<>();
-    private final Map<MPGuiElement<?>, GridPos>        childGridPos = new HashMap<>();
 
-    private int   gridRows;
-    private int   gridCols;
-    private float gridGapX = 0f;
-    private float gridGapY = 0f;
+    public MPGuiAnchorPanel(GuiShape elementShape) { super(elementShape); }
 
-    public MPGuiGridPanel(GuiShape elementShape, int rows, int cols) {
-        super(elementShape);
-        gridRows = Math.max(1, rows);
-        gridCols = Math.max(1, cols);
-    }
-
-    public MPGuiGridPanel setGridSize(int rows, int cols) {
-        gridRows = Math.max(1, rows);
-        gridCols = Math.max(1, cols);
-        return this;
-    }
-
-    public MPGuiGridPanel setGaps(float gapX, float gapY) {
-        gridGapX = gapX;
-        gridGapY = gapY;
-        return this;
-    }
-
-    public void addChild(MPGuiElement<?> child, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset, @Nullable GridPos gridPos) {
+    public void addChild(MPGuiElement<?> child, @Nullable GuiMargin margin, @Nullable AnchorPosition anchor, @Nullable GuiVector offset) {
         super.addChild(child, margin, offset);
         childAnchors.put(child, anchor != null ? anchor : AnchorPosition.TOP_LEFT);
-        childGridPos.put(child, gridPos != null ? gridPos : GRID_POS_ZERO);
     }
 
     @Override
     protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
-        if (gridRows <= 0 || gridCols <= 0) return;
-
-        float scaledGapX = calculateFlowComponentX(parentDefaultSize, parentContentSize, gridGapX);
-        float scaledGapY = calculateFlowComponentY(parentDefaultSize, parentContentSize, gridGapY);
-
-        float availW = inner.width() - scaledGapX * (gridCols - 1);
-        float availH = inner.height() - scaledGapY * (gridRows - 1);
-
-        float cellW = Math.max(0, availW / gridCols);
-        float cellH = Math.max(0, availH / gridRows);
-
         for (MPGuiElement<?> child : children) {
-            AnchorPosition anchor = childAnchors.getOrDefault(child, AnchorPosition.TOP_LEFT);
-            GridPos        pos    = childGridPos.getOrDefault(child, GRID_POS_ZERO);
-
-            float cellAreaX = inner.x() + pos.col * (cellW + scaledGapX);
-            float cellAreaY = inner.y() + pos.row * (cellH + scaledGapY);
-            float cellAreaW = cellW * pos.colSpan + scaledGapX * (pos.colSpan - 1);
-            float cellAreaH = cellH * pos.rowSpan + scaledGapY * (pos.rowSpan - 1);
-
-            measureChildWithMargin(parentDefaultSize, parentContentSize, child, getChildMargin(child), marginTemp, measureTemp);
+            // 1. Вручную считаем отступы, масштабируя их от экрана
+            GuiMargin margin = getChildMargin(child);
+            marginTemp[0] = calculateFlowComponentX(parentDefaultSize, parentContentSize, margin.getLeft());
+            marginTemp[1] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getTop());
+            marginTemp[2] = calculateFlowComponentX(parentDefaultSize, parentContentSize, margin.getRight());
+            marginTemp[3] = calculateFlowComponentY(parentDefaultSize, parentContentSize, margin.getBottom());
             float ml = marginTemp[0], mt = marginTemp[1], mr = marginTemp[2], mb = marginTemp[3];
 
-            float childAvailW = Math.max(0, cellAreaW - ml - mr);
-            float childAvailH = Math.max(0, cellAreaH - mt - mb);
+            // 2. Доступное пространство - это размер ПАНЕЛИ (inner)
+            float childAvailW = Math.max(0, inner.width() - ml - mr);
+            float childAvailH = Math.max(0, inner.height() - mt - mb);
 
+            // 3. Вычисляем предпочтительный размер элемента (учитывает FLOW, PARENT, ORIGIN, FIXED)
             child.measurePreferred(parentDefaultSize, parentContentSize, childAvailW, childAvailH, measureTemp);
             float childW = measureTemp.x();
             float childH = measureTemp.y();
 
-            float childX = cellAreaX + ml;
-            float childY = cellAreaY + mt;
+            float childX = inner.x() + ml;
+            float childY = inner.y() + mt;
 
-            GuiVector offset  = getChildOffset(child);
-            float     offsetX = calculateFlowComponentX(parentDefaultSize, parentContentSize, offset.x());
-            float     offsetY = calculateFlowComponentY(parentDefaultSize, parentContentSize, offset.y());
+            AnchorPosition anchor = childAnchors.getOrDefault(child, AnchorPosition.TOP_LEFT);
+            GuiVector      offset = getChildOffset(child);
 
+            // 4. Смещения (offset) масштабируются ВСЕГДА
+            float offsetX = calculateFlowComponentX(parentDefaultSize, parentContentSize, offset.x());
+            float offsetY = calculateFlowComponentY(parentDefaultSize, parentContentSize, offset.y());
+
+            // 5. Позиционирование по якорю
             switch (anchor) {
                 case TOP_LEFT:
                     childX += offsetX;
