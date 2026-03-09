@@ -15,6 +15,7 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Mouse;
+import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiScrollPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
@@ -186,6 +187,7 @@ public abstract class MPGuiScreen extends GuiScreen {
             ((MPGuiButton<?>) button).setId(currentElementID++);
             return super.addButton(button);
         }
+        MouseProject.LOGGER.error("Button {} isn't MPGuiButton. In will be skipped.", button.getClass());
         return null;
     }
 
