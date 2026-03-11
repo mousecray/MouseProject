@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.MPGuiScreen;
@@ -19,6 +18,7 @@ import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Consumer;
 
 import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.measurePreferredWithScaleRules;
 
@@ -116,11 +116,13 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
-        if (scrollEnabled && mouseHover(mc, mouseX, mouseY)) {
-            int dWheel = Mouse.getDWheel();
-            if (dWheel != 0) applyScroll(-dWheel / 10f);
-        }
         if (content != null) content.onUpdate0(mc, mouseX, mouseY);
+    }
+
+    protected void delegateToContent(Minecraft mc, int mouseX, int mouseY, Consumer<MPGuiElement<?>> action) {
+        if (mouseHover(mc, mouseX, mouseY) && content != null && content.mouseHover(mc, mouseX, mouseY)) {
+            action.accept(content);
+        }
     }
 
     @Override
@@ -183,33 +185,52 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
         return this;
     }
 
+    @Override public boolean onMouseEnter0(Minecraft mc, int mouseX, int mouseY) { return true; }
+    @Override public boolean onMouseLeave0(Minecraft mc, int mouseX, int mouseY) { return true; }
+
     @Override
-    public void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> h = findTopHovered(mc, mouseX, mouseY);
-        if (h != null) h.onMouseEnter0(mc, mouseX, mouseY);
+    public boolean onMouseScrolled0(Minecraft mc, int mouseX, int mouseY, int scroll) {
+        if (!calculatedElementShape.contains(mouseX, mouseY)) return false;
+
+        if (content != null && content.mouseHover(mc, mouseX, mouseY)) {
+            if (content.onMouseScrolled0(mc, mouseX, mouseY, scroll)) return true;
+        }
+
+        if (scrollEnabled) {
+            float oldScroll = scrollY;
+            applyScroll(-scroll / 10f);
+
+            return Float.compare(oldScroll, scrollY) != 0;
+        }
+
+        return false;
     }
 
     @Override
-    public void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> h = findTopHovered(mc, mouseX, mouseY);
-        if (h != null) h.onMouseLeave0(mc, mouseX, mouseY);
+    public boolean onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
+        if (!calculatedElementShape.contains(mouseX, mouseY)) return false;
+        if (content != null && content.mouseHover(mc, mouseX, mouseY)) {
+            return content.onMousePressed0(mc, mouseX, mouseY);
+        }
+        return false;
     }
 
     @Override
-    public void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> h = findTopHovered(mc, mouseX, mouseY);
-        if (h != null) h.onMousePressed0(mc, mouseX, mouseY);
+    public boolean onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
+        if (!calculatedElementShape.contains(mouseX, mouseY)) return false;
+        if (content != null && content.mouseHover(mc, mouseX, mouseY)) {
+            return content.onMouseReleased0(mc, mouseX, mouseY);
+        }
+        return false;
     }
 
     @Override
-    public void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> h = findTopHovered(mc, mouseX, mouseY);
-        if (h != null) h.onMouseReleased0(mc, mouseX, mouseY);
-    }
-    @Override
-    public void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
-        MPGuiElement<?> h = findTopHovered(mc, mouseX, mouseY);
-        if (h != null) h.onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
+    public boolean onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
+        if (!calculatedElementShape.contains(mouseX, mouseY)) return false;
+        if (content != null && content.mouseHover(mc, mouseX, mouseY)) {
+            return content.onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
+        }
+        return false;
     }
 
     @Override

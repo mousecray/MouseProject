@@ -45,6 +45,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
     protected final MutableGuiVector measureTemp        = new MutableGuiVector();
     protected final MutableGuiShape  childAvailableTemp = new MutableGuiShape();
+    protected final MutableGuiShape  innerShapeTemp     = new MutableGuiShape();
     protected final float[]          marginTemp         = new float[4];
 
     private MPGuiScreen                  screen;
@@ -117,23 +118,21 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
         GuiRenderHelper.calculateFlowComponentShape(
-                calculatedElementShape,
-                parentDefaultSize, parentContentSize, elementShape, scaleRules, available
+                calculatedElementShape, parentDefaultSize, parentContentSize,
+                elementShape, scaleRules, available
         );
 
         if (calculatedElementShape.width() <= 0 || calculatedElementShape.height() <= 0) return;
 
-        //2. Масштабируем отступы
         float padL = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getLeft());
         float padT = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getTop());
         float padR = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getRight());
         float padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getBottom());
 
-        //3. Создаем ВНУТРЕННЮЮ область (уже сжатую паддингом) и передаем её детям
-        childAvailableTemp.withShape(calculatedElementShape);
-        childAvailableTemp.grow(padL, padT, -padL - padR, -padT - padB);
+        innerShapeTemp.withShape(calculatedElementShape);
+        innerShapeTemp.grow(padL, padT, -padL - padR, -padT - padB);
 
-        layoutChildren(parentDefaultSize, parentContentSize, childAvailableTemp);
+        layoutChildren(parentDefaultSize, parentContentSize, innerShapeTemp);
     }
 
     protected abstract void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner);
@@ -143,43 +142,60 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
     }
 
-    @Override public void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
+    @Override
+    public void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
         for (MPGuiElement<?> child : children)
             child.onUpdate0(mc, mouseX, mouseY);
-    }
-    @Override
-    public void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null)
-            hovered.onMouseEnter0(mc, mouseX, mouseY);
-    }
-    @Override
-    public void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null)
-            hovered.onMouseLeave0(mc, mouseX, mouseY);
-    }
-    @Override
-    public void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null)
-            hovered.onMousePressed0(mc, mouseX, mouseY);
-    }
-    @Override
-    public void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null)
-            hovered.onMouseReleased0(mc, mouseX, mouseY);
-    }
-    @Override
-    public void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
-        MPGuiElement<?> hovered = findTopHovered(mc, mouseX, mouseY);
-        if (hovered != null)
-            hovered.onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
     }
 
     @Override
     public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) { return calculatedElementShape.contains(mouseX, mouseY); }
+
+    @Override public boolean onMouseEnter0(Minecraft mc, int mouseX, int mouseY) { return true; }
+    @Override public boolean onMouseLeave0(Minecraft mc, int mouseX, int mouseY) { return true; }
+
+    @Override
+    public boolean onMouseScrolled0(Minecraft mc, int mouseX, int mouseY, int scroll) {
+        if (!calculatedElementShape.contains(mouseX, mouseY)) return false;
+
+        for (int k = children.size() - 1; k >= 0; k--) {
+            MPGuiElement<?> child = children.get(k);
+            if (child.mouseHover(mc, mouseX, mouseY) && child.onMouseScrolled0(mc, mouseX, mouseY, scroll)) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
+        if (!calculatedElementShape.contains(mouseX, mouseY)) return false;
+        for (int k = children.size() - 1; k >= 0; k--) {
+            MPGuiElement<?> child = children.get(k);
+            if (child.mouseHover(mc, mouseX, mouseY) && child.onMousePressed0(mc, mouseX, mouseY)) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
+        if (!calculatedElementShape.contains(mouseX, mouseY)) return false;
+        for (int k = children.size() - 1; k >= 0; k--) {
+            MPGuiElement<?> child = children.get(k);
+            if (child.mouseHover(mc, mouseX, mouseY) && child.onMouseReleased0(mc, mouseX, mouseY)) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
+        if (!calculatedElementShape.contains(mouseX, mouseY)) return false;
+        for (int k = children.size() - 1; k >= 0; k--) {
+            MPGuiElement<?> child = children.get(k);
+            if (child.mouseHover(mc, mouseX, mouseY) && child.onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override @Nullable
     public MPGuiElement<?> findTopHovered(Minecraft mc, int mouseX, int mouseY) {
@@ -195,8 +211,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     @Override
     public void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         drawPanelBackground(mc, mouseX, mouseY, partialTicks);
-        for (MPGuiElement<?> child : children)
-            child.onDrawBackground(mc, mouseX, mouseY, partialTicks);
+        for (MPGuiElement<?> child : children) child.onDrawBackground(mc, mouseX, mouseY, partialTicks);
     }
 
     protected void drawPanelBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
@@ -207,16 +222,15 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
     @Override
     public void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (MPGuiElement<?> child : children)
-            child.onDrawForeground(mc, mouseX, mouseY, partialTicks);
+        for (MPGuiElement<?> child : children) child.onDrawForeground(mc, mouseX, mouseY, partialTicks);
     }
-    @Override public void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (MPGuiElement<?> child : children)
-            child.onDrawText(mc, mouseX, mouseY, partialTicks);
+    @Override
+    public void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        for (MPGuiElement<?> child : children) child.onDrawText(mc, mouseX, mouseY, partialTicks);
     }
-    @Override public void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (MPGuiElement<?> child : children)
-            child.onDrawLast(mc, mouseX, mouseY, partialTicks);
+    @Override
+    public void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        for (MPGuiElement<?> child : children) child.onDrawLast(mc, mouseX, mouseY, partialTicks);
     }
 
     public void collectElements() {

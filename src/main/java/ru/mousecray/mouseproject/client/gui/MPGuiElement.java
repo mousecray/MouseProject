@@ -33,11 +33,11 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     @Nullable GuiButtonActionState getActionState();
     @Nullable GuiButtonPersistentState getPersistentState();
     void onUpdate0(Minecraft mc, int mouseX, int mouseY);
-    void onMouseEnter0(Minecraft mc, int mouseX, int mouseY);
-    void onMouseLeave0(Minecraft mc, int mouseX, int mouseY);
-    void onMousePressed0(Minecraft mc, int mouseX, int mouseY);
-    void onMouseReleased0(Minecraft mc, int mouseX, int mouseY);
-    void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY);
+    boolean onMouseEnter0(Minecraft mc, int mouseX, int mouseY);
+    boolean onMouseLeave0(Minecraft mc, int mouseX, int mouseY);
+    boolean onMousePressed0(Minecraft mc, int mouseX, int mouseY);
+    boolean onMouseReleased0(Minecraft mc, int mouseX, int mouseY);
+    boolean onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY);
     boolean mouseHover(Minecraft mc, int mouseX, int mouseY);
     void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks);
     void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks);
@@ -55,4 +55,5 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     void setScaleRules(GuiScaleRules scaleRules);
     void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result);
     void offsetCalculatedShape(float dx, float dy);
+    default boolean onMouseScrolled0(Minecraft mc, int mouseX, int mouseY, int scroll) { return false; }
 }

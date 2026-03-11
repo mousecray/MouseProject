@@ -256,8 +256,9 @@ public class GuiScreenWallet extends MPGuiScreen {
 
         MPGuiAnchorPanel coinsAnchorContent = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "coins_anchor_content", MPGuiAnchorPanel.class,
-                () -> new MPGuiAnchorPanel(new GuiShape(0, 0, 222, 115)),
-                null, MPGuiPanel::removeAllChildren
+                () -> new MPGuiAnchorPanel(new GuiShape(0, 0, 222, 400)),
+                t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT)),
+                MPGuiPanel::removeAllChildren
         );
 
         MPGuiSimpleScrollPanel coinsContainer = MPGuiElementCache.INSTANCE.getOrCreate(
@@ -291,7 +292,6 @@ public class GuiScreenWallet extends MPGuiScreen {
                 );
                 coinsAnchorContent.addChild(columnPanel, null, AnchorPosition.TOP_LEFT, new GuiVector(colX, 0));
 
-                coinsAnchorContent.setPadding(new GuiPadding(0, 0, 0, 30f));
                 for (int row = 0; row < 2; row++) {
                     int idx = col * 2 + row;
                     if (idx >= groupsList.size()) break;
