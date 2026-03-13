@@ -59,4 +59,6 @@ public interface IGuiShape {
     default IGuiShape shrink(float all)                          { return grow(-all); }
     default IGuiShape shrink(float hor, float ver)               { return grow(-hor, -ver); }
     default IGuiShape shrink(float l, float t, float r, float b) { return grow(-l, -t, -r, -b); }
+
+    IGuiShape copy();
 }

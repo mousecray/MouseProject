@@ -94,6 +94,7 @@ public final class MutableGuiVector implements IGuiVector {
         return this;
     }
 
+    @Override public MutableGuiVector copy() { return new MutableGuiVector(x, y); }
 
     @Override
     public boolean equals(Object o) {

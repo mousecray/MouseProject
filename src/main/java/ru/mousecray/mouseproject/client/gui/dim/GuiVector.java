@@ -47,6 +47,8 @@ public final class GuiVector implements IGuiVector {
     public GuiVector add(float dx, float dy) { return new GuiVector(x + dx, y + dy); }
     public GuiVector sub(float dx, float dy) { return new GuiVector(x - dx, y - dy); }
 
+    @Override public GuiVector copy()        { return new GuiVector(x, y); }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -48,6 +48,8 @@ public final class GuiShape implements IGuiShape {
         return new GuiShape(pos.x() - left, pos.y() - top, size.x() + left + right, size.y() + top + bottom);
     }
 
+    @Override public GuiShape copy() { return new GuiShape(pos.copy(), size.copy()); }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

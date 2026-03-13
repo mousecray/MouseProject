@@ -89,6 +89,8 @@ public final class MutableGuiShape implements IGuiShape {
         return this;
     }
 
+    @Override public MutableGuiShape copy() { return new MutableGuiShape(pos.copy(), size.copy()); }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

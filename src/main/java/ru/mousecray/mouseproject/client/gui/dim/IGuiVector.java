@@ -29,4 +29,6 @@ public interface IGuiVector {
         float len = length();
         return len == 0f ? this : div(len);
     }
+
+    IGuiVector copy();
 }

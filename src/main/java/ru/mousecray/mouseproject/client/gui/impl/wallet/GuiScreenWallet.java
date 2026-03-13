@@ -257,7 +257,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         MPGuiAnchorPanel coinsAnchorContent = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "coins_anchor_content", MPGuiAnchorPanel.class,
                 () -> new MPGuiAnchorPanel(new GuiShape(0, 0, 222, 400)),
-                t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT)),
+                t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL)),
                 MPGuiPanel::removeAllChildren
         );
 
@@ -279,18 +279,14 @@ public class GuiScreenWallet extends MPGuiScreen {
             List<Map.Entry<Integer, List<CoinValue>>> groupsList = new ArrayList<>(activeGroups.entrySet());
 
             for (int col = 0; col < 2; col++) {
-                float colX = col * (colWidth + COLUMN_GAP);
 
                 MPGuiLinearPanel columnPanel = MPGuiElementCache.INSTANCE.getOrCreate(
                         this, "column_panel_" + col, MPGuiLinearPanel.class,
-                        () -> new MPGuiLinearPanel(new GuiShape(colX, 0, colWidth, 115), LinearPanelOrientation.VERTICAL),
-                        t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT)),
-                        t -> {
-                            t.setElementShape(t.getElementShape().withX(colX));
-                            t.removeAllChildren();
-                        }
+                        () -> new MPGuiLinearPanel(new GuiShape(0, 0, colWidth, 115), LinearPanelOrientation.VERTICAL),
+                        t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL)),
+                        MPGuiPanel::removeAllChildren
                 );
-                coinsAnchorContent.addChild(columnPanel, null, AnchorPosition.TOP_LEFT, new GuiVector(colX, 0));
+                coinsAnchorContent.addChild(columnPanel, null, AnchorPosition.TOP_LEFT, new GuiVector(0, 0));
 
                 for (int row = 0; row < 2; row++) {
                     int idx = col * 2 + row;

@@ -18,7 +18,6 @@ import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.function.Consumer;
 
 import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.measurePreferredWithScaleRules;
 
@@ -71,8 +70,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
         );
 
         if (content != null) {
-            MutableGuiShape contentAvail = calculatedElementShape.toMutable();
-            contentAvail.withHeight(Float.MAX_VALUE);
+            MutableGuiShape contentAvail = calculatedElementShape.copy().toMutable();
+            contentAvail.withHeight(99999f);
             content.calculate(parentDefaultSize, parentContentSize, contentAvail);
 
             contentHeight = calculateTrueContentHeight();
@@ -117,12 +116,6 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
     @Override
     public void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
         if (content != null) content.onUpdate0(mc, mouseX, mouseY);
-    }
-
-    protected void delegateToContent(Minecraft mc, int mouseX, int mouseY, Consumer<MPGuiElement<?>> action) {
-        if (mouseHover(mc, mouseX, mouseY) && content != null && content.mouseHover(mc, mouseX, mouseY)) {
-            action.accept(content);
-        }
     }
 
     @Override
