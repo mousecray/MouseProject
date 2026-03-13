@@ -267,7 +267,7 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
 
     @Override
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
-        return mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
+        return calculatedElementShape.contains(mouseX, mouseY);
     }
 
     public abstract void onClick(MPGuiMouseClickEvent<T> event);

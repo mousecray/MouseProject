@@ -329,8 +329,9 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) { }
 
-    @Override public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) {
-        return mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
+    @Override
+    public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) {
+        return calculatedElementShape.contains(mouseX, mouseY);
     }
 
     @Override
@@ -344,24 +345,28 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     }
 
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
-        return mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
+        return calculatedElementShape.contains(mouseX, mouseY);
     }
 
     protected void onClick(MPGuiMouseClickEvent<T> event) { }
 
-    @Override public final void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override
+    public final void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         onDrawTextBoxBackground(mc, mouseX, mouseY, partialTicks);
     }
 
-    @Override public final void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override
+    public final void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         onDrawTextBoxForeground(mc, mouseX, mouseY, partialTicks);
     }
 
-    @Override public final void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override
+    public final void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         onDrawTextBoxText(mc, mouseX, mouseY, partialTicks);
     }
 
-    @Override public final void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    @Override
+    public final void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         onDrawTextBoxLast(mc, mouseX, mouseY, partialTicks);
     }
 
@@ -407,7 +412,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     @Override @Nullable
     public MPGuiElement<?> findTopHovered(Minecraft mc, int mouseX, int mouseY) {
-        return mouseHover(mc, mouseX, mouseY) ? this : null;
+        return calculatedElementShape.contains(mouseX, mouseY) ? this : null;
     }
 
     protected void onUpdate(MPGuiTickEvent<T> event) { }

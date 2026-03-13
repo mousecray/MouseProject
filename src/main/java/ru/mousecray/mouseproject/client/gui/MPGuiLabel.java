@@ -300,16 +300,17 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
 
     @Override
     public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) {
-        return mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
+        return calculatedElementShape.contains(mouseX, mouseY);
     }
 
+
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
-        return mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
+        return calculatedElementShape.contains(mouseX, mouseY);
     }
 
     @Override @Nullable
     public MPGuiElement<?> findTopHovered(Minecraft mc, int mouseX, int mouseY) {
-        return mouseHover(mc, mouseX, mouseY) ? this : null;
+        return calculatedElementShape.contains(mouseX, mouseY) ? this : null;
     }
 
     public abstract void onClick(MPGuiMouseClickEvent<T> event);
