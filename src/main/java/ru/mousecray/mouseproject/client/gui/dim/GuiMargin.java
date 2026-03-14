@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ */
+
 package ru.mousecray.mouseproject.client.gui.dim;
 
 import net.minecraftforge.fml.relauncher.Side;
@@ -6,7 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiMargin {
     public static final GuiMargin ZERO = new GuiMargin(0);
-    
+
     private float left, top, right, bottom;
 
     public GuiMargin(float all) { left = top = right = bottom = all; }
