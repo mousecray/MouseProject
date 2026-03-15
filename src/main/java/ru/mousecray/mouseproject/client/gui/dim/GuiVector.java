@@ -5,6 +5,8 @@
 
 package ru.mousecray.mouseproject.client.gui.dim;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -12,10 +14,36 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public final class GuiVector implements IGuiVector {
     public static final GuiVector ZERO = new GuiVector(0f, 0f);
 
+    private static final Long2ObjectMap<GuiVector> cache = new Long2ObjectOpenHashMap<>(32768);
+
+    /**
+     * @return кешированное значение от -500.00 до +500.00
+     * (всегда округляется до 0.01)
+     */
+    @SuppressWarnings("ManualMinMaxCalculation")
+    public static GuiVector of(float x, float y) {
+        float cx = x < -500f ? -500f : (x > 500f ? 500f : x);
+        float cy = y < -500f ? -500f : (y > 500f ? 500f : y);
+
+        int ix = Math.round(cx * 100f);
+        int iy = Math.round(cy * 100f);
+
+        long key = ((long) (ix + 50000)) * 100001L + (iy + 50000);
+
+        GuiVector cached = cache.get(key);
+        if (cached != null) return cached;
+
+        GuiVector vec = new GuiVector(ix * 0.01f, iy * 0.01f);
+        cache.put(key, vec);
+        return vec;
+    }
+
+    @SuppressWarnings("SuspiciousNameCombination") public static GuiVector of(float x) { return of(x, x); }
+
     private final float x;
     private final float y;
 
-    public GuiVector(float x, float y) {
+    private GuiVector(float x, float y) {
         this.x = x;
         this.y = y;
     }
@@ -28,31 +56,31 @@ public final class GuiVector implements IGuiVector {
     @Override public float x()                                { return x; }
     @Override public float y()                                { return y; }
 
-    @Override public GuiVector withX(float newX)              { return new GuiVector(newX, y); }
-    @Override public GuiVector withY(float newY)              { return new GuiVector(x, newY); }
-    @Override public IGuiVector withVector(IGuiVector newVec) { return new GuiVector(x, y); }
-    @Override public GuiVector add(IGuiVector other)          { return new GuiVector(x + other.x(), y + other.y()); }
-    @Override public GuiVector sub(IGuiVector other)          { return new GuiVector(x - other.x(), y - other.y()); }
-    @Override public GuiVector mul(float scalar)              { return new GuiVector(x * scalar, y * scalar); }
+    @Override public GuiVector withX(float newX)              { return GuiVector.of(newX, y); }
+    @Override public GuiVector withY(float newY)              { return GuiVector.of(x, newY); }
+    @Override public IGuiVector withVector(IGuiVector newVec) { return GuiVector.of(x, y); }
+    @Override public GuiVector add(IGuiVector other)          { return GuiVector.of(x + other.x(), y + other.y()); }
+    @Override public GuiVector sub(IGuiVector other)          { return GuiVector.of(x - other.x(), y - other.y()); }
+    @Override public GuiVector mul(float scalar)              { return GuiVector.of(x * scalar, y * scalar); }
 
     @Override
     public GuiVector div(float scalar) {
         if (scalar == 0f) throw new ArithmeticException("Division by zero");
-        return new GuiVector(x / scalar, y / scalar);
+        return GuiVector.of(x / scalar, y / scalar);
     }
 
-    @Override public GuiVector mul(IGuiVector other) { return new GuiVector(x * other.x(), y * other.y()); }
+    @Override public GuiVector mul(IGuiVector other) { return GuiVector.of(x * other.x(), y * other.y()); }
 
     @Override
     public GuiVector div(IGuiVector other) {
         if (other.x() == 0f || other.y() == 0f) throw new ArithmeticException("Division by zero");
-        return new GuiVector(x / other.x(), y / other.y());
+        return GuiVector.of(x / other.x(), y / other.y());
     }
 
-    public GuiVector add(float dx, float dy) { return new GuiVector(x + dx, y + dy); }
-    public GuiVector sub(float dx, float dy) { return new GuiVector(x - dx, y - dy); }
+    public GuiVector add(float dx, float dy) { return GuiVector.of(x + dx, y + dy); }
+    public GuiVector sub(float dx, float dy) { return GuiVector.of(x - dx, y - dy); }
 
-    @Override public GuiVector copy()        { return new GuiVector(x, y); }
+    @Override public GuiVector copy()        { return GuiVector.of(x, y); }
 
     @Override
     public boolean equals(Object o) {

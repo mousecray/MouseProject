@@ -313,7 +313,7 @@ public abstract class MPGuiScreen extends GuiScreen {
         int newSizeY = (int) (height / 1.15D);
         int newSizeX = (int) (height / 0.8D);
         guiShape = new GuiShape((width - newSizeX) / 2f, (height - newSizeY - 20) / 2f, newSizeX, newSizeY);
-        guiBound = new GuiVector(
+        guiBound = GuiVector.of(
                 guiShape.width() * guiDefaultBound.x() / guiDefaultSize.x(),
                 guiShape.height() * guiDefaultBound.y() / guiDefaultSize.y());
         guiContentShape = new GuiShape(

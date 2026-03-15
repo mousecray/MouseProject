@@ -6,7 +6,6 @@
 package ru.mousecray.mouseproject.client.gui.impl;
 
 import net.minecraft.init.SoundEvents;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.MPGuiButton;
@@ -18,6 +17,7 @@ import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
 import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
+import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,14 +28,16 @@ public class MPGuiActionButton extends MPGuiButton<MPGuiActionButton> {
     private final Consumer<MPGuiMouseClickEvent<MPGuiActionButton>> onClick;
 
     public MPGuiActionButton(
-            @Nullable MPGuiString text,
-            GuiShape elementShape,
-            ResourceLocation texture, GuiVector textureSize, GuiShape textureShape,
-            MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiActionButton>> onClick) {
+            GuiShape elementShape, @Nullable MPGuiString text, MPFontSize fontSize,
+            Consumer<MPGuiMouseClickEvent<MPGuiActionButton>> onClick
+    ) {
         super(
                 text == null ? "" : text.get(), elementShape,
                 MPGuiTexturePack.Builder
-                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
+                        .create(
+                                MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                                GuiVector.ZERO, GuiVector.of(80, 10)
+                        )
                         .addTexture(GuiButtonPersistentState.DISABLED, 0)
                         .addTexture(GuiButtonPersistentState.NORMAL, 1)
                         .addTexture(GuiButtonActionState.HOVER, 2)
@@ -49,14 +51,16 @@ public class MPGuiActionButton extends MPGuiButton<MPGuiActionButton> {
     }
 
     public MPGuiActionButton(
-            @Nullable String text,
-            GuiShape elementShape,
-            ResourceLocation texture, GuiVector textureSize, GuiShape textureShape,
-            MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiActionButton>> onClick) {
+            GuiShape elementShape, @Nullable String text,
+            MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiActionButton>> onClick
+    ) {
         super(
                 text, elementShape,
                 MPGuiTexturePack.Builder
-                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
+                        .create(
+                                MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                                GuiVector.ZERO, GuiVector.of(80, 10)
+                        )
                         .addTexture(GuiButtonPersistentState.DISABLED, 0)
                         .addTexture(GuiButtonPersistentState.NORMAL, 1)
                         .addTexture(GuiButtonActionState.HOVER, 2)

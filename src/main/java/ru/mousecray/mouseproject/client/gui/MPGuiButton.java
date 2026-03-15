@@ -52,7 +52,7 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
     protected final MutableGuiVector calculatedTextOffsetTemp = new MutableGuiVector();
     protected final MPFontSize       fontSize;
 
-    protected MPGuiString guiString = MPGuiString.simple("");
+    protected MPGuiString guiString;
 
     @Nullable protected GuiButtonActionState     actionState     = null;
     @Nullable protected GuiButtonPersistentState persistentState = GuiButtonPersistentState.NORMAL;

@@ -12,6 +12,7 @@ import ru.mousecray.mouseproject.Tags;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiNumberField;
+import ru.mousecray.mouseproject.client.gui.impl.MPGuiSimpleField;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiSlider;
 import ru.mousecray.mouseproject.client.gui.impl.container.MPGuiFreePanel;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
@@ -43,11 +44,9 @@ public class WalletSliderControl extends MPGuiFreePanel {
         this.maxCoinValue = maxCoinValue;
 
         field = new MPGuiNumberField(
-                fontRenderer,
-                MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
                 new GuiShape(0, 0, width, height * 0.8f),
-                GuiScreenWallet.TEXTURES, GuiScreenWallet.TEXTURES_SIZE,
-                new GuiShape(104, 200, 80, 10),
+                MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
+                fontRenderer,
                 fontSize,
                 this::onInternalTextTyped
         );
@@ -84,7 +83,7 @@ public class WalletSliderControl extends MPGuiFreePanel {
         addChild(slider, null, new GuiVector(0, height / 1.8f));
     }
 
-    private void onInternalTextTyped(MPGuiTextTypedEvent<MPGuiNumberField> event) {
+    private void onInternalTextTyped(MPGuiTextTypedEvent<MPGuiSimpleField> event) {
         String newText = event.getNewText();
 
         if (newText == null || newText.trim().isEmpty()) {

@@ -70,11 +70,10 @@ public class GuiScreenWallet extends MPGuiScreen {
                 this, "close_button", MPGuiCloseButton.class,
                 () -> new MPGuiCloseButton(
                         new GuiShape(0, 0, 9, 9),
-                        TEXTURES, TEXTURES_SIZE, new GuiShape(95, 200, 9, 9), fontSize,
                         event -> closeGui()
                 )
         );
-        addButton(closeButton, null, AnchorPosition.TOP_RIGHT, GuiVector.ZERO);
+        addButton(closeButton, GuiMargin.ZERO, AnchorPosition.TOP_RIGHT, GuiVector.ZERO);
 
         if (walletPipe == null) return;
 
@@ -95,9 +94,10 @@ public class GuiScreenWallet extends MPGuiScreen {
 
         MPGuiActionButton takeAction = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "take_action", MPGuiActionButton.class,
-                () -> new MPGuiActionButton(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.take"),
+                () -> new MPGuiActionButton(
                         GuiShape.ZERO,
-                        TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize, event -> { }
+                        MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.take"), fontSize,
+                        event -> { }
                 ),
                 t -> {
                     t.applyState(GuiButtonPersistentState.DISABLED);
@@ -107,9 +107,10 @@ public class GuiScreenWallet extends MPGuiScreen {
 
         MPGuiActionButton putAction = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "put_action", MPGuiActionButton.class,
-                () -> new MPGuiActionButton(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.put"),
+                () -> new MPGuiActionButton(
                         GuiShape.ZERO,
-                        TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize, event -> { }
+                        MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.put"), fontSize,
+                        event -> { }
                 ),
                 t -> {
                     t.applyState(GuiButtonPersistentState.DISABLED);

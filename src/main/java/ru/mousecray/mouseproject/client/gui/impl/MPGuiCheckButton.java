@@ -8,7 +8,6 @@ package ru.mousecray.mouseproject.client.gui.impl;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
@@ -27,6 +26,7 @@ import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexture;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
 import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
+import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
@@ -40,7 +40,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
             MPGuiString text,
             FontRenderer fontRenderer,
             GuiShape elementShape,
-            ResourceLocation texture, GuiVector textureSize, GuiShape textureShape,
+            GuiShape textureShape,
             MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiCheckButton>> onClick) {
         super(
                 text.get(),
@@ -51,7 +51,10 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
                         Math.max(elementShape.height(), fontRenderer.FONT_HEIGHT)
                 ),
                 MPGuiTexturePack.Builder
-                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
+                        .create(
+                                MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                                textureShape.pos(), textureShape.size()
+                        )
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)
                         .addTexture(GuiButtonActionState.PRESSED, 2)
@@ -85,7 +88,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
             String text,
             FontRenderer fontRenderer,
             GuiShape elementShape,
-            ResourceLocation texture, GuiVector textureSize, GuiShape textureShape,
+            GuiShape textureShape,
             MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiCheckButton>> onClick) {
         super(
                 text,
@@ -96,7 +99,10 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
                         Math.max(elementShape.height(), fontRenderer.FONT_HEIGHT)
                 ),
                 MPGuiTexturePack.Builder
-                        .create(texture, textureSize, textureShape.pos(), textureShape.size())
+                        .create(
+                                MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                                GuiVector.of(184, 0), GuiVector.of(8)
+                        )
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)
                         .addTexture(GuiButtonActionState.PRESSED, 2)

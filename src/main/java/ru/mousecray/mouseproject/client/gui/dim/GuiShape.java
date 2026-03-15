@@ -18,7 +18,7 @@ public final class GuiShape implements IGuiShape {
     @Nonnull private final GuiVector pos, size;
 
     public GuiShape(float x, float y, float width, float height) {
-        this(new GuiVector(x, y), new GuiVector(width, height));
+        this(GuiVector.of(x, y), GuiVector.of(width, height));
     }
 
     public GuiShape(IGuiVector pos, IGuiVector size) {

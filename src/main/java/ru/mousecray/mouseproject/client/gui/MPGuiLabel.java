@@ -58,7 +58,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     protected final MutableGuiShape elementShape = new MutableGuiShape(), calculatedElementShape = new MutableGuiShape();
     protected final MutableGuiShape calculatedInnerShape = new MutableGuiShape();
 
-    protected MPGuiString guiString = MPGuiString.simple("");
+    protected MPGuiString guiString;
 
     private GuiScaleRules scaleRules = new GuiScaleRules(GuiScaleType.FLOW);
 

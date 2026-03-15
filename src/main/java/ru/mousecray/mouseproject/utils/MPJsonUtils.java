@@ -10,7 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
-public class MPJsonUtils {
+public final class MPJsonUtils {
     public static long getLong(JsonObject json, String memberName) {
         if (json.has(memberName)) return getLong(json.get(memberName), memberName);
         else throw new JsonSyntaxException("Missing " + memberName + ", expected to find a Int");
@@ -39,4 +39,6 @@ public class MPJsonUtils {
             return s;
         }
     }
+
+    private MPJsonUtils() { throw new UnsupportedOperationException("Cannot create utility class"); }
 }

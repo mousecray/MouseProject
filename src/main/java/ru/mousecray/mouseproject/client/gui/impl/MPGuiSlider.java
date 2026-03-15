@@ -213,8 +213,8 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         if (lastParentDefaultSize != null && lastParentContentSize != null) {
             knob.calculate(lastParentDefaultSize, lastParentContentSize, childAvailableTemp);
         } else {
-            knob.calculate(new GuiVector(inner.width(), inner.height()),
-                    new GuiVector(inner.width(), inner.height()),
+            knob.calculate(GuiVector.of(inner.width(), inner.height()),
+                    GuiVector.of(inner.width(), inner.height()),
                     childAvailableTemp);
         }
     }

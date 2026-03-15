@@ -7,7 +7,7 @@ package ru.mousecray.mouseproject.utils;
 
 import java.util.Random;
 
-public class MPRandomUtils {
+public final class MPRandomUtils {
     public static boolean normalChance(Random random, int chance) {
         chance = Math.abs(chance);
         if (chance > 100) chance = 100;
@@ -117,4 +117,6 @@ public class MPRandomUtils {
         percent += (random.nextInt(maxDeviationPercentI * 2) + 1 - maxDeviationPercentI) / 100f;
         return percent * fromNumber / 100;
     }
+
+    private MPRandomUtils() { throw new UnsupportedOperationException("Cannot create utility class"); }
 }

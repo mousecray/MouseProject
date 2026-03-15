@@ -10,7 +10,7 @@ import net.minecraft.util.math.MathHelper;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 
-public class MPMathUtils {
+public final class MPMathUtils {
     @Nullable
     public static int[] distributeNumber(int total, int numGroups) {
         if (numGroups <= 0 || total <= 0) return null;
@@ -83,4 +83,6 @@ public class MPMathUtils {
         float normalized = (value - min) / (max - min);
         return MathHelper.clamp(normalized, 0.0f, 1.0f); // Ограничиваем [0, 1]
     }
+
+    private MPMathUtils() { throw new UnsupportedOperationException("Cannot create utility class"); }
 }
