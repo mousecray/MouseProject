@@ -120,7 +120,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         float      padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getBottom());
 
         calculatedInnerShape.withShape(calculatedElementShape);
-        calculatedInnerShape.grow(padL, padT, -padL - padR, -padT - padB);
+        calculatedInnerShape.grow(-padL, -padT, -padR, -padB);
 
         x = (int) calculatedElementShape.x();
         y = (int) calculatedElementShape.y();
@@ -154,7 +154,8 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override public void setTextOffset(IGuiVector offset)             { }
     @Override public MutableGuiVector getTextOffset()                  { return new MutableGuiVector(); }
 
-    @Override public void setGuiString(MPGuiString guiString) {
+    @Override
+    public void setGuiString(MPGuiString guiString) {
         this.guiString = guiString;
         super.setText(guiString.get());
     }
@@ -445,13 +446,14 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     }
 
     protected boolean checkIsOnText(int mouseX, int mouseY) {
-        FontRenderer fr         = Minecraft.getMinecraft().fontRenderer;
-        float        scale      = fontSize.getScale();
-        float        centerY    = y + height / 2f;
-        float        halfHeight = (fr.FONT_HEIGHT + 2) * scale / 2f;
+        FontRenderer fr    = Minecraft.getMinecraft().fontRenderer;
+        float        scale = fontSize.getScale();
 
-        float textStartX = x + width / 35f;
-        float textEndX   = x + width - width / 35f;
+        float centerY    = calculatedInnerShape.y() + calculatedInnerShape.height() / 2f;
+        float halfHeight = (fr.FONT_HEIGHT + 2) * scale / 2f;
+
+        float textStartX = calculatedInnerShape.x();
+        float textEndX   = calculatedInnerShape.x() + calculatedInnerShape.width();
 
         return mouseX >= textStartX && mouseX <= textEndX &&
                 mouseY >= centerY - halfHeight && mouseY <= centerY + halfHeight;
@@ -461,10 +463,13 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         FontRenderer fr           = Minecraft.getMinecraft().fontRenderer;
         float        scale        = fontSize.getScale();
         float        inverseScale = 1.0f / scale;
-        float        textX        = x + width / 35f;
 
-        int    relX        = (int) ((mouseX - textX) * inverseScale);
-        String visibleText = fr.trimStringToWidth(getText().substring(lineScrollOffset), (int) (width * inverseScale));
+        float textX = calculatedInnerShape.x();
+
+        int relX = (int) ((mouseX - textX) * inverseScale);
+        String visibleText = fr.trimStringToWidth(
+                getText().substring(lineScrollOffset), (int) (calculatedInnerShape.width() * inverseScale)
+        );
         return fr.trimStringToWidth(visibleText, relX).length() + lineScrollOffset;
     }
 

@@ -413,7 +413,7 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
         float      padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getBottom());
 
         calculatedInnerShape.withShape(calculatedElementShape);
-        calculatedInnerShape.grow(padL, padT, -padL - padR, -padT - padB);
+        calculatedInnerShape.grow(-padL, -padT, -padR, -padB);
 
         if (textOffset != null) {
             GuiRenderHelper.calculateFlowComponentVector(

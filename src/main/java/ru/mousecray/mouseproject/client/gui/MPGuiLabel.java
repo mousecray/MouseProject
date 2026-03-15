@@ -142,7 +142,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         float      padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getBottom());
 
         calculatedInnerShape.withShape(calculatedElementShape);
-        calculatedInnerShape.grow(padL, padT, -padL - padR, -padT - padB);
+        calculatedInnerShape.grow(-padL, -padT, -padR, -padB);
 
         x = (int) calculatedElementShape.x();
         y = (int) calculatedElementShape.y();

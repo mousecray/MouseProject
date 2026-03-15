@@ -223,7 +223,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                 () -> new MPGuiSimpleScrollPanel(new GuiShape(0, 0, 222, 115)),
                 null, t -> t.setContent(coinsPanel)
         );
-        addPanel(coinsContainer, null, AnchorPosition.TOP_LEFT, new GuiVector(4, 15));
+        addPanel(coinsContainer, null, AnchorPosition.TOP_LEFT, new GuiVector(4, 10));
 
         if (activeGroups.isEmpty()) {
             MPGuiStaticLabel emptyLabel = MPGuiElementCache.INSTANCE.getOrCreate(

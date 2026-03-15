@@ -135,7 +135,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         float padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getBottom());
 
         innerShapeTemp.withShape(calculatedElementShape);
-        innerShapeTemp.grow(padL, padT, -padL - padR, -padT - padB);
+        innerShapeTemp.grow(-padL, -padT, -padR, -padB);
 
         layoutChildren(parentDefaultSize, parentContentSize, innerShapeTemp);
     }

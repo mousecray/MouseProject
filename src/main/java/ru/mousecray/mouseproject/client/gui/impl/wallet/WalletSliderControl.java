@@ -9,10 +9,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.Tags;
-import ru.mousecray.mouseproject.client.gui.dim.GuiScaleRules;
-import ru.mousecray.mouseproject.client.gui.dim.GuiScaleType;
-import ru.mousecray.mouseproject.client.gui.dim.GuiShape;
-import ru.mousecray.mouseproject.client.gui.dim.GuiVector;
+import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiNumberField;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiSlider;
@@ -45,20 +42,26 @@ public class WalletSliderControl extends MPGuiFreePanel {
         super(new GuiShape(0, 0, width, height));
         this.maxCoinValue = maxCoinValue;
 
+        float fieldH = height * 0.7f;
+
         field = new MPGuiNumberField(
                 fontRenderer,
                 MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
-                new GuiShape(0, 0, width, height * 0.7f),
+                new GuiShape(0, 0, width, fieldH),
                 GuiScreenWallet.TEXTURES, GuiScreenWallet.TEXTURES_SIZE,
                 new GuiShape(104, 200, 80, 10),
                 fontSize,
                 this::onInternalTextTyped
         );
         field.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
+        field.setPadding(new GuiPadding(4, 0, 4, 0)); // Текст теперь аккуратно отодвинут!
+
+        float sliderH = height - fieldH;
+        float knobW   = sliderH * (5f / 7f);
 
         class InnerSlider extends MPGuiSlider<InnerSlider> {
             public InnerSlider() {
-                super(new GuiShape(0, 0, width, height * 0.3f),
+                super(new GuiShape(0, 0, width, sliderH),
                         null,
                         MPGuiTexturePack.Builder.create(
                                         GuiScreenWallet.TEXTURES, GuiScreenWallet.TEXTURES_SIZE,
@@ -68,7 +71,7 @@ public class WalletSliderControl extends MPGuiFreePanel {
                                 .addTexture(GuiButtonActionState.HOVER, 1)
                                 .addTexture(GuiButtonActionState.PRESSED, 2)
                                 .build(),
-                        height * 0.3f, 0, 100, false);
+                        knobW, sliderH, 0, 100, false); // Передаем рассчитанные пропорции
             }
         }
         slider = new InnerSlider();
@@ -80,7 +83,7 @@ public class WalletSliderControl extends MPGuiFreePanel {
         });
 
         addChild(field, null, null);
-        addChild(slider, null, new GuiVector(0, height * 0.7f));
+        addChild(slider, null, new GuiVector(0, fieldH));
     }
 
     private void onInternalTextTyped(MPGuiTextTypedEvent<MPGuiNumberField> event) {
