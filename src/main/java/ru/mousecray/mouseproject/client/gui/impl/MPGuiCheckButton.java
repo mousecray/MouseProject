@@ -37,10 +37,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
     private final float                                            boxOriginalWidth;
 
     public MPGuiCheckButton(
-            MPGuiString text,
-            FontRenderer fontRenderer,
-            GuiShape elementShape,
-            GuiShape textureShape,
+            GuiShape elementShape, MPGuiString text, FontRenderer fontRenderer,
             MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiCheckButton>> onClick) {
         super(
                 text.get(),
@@ -53,7 +50,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
                 MPGuiTexturePack.Builder
                         .create(
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                                textureShape.pos(), textureShape.size()
+                                GuiVector.of(184, 0), GuiVector.of(8)
                         )
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)
@@ -85,10 +82,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
     }
 
     public MPGuiCheckButton(
-            String text,
-            FontRenderer fontRenderer,
-            GuiShape elementShape,
-            GuiShape textureShape,
+            GuiShape elementShape, String text, FontRenderer fontRenderer,
             MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiCheckButton>> onClick) {
         super(
                 text,

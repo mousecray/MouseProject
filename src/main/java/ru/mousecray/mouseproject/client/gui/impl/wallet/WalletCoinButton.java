@@ -9,13 +9,13 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
+import ru.mousecray.mouseproject.client.gui.MPGuiSelectedButton;
 import ru.mousecray.mouseproject.client.gui.dim.GuiScaleRules;
 import ru.mousecray.mouseproject.client.gui.dim.GuiScaleType;
 import ru.mousecray.mouseproject.client.gui.dim.GuiShape;
 import ru.mousecray.mouseproject.client.gui.dim.GuiVector;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiTickEvent;
-import ru.mousecray.mouseproject.client.gui.impl.MPGuiSelectedButton;
 import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
@@ -33,12 +33,13 @@ public class WalletCoinButton extends MPGuiSelectedButton<WalletCoinButton> {
             Consumer<MPGuiMouseClickEvent<WalletCoinButton>> onClick
     ) {
         super(
-                coinValue.getFormattedValue(CoinValue.FormatType.SHORT), elementShape, GuiScreenWallet.TEXTURES, GuiScreenWallet.TEXTURES_SIZE,
+                elementShape, coinValue.getFormattedValue(CoinValue.FormatType.SHORT),
+                GuiScreenWallet.TEXTURES, GuiScreenWallet.TEXTURES_SIZE,
                 new GuiShape(230, 0, 10, 13), fontSize, onClick
         );
         this.coinValue = coinValue;
         cachedName = new ItemStack(coinValue.getType().getItem(), 1).getDisplayName();
-        setTextOffset(new GuiVector(0, getElementShape().height() / 3.5f));
+        setTextOffset(GuiVector.of(0, getElementShape().height() / 3.5f));
         int length = coinValue.getFormattedValue(CoinValue.FormatType.SHORT).length();
         if (length > 4) setTextScaleMultiplayer((float) Math.max(0.5, 4d / length));
         setScaleRules(new GuiScaleRules(GuiScaleType.ORIGIN_VERTICAL));

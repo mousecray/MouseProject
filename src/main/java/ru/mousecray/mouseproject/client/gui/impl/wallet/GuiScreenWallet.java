@@ -96,7 +96,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                 this, "take_action", MPGuiActionButton.class,
                 () -> new MPGuiActionButton(
                         GuiShape.ZERO,
-                        MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.take"), fontSize,
+                        MPGuiString.localizedGuiTag("wallet.button.take"), fontSize,
                         event -> { }
                 ),
                 t -> {
@@ -109,7 +109,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                 this, "put_action", MPGuiActionButton.class,
                 () -> new MPGuiActionButton(
                         GuiShape.ZERO,
-                        MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.put"), fontSize,
+                        MPGuiString.localizedGuiTag("wallet.button.put"), fontSize,
                         event -> { }
                 ),
                 t -> {
@@ -226,15 +226,15 @@ public class GuiScreenWallet extends MPGuiScreen {
                 () -> new MPGuiSimpleScrollPanel(new GuiShape(0, 0, 222, 115)),
                 null, t -> t.setContent(coinsPanel)
         );
-        addPanel(coinsContainer, null, AnchorPosition.TOP_LEFT, new GuiVector(4, 10));
+        addPanel(coinsContainer, null, AnchorPosition.TOP_LEFT, GuiVector.of(4, 10));
 
         if (activeGroups.isEmpty()) {
             MPGuiStaticLabel emptyLabel = MPGuiElementCache.INSTANCE.getOrCreate(
                     this, "empty_label", MPGuiStaticLabel.class,
-                    () -> new MPGuiStaticLabel(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.label.empty"),
+                    () -> new MPGuiStaticLabel(MPGuiString.localizedGuiTag("wallet.label.empty"),
                             fontRenderer, new GuiShape(0, 0, 80, 10), 14737632, fontSize)
             );
-            coinsPanel.addChild(emptyLabel, null, new GuiVector(2, 0));
+            coinsPanel.addChild(emptyLabel, null, GuiVector.of(2, 0));
         } else {
             List<Map.Entry<Integer, List<CoinValue>>> groupsList = new ArrayList<>(activeGroups.entrySet());
 
@@ -253,7 +253,7 @@ public class GuiScreenWallet extends MPGuiScreen {
 
                     Map.Entry<Integer, List<CoinValue>> groupSlots = groupsList.get(idx);
 
-                    StringRef groupLabelKey = new StringRef("gui." + Tags.MOD_ID + ".wallet.label.");
+                    StringRef groupLabelKey = new StringRef("wallet.label.");
                     switch (groupSlots.getKey()) {
                         case 0:
                             groupLabelKey.$A("normal");
@@ -293,18 +293,18 @@ public class GuiScreenWallet extends MPGuiScreen {
 
                     MPGuiStaticLabel groupTitle = MPGuiElementCache.INSTANCE.getOrCreate(
                             this, "group_title_" + idx, MPGuiStaticLabel.class,
-                            () -> new MPGuiStaticLabel(MPGuiString.localized(groupLabelKey.$()), fontRenderer,
+                            () -> new MPGuiStaticLabel(MPGuiString.localizedGuiTag(groupLabelKey.$()), fontRenderer,
                                     new GuiShape(0, 0, colWidth - 15, 10), 14737632, fontSize),
-                            null, t -> t.setGuiString(MPGuiString.localized(groupLabelKey.$())), null
+                            null, t -> t.setGuiString(MPGuiString.localizedGuiTag(groupLabelKey.$())), null
                     );
                     titlePanel.addChild(groupTitle, null, AnchorPosition.MIDDLE_LEFT, null);
 
                     MPGuiCheckButton selectAll = MPGuiElementCache.INSTANCE.getOrCreate(
                             this, "select_all_" + idx, MPGuiCheckButton.class,
                             () -> new MPGuiCheckButton(
-                                    MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.select_all"), fontRenderer,
-                                    new GuiShape(0, 0, 8, 8), TEXTURES, TEXTURES_SIZE,
-                                    new GuiShape(240, 0, 8, 8), fontSize,
+                                    new GuiShape(0, 0, 8, 8),
+                                    MPGuiString.localizedGuiTag("wallet.button.select_all"),
+                                    fontRenderer, fontSize,
                                     e -> { }
                             )
                     );
@@ -349,9 +349,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         return MPGuiElementCache.INSTANCE.getOrCreate(
                 this, key, MPGuiDefaultButton.class,
                 () -> new MPGuiDefaultButton(
-                        MPGuiString.simple(text),
-                        new GuiShape(0, 0, 10, 13.0f), TEXTURES, TEXTURES_SIZE,
-                        new GuiShape(80, 200, 10, 10), fontSize, onClick
+                        new GuiShape(0, 0, 10, 13.0f), MPGuiString.simple(text), fontSize, onClick
                 ),
                 t -> t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL))
         );

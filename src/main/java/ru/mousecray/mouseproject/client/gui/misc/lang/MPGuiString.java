@@ -7,6 +7,7 @@ package ru.mousecray.mouseproject.client.gui.misc.lang;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import ru.mousecray.mouseproject.Tags;
 
 @SideOnly(Side.CLIENT)
 public interface MPGuiString {
@@ -20,7 +21,7 @@ public interface MPGuiString {
         return new MPLocalizedString(key, args);
     }
 
-    static MPGuiString localizedGuiTag() {
-
+    static MPGuiString localizedGuiTag(String key, Object... args) {
+        return localized("gui." + Tags.MOD_ID + "." + key, args);
     }
 }

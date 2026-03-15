@@ -8,7 +8,6 @@ package ru.mousecray.mouseproject.client.gui.impl.wallet;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.Tags;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiNumberField;
@@ -45,10 +44,8 @@ public class WalletSliderControl extends MPGuiFreePanel {
 
         field = new MPGuiNumberField(
                 new GuiShape(0, 0, width, height * 0.8f),
-                MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
-                fontRenderer,
-                fontSize,
-                this::onInternalTextTyped
+                MPGuiString.localizedGuiTag("wallet.text_field.take_put_count"),
+                fontRenderer, fontSize, this::onInternalTextTyped
         );
         field.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
         field.setPadding(new GuiPadding(3f, 0, 0, 0));
@@ -62,7 +59,7 @@ public class WalletSliderControl extends MPGuiFreePanel {
                         null,
                         MPGuiTexturePack.Builder.create(
                                         GuiScreenWallet.TEXTURES, GuiScreenWallet.TEXTURES_SIZE,
-                                        new GuiVector(90, 200), new GuiVector(5, 7)
+                                        GuiVector.of(90, 200), GuiVector.of(5, 7)
                                 )
                                 .addTexture(GuiButtonPersistentState.NORMAL, 0)
                                 .addTexture(GuiButtonActionState.HOVER, 1)
@@ -80,7 +77,7 @@ public class WalletSliderControl extends MPGuiFreePanel {
         });
 
         addChild(field, null, null);
-        addChild(slider, null, new GuiVector(0, height / 1.8f));
+        addChild(slider, null, GuiVector.of(0, height / 1.8f));
     }
 
     private void onInternalTextTyped(MPGuiTextTypedEvent<MPGuiSimpleField> event) {

@@ -10,6 +10,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.MPGuiButton;
 import ru.mousecray.mouseproject.client.gui.dim.GuiShape;
+import ru.mousecray.mouseproject.client.gui.dim.GuiVector;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
@@ -27,16 +28,14 @@ public class MPGuiDefaultButton extends MPGuiButton<MPGuiDefaultButton> {
     private final Consumer<MPGuiMouseClickEvent<MPGuiDefaultButton>> onClick;
 
     public MPGuiDefaultButton(
-            @Nullable MPGuiString text,
-            GuiShape elementShape,
-            GuiShape textureShape,
+            GuiShape elementShape, @Nullable MPGuiString text,
             MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiDefaultButton>> onClick) {
         super(
                 text == null ? "" : text.get(), elementShape,
                 MPGuiTexturePack.Builder
                         .create(
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                                textureShape.pos(), textureShape.size()
+                                GuiVector.of(192, 0), GuiVector.of(10)
                         )
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)
@@ -49,16 +48,14 @@ public class MPGuiDefaultButton extends MPGuiButton<MPGuiDefaultButton> {
     }
 
     public MPGuiDefaultButton(
-            @Nullable String text,
-            GuiShape elementShape,
-            GuiShape textureShape,
+            GuiShape elementShape, @Nullable String text,
             MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiDefaultButton>> onClick) {
         super(
                 text, elementShape,
                 MPGuiTexturePack.Builder
                         .create(
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                                textureShape.pos(), textureShape.size()
+                                GuiVector.of(192, 0), GuiVector.of(10)
                         )
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)
