@@ -62,7 +62,7 @@ public class MPGuiTexturePack {
             textures.put(state,
                     new MPGuiTexture(
                             baseTexture, textureSize,
-                            new GuiVector(startPos.x(), startPos.y() + elementSize.y() * index),
+                            GuiVector.of(startPos.x(), startPos.y() + elementSize.y() * index),
                             elementSize
                     )
             );

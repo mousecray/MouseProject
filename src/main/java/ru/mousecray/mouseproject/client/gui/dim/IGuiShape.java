@@ -39,7 +39,7 @@ public interface IGuiShape {
 
     default float centerX()                                      { return x() + width() * 0.5f; }
     default float centerY()                                      { return y() + height() * 0.5f; }
-    default IGuiVector center()                                  { return new GuiVector(centerX(), centerY()); }
+    default IGuiVector center()                                  { return GuiVector.of(centerX(), centerY()); }
 
     default boolean isEmpty()                                    { return width() <= 0f || height() <= 0f; }
 
