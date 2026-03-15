@@ -23,7 +23,7 @@ public class MPGuiElementCache {
     private final Map<String, WeakReference<MPGuiElement<?>>> cache = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public <T extends MPGuiElement<T>> T get(MPGuiScreen screen, String key, Class<T> type) {
+    public <T extends MPGuiElement<?>> T get(MPGuiScreen screen, String key, Class<T> type) {
         String                         actualKey = screen.getScreenName() + ":" + key;
         WeakReference<MPGuiElement<?>> ref       = cache.get(actualKey);
         if (ref != null) {
@@ -37,7 +37,7 @@ public class MPGuiElementCache {
         return null;
     }
 
-    public <T extends MPGuiElement<T>> T getOrCreate(MPGuiScreen screen, String key, Class<T> type, Supplier<T> typeSupplier, Consumer<T> createAction, Consumer<T> existAction, Consumer<T> finalAction) {
+    public <T extends MPGuiElement<?>> T getOrCreate(MPGuiScreen screen, String key, Class<T> type, Supplier<T> typeSupplier, Consumer<T> createAction, Consumer<T> existAction, Consumer<T> finalAction) {
         T t = get(screen, key, type);
         if (t == null) {
             put(screen, key, t = typeSupplier.get());
@@ -47,19 +47,19 @@ public class MPGuiElementCache {
         return t;
     }
 
-    public <T extends MPGuiElement<T>> T getOrCreate(MPGuiScreen screen, String key, Class<T> type, Supplier<T> typeSupplier, Consumer<T> createAction, Consumer<T> finalAction) {
+    public <T extends MPGuiElement<?>> T getOrCreate(MPGuiScreen screen, String key, Class<T> type, Supplier<T> typeSupplier, Consumer<T> createAction, Consumer<T> finalAction) {
         return getOrCreate(screen, key, type, typeSupplier, createAction, null, finalAction);
     }
 
-    public <T extends MPGuiElement<T>> T getOrCreate(MPGuiScreen screen, String key, Class<T> type, Supplier<T> typeSupplier, Consumer<T> createAction) {
+    public <T extends MPGuiElement<?>> T getOrCreate(MPGuiScreen screen, String key, Class<T> type, Supplier<T> typeSupplier, Consumer<T> createAction) {
         return getOrCreate(screen, key, type, typeSupplier, createAction, null);
     }
 
-    public <T extends MPGuiElement<T>> T getOrCreate(MPGuiScreen screen, String key, Class<T> type, Supplier<T> typeSupplier) {
+    public <T extends MPGuiElement<?>> T getOrCreate(MPGuiScreen screen, String key, Class<T> type, Supplier<T> typeSupplier) {
         return getOrCreate(screen, key, type, typeSupplier, null);
     }
 
-    public <T extends MPGuiElement<T>> void put(MPGuiScreen screen, String key, T element) {
+    public <T extends MPGuiElement<?>> void put(MPGuiScreen screen, String key, T element) {
         cache.put(screen.getScreenName() + ":" + key, new WeakReference<>(element));
     }
 

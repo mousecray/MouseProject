@@ -237,8 +237,8 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         return result;
     }
 
-    protected final void onKeyTyped0(char typedChar, int keyCode) {
-        textboxKeyTyped(typedChar, keyCode);
+    protected final boolean onKeyTyped0(char typedChar, int keyCode) {
+        return textboxKeyTyped(typedChar, keyCode);
     }
 
     @Override

@@ -211,10 +211,7 @@ public abstract class MPGuiScreen extends GuiScreen {
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         boolean handled = false;
-        if (focusedTextField != null) {
-            focusedTextField.onKeyTyped0(typedChar, keyCode);
-            handled = true;
-        }
+        if (focusedTextField != null) handled = focusedTextField.onKeyTyped0(typedChar, keyCode);
         if (!handled) super.keyTyped(typedChar, keyCode);
     }
 

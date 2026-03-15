@@ -16,13 +16,11 @@ import ru.mousecray.mouseproject.client.gui.MPGuiScreen;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
-import ru.mousecray.mouseproject.client.gui.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.impl.*;
 import ru.mousecray.mouseproject.client.gui.impl.container.*;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.MPGuiElementCache;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import ru.mousecray.mouseproject.common.economy.CoinHelper;
 import ru.mousecray.mouseproject.common.economy.CoinValue;
@@ -91,14 +89,14 @@ public class GuiScreenWallet extends MPGuiScreen {
         );
         addLabel(titleLabel, null, AnchorPosition.TOP_LEFT, GuiVector.ZERO);
 
-        float panelWidth         = 114f;
-        float buttonTakePutYSize = 13.0f;
-        float buttonTakePutGap   = 10f;
+        float panelWidth  = 114f;
+        float controlSize = 13.0f;
+        float controlGap  = 10f;
 
         MPGuiActionButton takeAction = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "take_action", MPGuiActionButton.class,
                 () -> new MPGuiActionButton(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.take"),
-                        new GuiShape(0, 0, panelWidth, 12),
+                        new GuiShape(0, 0, panelWidth, controlSize),
                         TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize, event -> { }
                 ),
                 t -> {
@@ -110,7 +108,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         MPGuiActionButton putAction = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "put_action", MPGuiActionButton.class,
                 () -> new MPGuiActionButton(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.put"),
-                        new GuiShape(0, 0, panelWidth, 12),
+                        new GuiShape(0, 0, panelWidth, controlSize),
                         TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize, event -> { }
                 ),
                 t -> {
@@ -119,53 +117,14 @@ public class GuiScreenWallet extends MPGuiScreen {
                 }
         );
 
-        Consumer<MPGuiTextTypedEvent<MPGuiNumberField>> fieldEventTake = event -> {
-            String newText = event.getNewText();
-            if (newText == null || newText.length() > 19 || newText.trim().isEmpty()) {
-                event.setCancelled(true);
-                takeAction.applyState(GuiButtonPersistentState.DISABLED);
-                putAction.applyState(GuiButtonPersistentState.DISABLED);
-                return;
-            }
-            try {
-                long l = Long.parseLong(newText);
-                if (l <= 0) throw new NumberFormatException();
-            } catch (NumberFormatException ignore) {
-                event.setCancelled(true);
-                takeAction.applyState(GuiButtonPersistentState.DISABLED);
-                putAction.applyState(GuiButtonPersistentState.DISABLED);
-                return;
-            }
-            takeAction.applyState(GuiButtonPersistentState.NORMAL);
-            putAction.applyState(GuiButtonPersistentState.NORMAL);
-        };
-
-        MPGuiNumberField fieldTakePut = MPGuiElementCache.INSTANCE.getOrCreate(
-                this, "field_take_put", MPGuiNumberField.class,
-                () -> new MPGuiNumberField(fontRenderer, MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
-                        new GuiShape(0, 0, panelWidth, buttonTakePutYSize * 1.2f),
-                        TEXTURES, TEXTURES_SIZE, new GuiShape(104, 200, 80, 10), fontSize, fieldEventTake
-                ),
+        WalletSliderControl walletSlider = MPGuiElementCache.INSTANCE.getOrCreate(
+                this, "wallet_slider_control", WalletSliderControl.class,
+                () -> new WalletSliderControl(fontRenderer, fontSize, panelWidth, controlSize, maxCoinValue),
                 t -> {
-                    t.applyState(GuiButtonPersistentState.DISABLED);
-                    t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
-                }
-        );
-
-        class WalletSlider extends MPGuiSlider<WalletSlider> {
-            public WalletSlider() {
-                super(new GuiShape(0, 0, panelWidth, 11),
-                        MPGuiTexturePack.Builder.create(TEXTURES, TEXTURES_SIZE, new GuiVector(0, 200), new GuiVector(80, 10)).build(),
-                        MPGuiTexturePack.Builder.create(TEXTURES, TEXTURES_SIZE, new GuiVector(90, 200), new GuiVector(5, 7)).build(),
-                        new GuiVector(6.68f, 11), 0, 100, false);
-            }
-        }
-        @SuppressWarnings("Convert2MethodRef")
-        WalletSlider slider = MPGuiElementCache.INSTANCE.getOrCreate(
-                this, "wallet_slider", WalletSlider.class,
-                () -> new WalletSlider(),
-                t -> {
-                    t.onChange(value -> fieldTakePut.setNumberText(value == 0 ? 1 : (long) value * maxCoinValue / 100));
+                    t.onValidityChanged(isValid -> {
+                        takeAction.applyState(isValid ? GuiButtonPersistentState.NORMAL : GuiButtonPersistentState.DISABLED);
+                        putAction.applyState(isValid ? GuiButtonPersistentState.NORMAL : GuiButtonPersistentState.DISABLED);
+                    });
                     t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
                 }
         );
@@ -180,41 +139,33 @@ public class GuiScreenWallet extends MPGuiScreen {
 
         MPGuiLinearPanel row1 = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "row1_panel", MPGuiLinearPanel.class,
-                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize), LinearPanelOrientation.HORIZONTAL),
+                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, controlSize), LinearPanelOrientation.HORIZONTAL),
                 null, MPGuiPanel::removeAllChildren
         );
-        row1.addChild(createDynamicButton("btn_+1", "+1", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1, 1))), null, null);
-        row1.addChild(createDynamicButton("btn_+10", "+10", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 10, 1))), null, null);
-        row1.addChild(createDynamicButton("btn_+50", "+50", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 50, 1))), null, null);
-        row1.addChild(createSpacer("row1_spacer", buttonTakePutGap), null, null);
-        row1.addChild(createDynamicButton("btn_-1", "-1", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1, 1))), null, null);
-        row1.addChild(createDynamicButton("btn_-10", "-10", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 10, 1))), null, null);
-        row1.addChild(createDynamicButton("btn_-50", "-50", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 50, 1))), null, null);
+        row1.addChild(createDynamicButton("btn_+1", "+1", fontSize, e -> walletSlider.addValue(1)), null, null);
+        row1.addChild(createDynamicButton("btn_+10", "+10", fontSize, e -> walletSlider.addValue(10)), null, null);
+        row1.addChild(createDynamicButton("btn_+50", "+50", fontSize, e -> walletSlider.addValue(50)), null, null);
+        row1.addChild(createSpacer("row1_spacer", controlGap), null, null);
+        row1.addChild(createDynamicButton("btn_-1", "-1", fontSize, e -> walletSlider.addValue(-1)), null, null);
+        row1.addChild(createDynamicButton("btn_-10", "-10", fontSize, e -> walletSlider.addValue(-10)), null, null);
+        row1.addChild(createDynamicButton("btn_-50", "-50", fontSize, e -> walletSlider.addValue(-50)), null, null);
         controls.addChild(row1, null, null);
 
         MPGuiLinearPanel row2 = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "row2_panel", MPGuiLinearPanel.class,
-                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, buttonTakePutYSize), LinearPanelOrientation.HORIZONTAL),
+                () -> new MPGuiLinearPanel(new GuiShape(0, 0, panelWidth, controlSize), LinearPanelOrientation.HORIZONTAL),
                 null, MPGuiPanel::removeAllChildren
         );
-        row2.addChild(createDynamicButton("btn_+100", "+100", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 100, 1))), null, null);
-        row2.addChild(createDynamicButton("btn_+500", "+500", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 500, 1))), null, null);
-        row2.addChild(createDynamicButton("btn_+1K", "+1K", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() + 1000, 1))), null, null);
-        row2.addChild(createSpacer("row2_spacer", buttonTakePutGap), null, null);
-        row2.addChild(createDynamicButton("btn_-100", "-100", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 100, 1))), null, null);
-        row2.addChild(createDynamicButton("btn_-500", "-500", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 500, 1))), null, null);
-        row2.addChild(createDynamicButton("btn_-1K", "-1K", fontSize, e -> fieldTakePut.setNumberText(Math.max(fieldTakePut.getNumberText() - 1000, 1))), null, null);
+        row2.addChild(createDynamicButton("btn_+100", "+100", fontSize, e -> walletSlider.addValue(100)), null, null);
+        row2.addChild(createDynamicButton("btn_+500", "+500", fontSize, e -> walletSlider.addValue(500)), null, null);
+        row2.addChild(createDynamicButton("btn_+1K", "+1K", fontSize, e -> walletSlider.addValue(1000)), null, null);
+        row2.addChild(createSpacer("row2_spacer", controlGap), null, null);
+        row2.addChild(createDynamicButton("btn_-100", "-100", fontSize, e -> walletSlider.addValue(-100)), null, null);
+        row2.addChild(createDynamicButton("btn_-500", "-500", fontSize, e -> walletSlider.addValue(-500)), null, null);
+        row2.addChild(createDynamicButton("btn_-1K", "-1K", fontSize, e -> walletSlider.addValue(-1000)), null, null);
         controls.addChild(row2, null, null);
 
-        MPGuiFreePanel fieldSliderStack = MPGuiElementCache.INSTANCE.getOrCreate(
-                this, "field_slider_stack", MPGuiFreePanel.class,
-                () -> new MPGuiFreePanel(new GuiShape(0, 0, panelWidth, 18)),
-                null, MPGuiPanel::removeAllChildren
-        );
-        controls.addChild(fieldSliderStack, null, null);
-
-        fieldSliderStack.addChild(fieldTakePut, null, null);
-        fieldSliderStack.addChild(slider, null, new GuiVector(0, buttonTakePutYSize * 1.2f - 9));
+        controls.addChild(walletSlider, null, null);
 
         controls.addChild(takeAction, null, null);
         controls.addChild(putAction, null, null);
@@ -222,7 +173,6 @@ public class GuiScreenWallet extends MPGuiScreen {
         float coinW        = 14.9f;
         float coinH        = 23f;
         int   slot_count_x = 7;
-        float COLUMN_GAP   = 12f;
         float CELL_GAP     = 6f;
         float colWidth     = slot_count_x * coinW;
 

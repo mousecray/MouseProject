@@ -42,7 +42,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
     private IGuiVector lastParentDefaultSize, lastParentContentSize;
 
-    public MPGuiSlider(GuiShape shape, MPGuiTexturePack trackTexture, MPGuiTexturePack knobTexture, GuiVector knobSize, int min, int max, boolean isVertical) {
+    public MPGuiSlider(GuiShape shape, MPGuiTexturePack trackTexture, MPGuiTexturePack knobTexture, float knobSize, int min, int max, boolean isVertical) {
         super(shape);
         this.isVertical = isVertical;
         this.min = min;
@@ -63,11 +63,11 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
         track = new TrackButton();
         track.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT));
-        addChild(track); //Добавляем через базовый метод без отступов и смещений
+        addChild(track);
 
         class KnobButton extends MPGuiButton<KnobButton> {
             public KnobButton() {
-                super("", new GuiShape(0, 0, knobSize.x(), knobSize.y()),
+                super("", new GuiShape(0, 0, 0, knobSize),
                         knobTexture, SoundEvents.UI_BUTTON_CLICK, MPFontSize.NORMAL);
             }
 
@@ -88,7 +88,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
         KnobButton knobBtn = new KnobButton();
         knob = knobBtn;
-        knobBtn.setScaleRules(new GuiScaleRules(GuiScaleType.FIXED));
+        knobBtn.setScaleRules(new GuiScaleRules(GuiScaleType.FLOW, GuiScaleType.ORIGIN_VERTICAL));
         addChild(knobBtn);
 
         setValue(min);
@@ -160,11 +160,9 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
      */
     @Override
     protected void layoutChildren(@Nonnull IGuiVector parentDefaultSize, @Nonnull IGuiVector parentContentSize, @Nonnull MutableGuiShape inner) {
-        //1. Компонуем трек (Track). У него правило PARENT, поэтому даем ему всё доступное пространство inner
         childAvailableTemp.withShape(inner);
         track.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
 
-        //2. Компонуем ползунок (Knob). Вызываем метод, который установит ему нужные координаты по прогрессу
         recalculateKnobPosition();
     }
 
@@ -172,7 +170,6 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         MutableGuiShape inner = getCalculatedElementShape();
         if (inner.width() <= 0 || inner.height() <= 0) return;
 
-        //Берем базовый размер ползунка (он FIXED, так что берем из ElementShape)
         float trackLength = isVertical
                 ? inner.height() - knob.getElementShape().height()
                 : inner.width() - knob.getElementShape().width();
