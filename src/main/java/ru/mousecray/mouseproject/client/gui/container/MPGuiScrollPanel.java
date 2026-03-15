@@ -24,8 +24,6 @@ import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.measurePreferredWithScaleRules;
-
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -242,7 +240,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     @Override
     public void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result) {
-        measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
+        GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
+        GuiRenderHelper.addPaddingToPreferred(parentDefaultSize, parentContentSize, result, getPadding(), scaleRules);
     }
 
     @Override public void setScreen(MPGuiScreen screen) {

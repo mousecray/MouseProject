@@ -42,21 +42,19 @@ public class WalletSliderControl extends MPGuiFreePanel {
         super(new GuiShape(0, 0, width, height));
         this.maxCoinValue = maxCoinValue;
 
-        float fieldH = height * 0.7f;
-
         field = new MPGuiNumberField(
                 fontRenderer,
                 MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.text_field.take_put_count"),
-                new GuiShape(0, 0, width, fieldH),
+                new GuiShape(0, 0, width, height * 0.8f),
                 GuiScreenWallet.TEXTURES, GuiScreenWallet.TEXTURES_SIZE,
                 new GuiShape(104, 200, 80, 10),
                 fontSize,
                 this::onInternalTextTyped
         );
         field.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
-        field.setPadding(new GuiPadding(4, 0, 4, 0)); // Текст теперь аккуратно отодвинут!
+        field.setPadding(new GuiPadding(3f, 0, 0, 0));
 
-        float sliderH = height - fieldH;
+        float sliderH = height * 0.5f;
         float knobW   = sliderH * (5f / 7f);
 
         class InnerSlider extends MPGuiSlider<InnerSlider> {
@@ -71,7 +69,7 @@ public class WalletSliderControl extends MPGuiFreePanel {
                                 .addTexture(GuiButtonActionState.HOVER, 1)
                                 .addTexture(GuiButtonActionState.PRESSED, 2)
                                 .build(),
-                        knobW, sliderH, 0, 100, false); // Передаем рассчитанные пропорции
+                        knobW, sliderH, 0, 100, false);
             }
         }
         slider = new InnerSlider();
@@ -83,7 +81,7 @@ public class WalletSliderControl extends MPGuiFreePanel {
         });
 
         addChild(field, null, null);
-        addChild(slider, null, new GuiVector(0, fieldH));
+        addChild(slider, null, new GuiVector(0, height / 1.8f));
     }
 
     private void onInternalTextTyped(MPGuiTextTypedEvent<MPGuiNumberField> event) {

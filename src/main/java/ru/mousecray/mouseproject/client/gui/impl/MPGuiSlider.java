@@ -5,6 +5,7 @@
 
 package ru.mousecray.mouseproject.client.gui.impl;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -19,10 +20,13 @@ import ru.mousecray.mouseproject.client.gui.misc.MPClickType;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Consumer;
 
 @SideOnly(Side.CLIENT)
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     private final MPGuiButton<?> knob;
     private final MPGuiButton<?> track;
@@ -42,7 +46,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
     private IGuiVector lastParentDefaultSize, lastParentContentSize;
 
-    public MPGuiSlider(GuiShape shape, MPGuiTexturePack trackTexture, MPGuiTexturePack knobTexture, float knobWidth, float knobHeight, int min, int max, boolean isVertical) {
+    public MPGuiSlider(GuiShape shape, @Nullable MPGuiTexturePack trackTexture, MPGuiTexturePack knobTexture, float knobWidth, float knobHeight, int min, int max, boolean isVertical) {
         super(shape);
         this.isVertical = isVertical;
         this.min = min;
@@ -55,7 +59,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
             }
 
             @Override
-            public void onClick(@Nonnull MPGuiMouseClickEvent<TrackButton> e) {
+            public void onClick(MPGuiMouseClickEvent<TrackButton> e) {
                 updateFromMouseX(e.getMouseX(), e.getMouseY());
                 fireClickEvent(e);
             }
@@ -72,14 +76,14 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
             }
 
             @Override
-            protected void onMouseDragged(@Nonnull MPGuiMouseDragEvent<KnobButton> e) {
+            protected void onMouseDragged(MPGuiMouseDragEvent<KnobButton> e) {
                 if (e.isCancelled()) return;
                 updateFromMouseX(e.getMouseX(), e.getMouseY());
                 fireDragEvent(e);
             }
 
             @Override
-            public void onClick(@Nonnull MPGuiMouseClickEvent<KnobButton> e) {
+            public void onClick(MPGuiMouseClickEvent<KnobButton> e) {
                 if (e.isCancelled()) return;
                 updateFromMouseX(e.getMouseX(), e.getMouseY());
                 fireClickEvent(e);
@@ -88,7 +92,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
         KnobButton knobBtn = new KnobButton();
         knob = knobBtn;
-        knobBtn.setScaleRules(new GuiScaleRules(GuiScaleType.FLOW, GuiScaleType.ORIGIN_VERTICAL));
+        knobBtn.setScaleRules(new GuiScaleRules(GuiScaleType.ORIGIN_VERTICAL));
         addChild(knobBtn);
 
         setValue(min);
@@ -121,7 +125,9 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
     private void fireClickEvent(MPGuiMouseClickEvent<?> original) {
         if (onClick != null) {
-            MPGuiEventFactory.pushMouseClickEvent(clickEvent, self(), original.getMc(), original.getMouseX(), original.getMouseY());
+            MPGuiEventFactory.pushMouseClickEvent(
+                    clickEvent, self(), original.getMc(), original.getMouseX(), original.getMouseY()
+            );
             onClick.accept(clickEvent);
         }
     }
@@ -161,9 +167,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     public boolean isVertical() { return isVertical; }
 
     @Override
-    protected void layoutChildren(
-            @Nonnull IGuiVector parentDefaultSize, @Nonnull IGuiVector parentContentSize, @Nonnull MutableGuiShape inner
-    ) {
+    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
         childAvailableTemp.withShape(inner);
         track.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
 
@@ -178,7 +182,10 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         float knobH = knob.getElementShape().height();
 
         if (lastParentDefaultSize != null && lastParentContentSize != null) {
-            knob.measurePreferred(lastParentDefaultSize, lastParentContentSize, inner.width(), inner.height(), measureTemp);
+            knob.measurePreferred(
+                    lastParentDefaultSize, lastParentContentSize,
+                    inner.width(), inner.height(), measureTemp
+            );
             knobW = measureTemp.x();
             knobH = measureTemp.y();
         }
@@ -213,7 +220,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     }
 
     @Override
-    public void calculate(@Nonnull IGuiVector parentDefaultSize, @Nonnull IGuiVector parentContentSize, @Nonnull IGuiShape available) {
+    public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
         lastParentDefaultSize = parentDefaultSize;
         lastParentContentSize = parentContentSize;
 

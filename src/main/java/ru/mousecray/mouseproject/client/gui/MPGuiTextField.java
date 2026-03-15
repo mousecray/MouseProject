@@ -85,7 +85,10 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
                           GuiShape elementShape,
                           @Nullable MPGuiTexturePack texturePack,
                           @Nullable SoundEvent soundClick, MPFontSize fontSize) {
-        super(0, fontRenderer, (int) elementShape.x(), (int) elementShape.y(), (int) elementShape.width(), (int) elementShape.height());
+        super(
+                0, fontRenderer, (int) elementShape.x(), (int) elementShape.y(),
+                (int) elementShape.width(), (int) elementShape.height()
+        );
         this.elementShape.withShape(elementShape);
         this.fontSize = fontSize;
         if (defaultText == null) defaultText = "";
@@ -139,6 +142,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override
     public void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result) {
         GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
+        GuiRenderHelper.addPaddingToPreferred(parentDefaultSize, parentContentSize, result, getPadding(), scaleRules);
     }
 
     @Override public void setTexturePack(MPGuiTexturePack texturePack) { }
@@ -195,7 +199,8 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     protected void onAnyEventFire(MPGuiEvent<T> event) { }
 
-    @Override public final void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
+    @Override
+    public final void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
         if (++partialTick >= 20) partialTick = 0;
         if (tickDown >= 0) ++tickDown;
 
@@ -480,7 +485,10 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     public final boolean isMouseOver() { return hovered; }
 
     public final void drawTextBoxForegroundLayer(int mouseX, int mouseY) {
-        MPGuiEventFactory.pushTickEvent(drawFGEvent, self(), Minecraft.getMinecraft(), mouseX, mouseY, Minecraft.getMinecraft().getRenderPartialTicks());
+        MPGuiEventFactory.pushTickEvent(
+                drawFGEvent, self(), Minecraft.getMinecraft(), mouseX, mouseY,
+                Minecraft.getMinecraft().getRenderPartialTicks()
+        );
         onAnyEventFire(drawFGEvent);
         if (!drawFGEvent.isCancelled()) drawTextBoxForegroundLayer(drawFGEvent);
     }
@@ -505,7 +513,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         float innerH = calculatedInnerShape.height();
 
         float textX = innerX * inverseScale;
-        float textY = (innerY + innerH / 2f) * inverseScale - (fontRenderer.FONT_HEIGHT / 2f);
+        float textY = (innerY + innerH / 2f) * inverseScale - (fontRenderer.FONT_HEIGHT / 1.4f) * inverseScale;
 
         int selectionEndPos = getSelectionEnd() - lineScrollOffset;
 
@@ -604,7 +612,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         String visibleText   = fontRenderer.trimStringToWidth(getText().substring(lineScrollOffset), maxInnerWidth);
 
         float textX     = innerX * inverseScale;
-        float textY     = (innerY + innerH / 2f) * inverseScale - (fontRenderer.FONT_HEIGHT / 2f);
+        float textY     = (innerY + innerH / 2f) * inverseScale - (fontRenderer.FONT_HEIGHT / 1.4f) * inverseScale;
         int   cursorPos = getCursorPosition() - lineScrollOffset;
 
         if (!visibleText.isEmpty()) {

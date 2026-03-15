@@ -354,4 +354,20 @@ public class GuiRenderHelper {
             if (scaleRules.isFixedVertical()) result.withY(elementShape.height());
         }
     }
+
+    public static void addPaddingToPreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiVector result, GuiPadding pad, GuiScaleRules scaleRules) {
+        if (pad != null) {
+            float padL = calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getLeft());
+            float padR = calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getRight());
+            float padT = calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getTop());
+            float padB = calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getBottom());
+
+            if (!scaleRules.isParentHorizontal() && !scaleRules.isFixedHorizontal()) {
+                result.withX(result.x() + padL + padR);
+            }
+            if (!scaleRules.isParentVertical() && !scaleRules.isFixedVertical()) {
+                result.withY(result.y() + padT + padB);
+            }
+        }
+    }
 }

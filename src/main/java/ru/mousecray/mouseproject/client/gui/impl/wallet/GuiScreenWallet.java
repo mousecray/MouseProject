@@ -96,30 +96,30 @@ public class GuiScreenWallet extends MPGuiScreen {
         MPGuiActionButton takeAction = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "take_action", MPGuiActionButton.class,
                 () -> new MPGuiActionButton(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.take"),
-                        new GuiShape(0, 0, panelWidth, controlSize),
+                        GuiShape.ZERO,
                         TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize, event -> { }
                 ),
                 t -> {
                     t.applyState(GuiButtonPersistentState.DISABLED);
-                    t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
+                    t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT));
                 }
         );
 
         MPGuiActionButton putAction = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "put_action", MPGuiActionButton.class,
                 () -> new MPGuiActionButton(MPGuiString.localized("gui." + Tags.MOD_ID + ".wallet.button.put"),
-                        new GuiShape(0, 0, panelWidth, controlSize),
+                        GuiShape.ZERO,
                         TEXTURES, TEXTURES_SIZE, new GuiShape(0, 200, 80, 10), fontSize, event -> { }
                 ),
                 t -> {
                     t.applyState(GuiButtonPersistentState.DISABLED);
-                    t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
+                    t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT));
                 }
         );
 
         WalletSliderControl walletSlider = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "wallet_slider_control", WalletSliderControl.class,
-                () -> new WalletSliderControl(fontRenderer, fontSize, panelWidth, controlSize, maxCoinValue),
+                () -> new WalletSliderControl(fontRenderer, fontSize, panelWidth, 16, maxCoinValue),
                 t -> {
                     t.onValidityChanged(isValid -> {
                         takeAction.applyState(isValid ? GuiButtonPersistentState.NORMAL : GuiButtonPersistentState.DISABLED);
@@ -149,6 +149,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         row1.addChild(createDynamicButton("btn_-1", "-1", fontSize, e -> walletSlider.addValue(-1)), null, null);
         row1.addChild(createDynamicButton("btn_-10", "-10", fontSize, e -> walletSlider.addValue(-10)), null, null);
         row1.addChild(createDynamicButton("btn_-50", "-50", fontSize, e -> walletSlider.addValue(-50)), null, null);
+        row1.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_VERTICAL));
         controls.addChild(row1, null, null);
 
         MPGuiLinearPanel row2 = MPGuiElementCache.INSTANCE.getOrCreate(
@@ -163,9 +164,10 @@ public class GuiScreenWallet extends MPGuiScreen {
         row2.addChild(createDynamicButton("btn_-100", "-100", fontSize, e -> walletSlider.addValue(-100)), null, null);
         row2.addChild(createDynamicButton("btn_-500", "-500", fontSize, e -> walletSlider.addValue(-500)), null, null);
         row2.addChild(createDynamicButton("btn_-1K", "-1K", fontSize, e -> walletSlider.addValue(-1000)), null, null);
+        row2.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_VERTICAL));
         controls.addChild(row2, null, null);
 
-        controls.addChild(walletSlider, null, null);
+        controls.addChild(walletSlider, new GuiMargin(0, 4f, 0, 2f), null);
 
         controls.addChild(takeAction, null, null);
         controls.addChild(putAction, null, null);

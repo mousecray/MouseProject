@@ -90,7 +90,7 @@ public final class MutableGuiShape implements IGuiShape {
     @Override
     public MutableGuiShape grow(float left, float top, float right, float bottom) {
         pos.add(-left, -top);
-        size.add(left + right, top + bottom);
+        size.add(right, bottom);
         return this;
     }
 
