@@ -43,13 +43,13 @@ import java.util.stream.Collectors;
 @ParametersAreNonnullByDefault
 public class GuiScreenWallet extends MPGuiScreen {
     static final  ResourceLocation           TEXTURES      = new ResourceLocation(Tags.MOD_ID, "textures/gui/wallet.png");
-    static final  GuiVector                  TEXTURES_SIZE = new GuiVector(256, 256);
+    static final  GuiVector                  TEXTURES_SIZE = GuiVector.of(256);
     private final EntityPlayer               player;
     private final ItemStackWalletNBTPipeline walletPipe;
     private final ItemStack                  walletStack;
 
     public GuiScreenWallet(EntityPlayer player, int slot) {
-        super("wallet_screen", new GuiVector(230, 200), new GuiVector(4, 4));
+        super("wallet_screen", GuiVector.of(230, 200), GuiVector.of(4));
         this.player = player;
         walletStack = player.inventory.getStackInSlot(slot).copy();
         walletPipe = !(walletStack.getItem() instanceof IWallet) ? null : MouseProjectNBT.get(walletStack).getWalletPipe();
@@ -136,7 +136,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                 null,
                 MPGuiPanel::removeAllChildren
         );
-        addPanel(controls, null, AnchorPosition.TOP_LEFT, new GuiVector(0, 133));
+        addPanel(controls, null, AnchorPosition.TOP_LEFT, GuiVector.of(0, 133));
 
         MPGuiLinearPanel row1 = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "row1_panel", MPGuiLinearPanel.class,

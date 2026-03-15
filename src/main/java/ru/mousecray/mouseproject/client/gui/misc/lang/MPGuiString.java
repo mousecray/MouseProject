@@ -19,4 +19,8 @@ public interface MPGuiString {
     static MPGuiString localized(String key, Object... args) {
         return new MPLocalizedString(key, args);
     }
+
+    static MPGuiString localizedGuiTag() {
+
+    }
 }
