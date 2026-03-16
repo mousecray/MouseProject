@@ -66,6 +66,19 @@ public class MPGuiTexturePack {
             return this;
         }
 
+        public Builder addTexture(IGuiButtonState state, int index, float opacity) {
+            textures.put(state,
+                    new MPGuiTexture(
+                            baseTexture, textureSize,
+                            GuiVector.of(startPos.x(), startPos.y() + elementSize.y() * index),
+                            elementSize,
+                            scaleRules,
+                            Math.max(0.0f, Math.min(1.0f, opacity))
+                    )
+            );
+            return this;
+        }
+
         public Builder addTexture(IGuiButtonState state, int index) {
             textures.put(state,
                     new MPGuiTexture(

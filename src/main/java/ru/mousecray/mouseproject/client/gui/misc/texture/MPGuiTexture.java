@@ -16,6 +16,7 @@ public class MPGuiTexture {
     private final IGuiVector           startPos;
     private final IGuiVector           endPos;
     private final GuiTextureScaleRules scaleRules;
+    private final float                opacity;
 
     private float   lastWidth  = -1;
     private float   lastHeight = -1;
@@ -23,15 +24,20 @@ public class MPGuiTexture {
     private int     quadCount  = 0;
 
     public MPGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize) {
-        this(texture, textureSize, startPos, elementSize, new GuiTextureScaleRules(GuiTextureScaleType.STRETCH));
+        this(texture, textureSize, startPos, elementSize, new GuiTextureScaleRules(GuiTextureScaleType.STRETCH), 1.0f);
     }
 
     public MPGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize, GuiTextureScaleRules scaleRules) {
+        this(texture, textureSize, startPos, elementSize, scaleRules, 1.0f);
+    }
+
+    public MPGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize, GuiTextureScaleRules scaleRules, float opacity) {
         this.texture = texture;
         this.textureSize = textureSize;
         this.startPos = startPos;
         endPos = elementSize;
         this.scaleRules = scaleRules != null ? scaleRules : new GuiTextureScaleRules(GuiTextureScaleType.STRETCH);
+        this.opacity = opacity;
     }
 
     public ResourceLocation getTexture()        { return texture; }
@@ -39,18 +45,19 @@ public class MPGuiTexture {
     public IGuiVector getStartPos()             { return startPos; }
     public IGuiVector getElementSize()          { return endPos; }
     public GuiTextureScaleRules getScaleRules() { return scaleRules; }
+    public float getOpacity()                   { return opacity; }
 
     public void bind(TextureManager manager)    { manager.bindTexture(texture); }
 
     public void draw(Minecraft mc, float x, float y, float width, float height) {
-        if (width <= 0 || height <= 0) return;
+        if (width <= 0 || height <= 0 || opacity <= 0.001f) return;
 
         if (width != lastWidth || height != lastHeight) bake(width, height);
 
         if (quadCount == 0) return;
 
         bind(mc.getTextureManager());
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, opacity);
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -74,6 +81,8 @@ public class MPGuiTexture {
                     texW, texH
             );
         }
+
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     private void bake(float width, float height) {
