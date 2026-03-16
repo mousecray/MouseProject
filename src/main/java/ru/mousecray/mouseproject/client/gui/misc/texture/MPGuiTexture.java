@@ -25,7 +25,7 @@ public class MPGuiTexture {
         this.texture = texture;
         this.textureSize = textureSize;
         this.startPos = startPos;
-        endPos = elementSize;
+        this.endPos = elementSize;
         this.scaleRules = scaleRules != null ? scaleRules : new GuiTextureScaleRules(GuiTextureScaleType.STRETCH);
     }
 
@@ -54,85 +54,84 @@ public class MPGuiTexture {
         float texW = endPos.x();
         float texH = endPos.y();
 
-        float startX    = 0, limitX = width, stepX = width;
-        float singleUvX = 0;
+        float multX = scaleRules.getMultiplierX();
+        float multY = scaleRules.getMultiplierY();
 
-        if (modeX == GuiTextureScaleRules.ScaleMode.SINGLE) {
-            float startPosX = 0;
-            if (anchorX == GuiTextureScaleRules.TextureAnchor.CENTER) startPosX = (width - texW) / 2f;
-            else if (anchorX == GuiTextureScaleRules.TextureAnchor.MAX) startPosX = width - texW;
+        float scaledTexW = texW * multX;
+        float scaledTexH = texH * multY;
 
-            float drawStart = Math.max(0, startPosX);
-            float drawEnd   = Math.min(width, startPosX + texW);
-            if (drawEnd <= drawStart) return;
+        float uvRatioX = 1.0f / multX;
+        float uvRatioY = 1.0f / multY;
 
-            startX = drawStart;
-            limitX = drawEnd;
-            stepX = drawEnd - drawStart;
-            singleUvX = drawStart - startPosX;
-        } else if (modeX == GuiTextureScaleRules.ScaleMode.FILL) {
-            stepX = texW;
-        }
+        float xCursor = 0;
+        while (xCursor < width) {
+            float drawX = xCursor, drawW = 0, uvX = 0, uvW = 0;
 
-        float startY    = 0, limitY = height, stepY = height;
-        float singleUvY = 0;
-
-        if (modeY == GuiTextureScaleRules.ScaleMode.SINGLE) {
-            float startPosY = 0;
-            if (anchorY == GuiTextureScaleRules.TextureAnchor.CENTER) startPosY = (height - texH) / 2f;
-            else if (anchorY == GuiTextureScaleRules.TextureAnchor.MAX) startPosY = height - texH;
-
-            float drawStart = Math.max(0, startPosY);
-            float drawEnd   = Math.min(height, startPosY + texH);
-            if (drawEnd <= drawStart) return;
-
-            startY = drawStart;
-            limitY = drawEnd;
-            stepY = drawEnd - drawStart;
-            singleUvY = drawStart - startPosY;
-        } else if (modeY == GuiTextureScaleRules.ScaleMode.FILL) {
-            stepY = texH;
-        }
-
-        for (float curX = startX; curX < limitX - 0.001f; curX += stepX) {
-            float drawW, uvX, uvW;
             if (modeX == GuiTextureScaleRules.ScaleMode.STRETCH) {
                 drawW = width;
-                uvX = 0;
                 uvW = texW;
+                xCursor = width;
             } else if (modeX == GuiTextureScaleRules.ScaleMode.FILL) {
-                drawW = Math.min(stepX, limitX - curX);
-                uvX = 0;
-                uvW = drawW;
+                drawW = Math.min(scaledTexW, width - xCursor);
+                uvW = drawW * uvRatioX;
+                xCursor += scaledTexW;
             } else {
-                drawW = stepX;
-                uvX = singleUvX;
-                uvW = stepX;
+                float boxStart = 0;
+                if (anchorX == GuiTextureScaleRules.TextureAnchor.CENTER) boxStart = (width - scaledTexW) / 2f;
+                else if (anchorX == GuiTextureScaleRules.TextureAnchor.MAX) boxStart = width - scaledTexW;
+
+                float dStart = Math.max(0, boxStart);
+                float dEnd   = Math.min(width, boxStart + scaledTexW);
+
+                if (dEnd > dStart) {
+                    drawX = dStart;
+                    drawW = dEnd - dStart;
+                    uvX = (dStart - boxStart) * uvRatioX;
+                    uvW = drawW * uvRatioX;
+                }
+                xCursor = width;
             }
 
-            for (float curY = startY; curY < limitY - 0.001f; curY += stepY) {
-                float drawH, uvY, uvH;
-                if (modeY == GuiTextureScaleRules.ScaleMode.STRETCH) {
-                    drawH = height;
-                    uvY = 0;
-                    uvH = texH;
-                } else if (modeY == GuiTextureScaleRules.ScaleMode.FILL) {
-                    drawH = Math.min(stepY, limitY - curY);
-                    uvY = 0;
-                    uvH = drawH;
-                } else {
-                    drawH = stepY;
-                    uvY = singleUvY;
-                    uvH = stepY;
-                }
+            if (drawW > 0) {
+                float yCursor = 0;
+                while (yCursor < height) {
+                    float drawY = yCursor, drawH = 0, uvY = 0, uvH = 0;
 
-                GuiRenderHelper.drawTexture(
-                        x + curX, y + curY,
-                        startPos.x() + uvX, startPos.y() + uvY,
-                        uvW, uvH,
-                        drawW, drawH,
-                        textureSize.x(), textureSize.y()
-                );
+                    if (modeY == GuiTextureScaleRules.ScaleMode.STRETCH) {
+                        drawH = height;
+                        uvH = texH;
+                        yCursor = height;
+                    } else if (modeY == GuiTextureScaleRules.ScaleMode.FILL) {
+                        drawH = Math.min(scaledTexH, height - yCursor);
+                        uvH = drawH * uvRatioY;
+                        yCursor += scaledTexH;
+                    } else {
+                        float boxStart = 0;
+                        if (anchorY == GuiTextureScaleRules.TextureAnchor.CENTER) boxStart = (height - scaledTexH) / 2f;
+                        else if (anchorY == GuiTextureScaleRules.TextureAnchor.MAX) boxStart = height - scaledTexH;
+
+                        float dStart = Math.max(0, boxStart);
+                        float dEnd   = Math.min(height, boxStart + scaledTexH);
+
+                        if (dEnd > dStart) {
+                            drawY = dStart;
+                            drawH = dEnd - dStart;
+                            uvY = (dStart - boxStart) * uvRatioY;
+                            uvH = drawH * uvRatioY;
+                        }
+                        yCursor = height;
+                    }
+
+                    if (drawH > 0) {
+                        GuiRenderHelper.drawTexture(
+                                x + drawX, y + drawY,
+                                startPos.x() + uvX, startPos.y() + uvY,
+                                uvW, uvH,
+                                drawW, drawH,
+                                textureSize.x(), textureSize.y()
+                        );
+                    }
+                }
             }
         }
     }

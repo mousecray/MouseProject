@@ -58,8 +58,9 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         range = this.max - min;
 
         GuiTextureScaleRules trackScaleRules = isVertical
-                ? new GuiTextureScaleRules(GuiTextureScaleType.FILL_VERTICAL, GuiTextureScaleType.SINGLE_HORIZONTAL_CENTER)
-                : new GuiTextureScaleRules(GuiTextureScaleType.FILL_HORIZONTAL, GuiTextureScaleType.SINGLE_VERTICAL_CENTER);
+                ? new GuiTextureScaleRules(GuiTextureScaleType.FILL_VERTICAL, GuiTextureScaleType.SINGLE_HORIZONTAL_LEFT)
+                : new GuiTextureScaleRules(GuiTextureScaleType.FILL_HORIZONTAL, GuiTextureScaleType.SINGLE_VERTICAL_TOP);
+        trackScaleRules.setMultiplier(0.7f);
 
         class TrackButton extends MPGuiButton<TrackButton> {
             public TrackButton() {

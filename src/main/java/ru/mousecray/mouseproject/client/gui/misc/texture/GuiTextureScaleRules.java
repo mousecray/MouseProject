@@ -3,7 +3,9 @@ package ru.mousecray.mouseproject.client.gui.misc.texture;
 import java.util.*;
 
 public class GuiTextureScaleRules {
-    private final Set<GuiTextureScaleType> scaleTypes = new HashSet<>();
+    private final Set<GuiTextureScaleType> scaleTypes  = new HashSet<>();
+    private       float                    multiplierX = 1.0f;
+    private       float                    multiplierY = 1.0f;
 
     public GuiTextureScaleRules(GuiTextureScaleType... types) {
         for (GuiTextureScaleType type : types) addType(type);
@@ -33,7 +35,6 @@ public class GuiTextureScaleRules {
         GuiTextureScaleType.Category catB = b.getCategory();
 
         if (catA == catB && axesOverlap(a, b)) return true;
-
         return axesOverlap(a, b);
     }
 
@@ -43,6 +44,29 @@ public class GuiTextureScaleRules {
         axesA.retainAll(axesB);
         return !axesA.isEmpty();
     }
+
+    public GuiTextureScaleRules setMultipliers(float multiplierX, float multiplierY) {
+        this.multiplierX = multiplierX;
+        this.multiplierY = multiplierY;
+        return this;
+    }
+
+    public GuiTextureScaleRules setMultiplayerX(float multiplierX) {
+        this.multiplierX = multiplierX;
+        return this;
+    }
+
+    public GuiTextureScaleRules setMultiplayerY(float multiplierY) {
+        this.multiplierY = multiplierY;
+        return this;
+    }
+
+    public GuiTextureScaleRules setMultiplier(float multiplier) {
+        return setMultipliers(multiplier, multiplier);
+    }
+
+    public float getMultiplierX() { return multiplierX; }
+    public float getMultiplierY() { return multiplierY; }
 
     public ScaleMode getModeX() {
         if (scaleTypes.contains(GuiTextureScaleType.FILL) || scaleTypes.contains(GuiTextureScaleType.FILL_HORIZONTAL))
