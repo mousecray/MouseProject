@@ -17,6 +17,11 @@ public class MPGuiTexture {
     private final IGuiVector           endPos;
     private final GuiTextureScaleRules scaleRules;
 
+    private float   lastWidth  = -1;
+    private float   lastHeight = -1;
+    private float[] bakedQuads = new float[0];
+    private int     quadCount  = 0;
+
     public MPGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize) {
         this(texture, textureSize, startPos, elementSize, new GuiTextureScaleRules(GuiTextureScaleType.STRETCH));
     }
@@ -25,7 +30,7 @@ public class MPGuiTexture {
         this.texture = texture;
         this.textureSize = textureSize;
         this.startPos = startPos;
-        this.endPos = elementSize;
+        endPos = elementSize;
         this.scaleRules = scaleRules != null ? scaleRules : new GuiTextureScaleRules(GuiTextureScaleType.STRETCH);
     }
 
@@ -40,28 +45,64 @@ public class MPGuiTexture {
     public void draw(Minecraft mc, float x, float y, float width, float height) {
         if (width <= 0 || height <= 0) return;
 
+        if (width != lastWidth || height != lastHeight) bake(width, height);
+
+        if (quadCount == 0) return;
+
         bind(mc.getTextureManager());
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
+        float texW   = textureSize.x();
+        float texH   = textureSize.y();
+        float startX = startPos.x();
+        float startY = startPos.y();
+
+        for (int i = 0; i < quadCount; i++) {
+            int idx = i * 8;
+            GuiRenderHelper.drawTexture(
+                    x + bakedQuads[idx],        //drawX
+                    y + bakedQuads[idx + 1],       //drawY
+                    startX + bakedQuads[idx + 2],  //uvX
+                    startY + bakedQuads[idx + 3],  //uvY
+                    bakedQuads[idx + 4],           //uvW
+                    bakedQuads[idx + 5],           //uvH
+                    bakedQuads[idx + 6],           //drawW
+                    bakedQuads[idx + 7],           //drawH
+                    texW, texH
+            );
+        }
+    }
+
+    private void bake(float width, float height) {
+        lastWidth = width;
+        lastHeight = height;
+        quadCount = 0;
+
         GuiTextureScaleRules.ScaleMode     modeX   = scaleRules.getModeX();
         GuiTextureScaleRules.ScaleMode     modeY   = scaleRules.getModeY();
         GuiTextureScaleRules.TextureAnchor anchorX = scaleRules.getAnchorX();
         GuiTextureScaleRules.TextureAnchor anchorY = scaleRules.getAnchorY();
 
-        float texW = endPos.x();
-        float texH = endPos.y();
-
+        float texW  = endPos.x();
+        float texH  = endPos.y();
         float multX = scaleRules.getMultiplierX();
         float multY = scaleRules.getMultiplierY();
+        if (multX == 0) multX = 1f;
+        if (multY == 0) multY = 1f;
 
         float scaledTexW = texW * multX;
         float scaledTexH = texH * multY;
+        float uvRatioX   = 1.0f / multX;
+        float uvRatioY   = 1.0f / multY;
 
-        float uvRatioX = 1.0f / multX;
-        float uvRatioY = 1.0f / multY;
+        int stepsX            = (modeX == GuiTextureScaleRules.ScaleMode.FILL && scaledTexW > 0) ? (int) Math.ceil(width / scaledTexW) : 1;
+        int stepsY            = (modeY == GuiTextureScaleRules.ScaleMode.FILL && scaledTexH > 0) ? (int) Math.ceil(height / scaledTexH) : 1;
+        int requiredArraySize = stepsX * stepsY * 8;
+
+        if (bakedQuads.length < requiredArraySize) bakedQuads = new float[requiredArraySize];
 
         float xCursor = 0;
         while (xCursor < width) {
@@ -123,13 +164,16 @@ public class MPGuiTexture {
                     }
 
                     if (drawH > 0) {
-                        GuiRenderHelper.drawTexture(
-                                x + drawX, y + drawY,
-                                startPos.x() + uvX, startPos.y() + uvY,
-                                uvW, uvH,
-                                drawW, drawH,
-                                textureSize.x(), textureSize.y()
-                        );
+                        int idx = quadCount * 8;
+                        bakedQuads[idx] = drawX;
+                        bakedQuads[idx + 1] = drawY;
+                        bakedQuads[idx + 2] = uvX;
+                        bakedQuads[idx + 3] = uvY;
+                        bakedQuads[idx + 4] = uvW;
+                        bakedQuads[idx + 5] = uvH;
+                        bakedQuads[idx + 6] = drawW;
+                        bakedQuads[idx + 7] = drawH;
+                        quadCount++;
                     }
                 }
             }
