@@ -1,8 +1,3 @@
-/*******************************************************************************
- * Copyright © 2026 mousecray
- * Licensed under the GNU Lesser General Public License, Version 3.0
- ******************************************************************************/
-
 package ru.mousecray.mouseproject.client.gui.misc.texture;
 
 import net.minecraft.client.Minecraft;
@@ -43,44 +38,101 @@ public class MPGuiTexture {
     public void bind(TextureManager manager)    { manager.bindTexture(texture); }
 
     public void draw(Minecraft mc, float x, float y, float width, float height) {
+        if (width <= 0 || height <= 0) return;
+
         bind(mc.getTextureManager());
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-        boolean fillX = scaleRules.isFillHorizontal();
-        boolean fillY = scaleRules.isFillVertical();
+        GuiTextureScaleRules.ScaleMode     modeX   = scaleRules.getModeX();
+        GuiTextureScaleRules.ScaleMode     modeY   = scaleRules.getModeY();
+        GuiTextureScaleRules.TextureAnchor anchorX = scaleRules.getAnchorX();
+        GuiTextureScaleRules.TextureAnchor anchorY = scaleRules.getAnchorY();
 
-        if (!fillX && !fillY) {
-            GuiRenderHelper.drawTexture(
-                    x, y,
-                    startPos.x(), startPos.y(), endPos.x(), endPos.y(),
-                    width, height,
-                    textureSize.x(), textureSize.y()
-            );
-        } else {
-            float sourceW = endPos.x();
-            float sourceH = endPos.y();
+        float texW = endPos.x();
+        float texH = endPos.y();
 
-            float stepX = fillX ? sourceW : width;
-            float stepY = fillY ? sourceH : height;
+        float startX    = 0, limitX = width, stepX = width;
+        float singleUvX = 0;
 
-            for (float curX = 0; curX < width; curX += stepX) {
-                float drawW = Math.min(stepX, width - curX);
-                float uvW   = fillX ? drawW : sourceW; // Координаты обрезаются
+        if (modeX == GuiTextureScaleRules.ScaleMode.SINGLE) {
+            float startPosX = 0;
+            if (anchorX == GuiTextureScaleRules.TextureAnchor.CENTER) startPosX = (width - texW) / 2f;
+            else if (anchorX == GuiTextureScaleRules.TextureAnchor.MAX) startPosX = width - texW;
 
-                for (float curY = 0; curY < height; curY += stepY) {
-                    float drawH = Math.min(stepY, height - curY);
-                    float uvH   = fillY ? drawH : sourceH;
+            float drawStart = Math.max(0, startPosX);
+            float drawEnd   = Math.min(width, startPosX + texW);
+            if (drawEnd <= drawStart) return;
 
-                    GuiRenderHelper.drawTexture(
-                            x + curX, y + curY,
-                            startPos.x(), startPos.y(), uvW, uvH,
-                            drawW, drawH,
-                            textureSize.x(), textureSize.y()
-                    );
+            startX = drawStart;
+            limitX = drawEnd;
+            stepX = drawEnd - drawStart;
+            singleUvX = drawStart - startPosX;
+        } else if (modeX == GuiTextureScaleRules.ScaleMode.FILL) {
+            stepX = texW;
+        }
+
+        float startY    = 0, limitY = height, stepY = height;
+        float singleUvY = 0;
+
+        if (modeY == GuiTextureScaleRules.ScaleMode.SINGLE) {
+            float startPosY = 0;
+            if (anchorY == GuiTextureScaleRules.TextureAnchor.CENTER) startPosY = (height - texH) / 2f;
+            else if (anchorY == GuiTextureScaleRules.TextureAnchor.MAX) startPosY = height - texH;
+
+            float drawStart = Math.max(0, startPosY);
+            float drawEnd   = Math.min(height, startPosY + texH);
+            if (drawEnd <= drawStart) return;
+
+            startY = drawStart;
+            limitY = drawEnd;
+            stepY = drawEnd - drawStart;
+            singleUvY = drawStart - startPosY;
+        } else if (modeY == GuiTextureScaleRules.ScaleMode.FILL) {
+            stepY = texH;
+        }
+
+        for (float curX = startX; curX < limitX - 0.001f; curX += stepX) {
+            float drawW, uvX, uvW;
+            if (modeX == GuiTextureScaleRules.ScaleMode.STRETCH) {
+                drawW = width;
+                uvX = 0;
+                uvW = texW;
+            } else if (modeX == GuiTextureScaleRules.ScaleMode.FILL) {
+                drawW = Math.min(stepX, limitX - curX);
+                uvX = 0;
+                uvW = drawW;
+            } else {
+                drawW = stepX;
+                uvX = singleUvX;
+                uvW = stepX;
+            }
+
+            for (float curY = startY; curY < limitY - 0.001f; curY += stepY) {
+                float drawH, uvY, uvH;
+                if (modeY == GuiTextureScaleRules.ScaleMode.STRETCH) {
+                    drawH = height;
+                    uvY = 0;
+                    uvH = texH;
+                } else if (modeY == GuiTextureScaleRules.ScaleMode.FILL) {
+                    drawH = Math.min(stepY, limitY - curY);
+                    uvY = 0;
+                    uvH = drawH;
+                } else {
+                    drawH = stepY;
+                    uvY = singleUvY;
+                    uvH = stepY;
                 }
+
+                GuiRenderHelper.drawTexture(
+                        x + curX, y + curY,
+                        startPos.x() + uvX, startPos.y() + uvY,
+                        uvW, uvH,
+                        drawW, drawH,
+                        textureSize.x(), textureSize.y()
+                );
             }
         }
     }

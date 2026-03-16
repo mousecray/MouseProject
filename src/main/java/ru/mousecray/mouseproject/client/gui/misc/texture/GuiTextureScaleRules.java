@@ -1,8 +1,3 @@
-/*******************************************************************************
- * Copyright © 2026 mousecray
- * Licensed under the GNU Lesser General Public License, Version 3.0
- ******************************************************************************/
-
 package ru.mousecray.mouseproject.client.gui.misc.texture;
 
 import java.util.*;
@@ -31,23 +26,13 @@ public class GuiTextureScaleRules {
             scaleTypes.remove(GuiTextureScaleType.FILL_HORIZONTAL);
             scaleTypes.remove(GuiTextureScaleType.FILL_VERTICAL);
         }
-
-        if (scaleTypes.contains(GuiTextureScaleType.STRETCH_HORIZONTAL) && scaleTypes.contains(GuiTextureScaleType.STRETCH_VERTICAL)) {
-            scaleTypes.remove(GuiTextureScaleType.STRETCH_HORIZONTAL);
-            scaleTypes.remove(GuiTextureScaleType.STRETCH_VERTICAL);
-            addType(GuiTextureScaleType.STRETCH);
-        }
-        if (scaleTypes.contains(GuiTextureScaleType.FILL_HORIZONTAL) && scaleTypes.contains(GuiTextureScaleType.FILL_VERTICAL)) {
-            scaleTypes.remove(GuiTextureScaleType.FILL_HORIZONTAL);
-            scaleTypes.remove(GuiTextureScaleType.FILL_VERTICAL);
-            addType(GuiTextureScaleType.FILL);
-        }
     }
 
     private boolean isIncompatible(GuiTextureScaleType a, GuiTextureScaleType b) {
         GuiTextureScaleType.Category catA = a.getCategory();
         GuiTextureScaleType.Category catB = b.getCategory();
-        if (catA == catB) return false;
+
+        if (catA == catB && axesOverlap(a, b)) return true;
 
         return axesOverlap(a, b);
     }
@@ -59,10 +44,37 @@ public class GuiTextureScaleRules {
         return !axesA.isEmpty();
     }
 
-    public boolean isStretchHorizontal()            { return scaleTypes.contains(GuiTextureScaleType.STRETCH) || scaleTypes.contains(GuiTextureScaleType.STRETCH_HORIZONTAL); }
-    public boolean isStretchVertical()              { return scaleTypes.contains(GuiTextureScaleType.STRETCH) || scaleTypes.contains(GuiTextureScaleType.STRETCH_VERTICAL); }
-    public boolean isFillHorizontal()               { return scaleTypes.contains(GuiTextureScaleType.FILL) || scaleTypes.contains(GuiTextureScaleType.FILL_HORIZONTAL); }
-    public boolean isFillVertical()                 { return scaleTypes.contains(GuiTextureScaleType.FILL) || scaleTypes.contains(GuiTextureScaleType.FILL_VERTICAL); }
+    public ScaleMode getModeX() {
+        if (scaleTypes.contains(GuiTextureScaleType.FILL) || scaleTypes.contains(GuiTextureScaleType.FILL_HORIZONTAL))
+            return ScaleMode.FILL;
+        if (scaleTypes.stream().anyMatch(t -> t.getCategory() == GuiTextureScaleType.Category.SINGLE && t.getAxes().contains(GuiTextureScaleType.Axes.HORIZONTAL)))
+            return ScaleMode.SINGLE;
+        return ScaleMode.STRETCH;
+    }
+
+    public ScaleMode getModeY() {
+        if (scaleTypes.contains(GuiTextureScaleType.FILL) || scaleTypes.contains(GuiTextureScaleType.FILL_VERTICAL))
+            return ScaleMode.FILL;
+        if (scaleTypes.stream().anyMatch(t -> t.getCategory() == GuiTextureScaleType.Category.SINGLE && t.getAxes().contains(GuiTextureScaleType.Axes.VERTICAL)))
+            return ScaleMode.SINGLE;
+        return ScaleMode.STRETCH;
+    }
+
+    public TextureAnchor getAnchorX() {
+        if (scaleTypes.contains(GuiTextureScaleType.SINGLE_HORIZONTAL_CENTER)) return TextureAnchor.CENTER;
+        if (scaleTypes.contains(GuiTextureScaleType.SINGLE_HORIZONTAL_RIGHT)) return TextureAnchor.MAX;
+        return TextureAnchor.MIN;
+    }
+
+    public TextureAnchor getAnchorY() {
+        if (scaleTypes.contains(GuiTextureScaleType.SINGLE_VERTICAL_CENTER)) return TextureAnchor.CENTER;
+        if (scaleTypes.contains(GuiTextureScaleType.SINGLE_VERTICAL_BOTTOM)) return TextureAnchor.MAX;
+        return TextureAnchor.MIN;
+    }
 
     public Set<GuiTextureScaleType> getScaleTypes() { return Collections.unmodifiableSet(scaleTypes); }
+
+    public enum ScaleMode {STRETCH, FILL, SINGLE}
+
+    public enum TextureAnchor {MIN, CENTER, MAX}
 }

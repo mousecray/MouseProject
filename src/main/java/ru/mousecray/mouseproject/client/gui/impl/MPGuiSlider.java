@@ -57,13 +57,17 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         this.max = Math.max(max, min);
         range = this.max - min;
 
+        GuiTextureScaleRules trackScaleRules = isVertical
+                ? new GuiTextureScaleRules(GuiTextureScaleType.FILL_VERTICAL, GuiTextureScaleType.SINGLE_HORIZONTAL_CENTER)
+                : new GuiTextureScaleRules(GuiTextureScaleType.FILL_HORIZONTAL, GuiTextureScaleType.SINGLE_VERTICAL_CENTER);
+
         class TrackButton extends MPGuiButton<TrackButton> {
             public TrackButton() {
                 super("", shape, MPGuiTexturePack.Builder
                         .create(
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                 GuiVector.of(230, 0), GuiVector.of(9, 4))
-                        .setScaleRules(new GuiTextureScaleRules(GuiTextureScaleType.FILL_HORIZONTAL))
+                        .setScaleRules(trackScaleRules)
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .build(), SoundEvents.UI_BUTTON_CLICK, MPFontSize.NORMAL);
             }
@@ -109,7 +113,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
         KnobButton knobBtn = new KnobButton();
         knob = knobBtn;
-        knobBtn.setScaleRules(new GuiScaleRules(GuiScaleType.ORIGIN_VERTICAL));
+        knobBtn.setScaleRules(new GuiScaleRules(isVertical ? GuiScaleType.ORIGIN_HORIZONTAL : GuiScaleType.ORIGIN_VERTICAL));
         addChild(knobBtn);
 
         setValue(min);
