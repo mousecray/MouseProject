@@ -35,7 +35,7 @@ public class MPGuiDefaultButton extends MPGuiButton<MPGuiDefaultButton> {
                 MPGuiTexturePack.Builder
                         .create(
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                                GuiVector.of(192, 0), GuiVector.of(10)
+                                GuiVector.of(80, 0), GuiVector.of(10)
                         )
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)

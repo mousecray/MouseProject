@@ -33,7 +33,7 @@ public class MPGuiCloseButton extends MPGuiButton<MPGuiCloseButton> {
                 MPGuiTexturePack.Builder
                         .create(
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                                GuiVector.of(96, 0), GuiVector.of(9)
+                                GuiVector.of(95, 0), GuiVector.of(9)
                         )
                         .addTexture(GuiButtonPersistentState.NORMAL, 0)
                         .addTexture(GuiButtonActionState.HOVER, 1)
