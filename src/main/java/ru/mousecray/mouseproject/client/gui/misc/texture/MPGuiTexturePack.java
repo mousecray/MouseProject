@@ -39,6 +39,7 @@ public class MPGuiTexturePack {
 
         return texture;
     }
+
     @SideOnly(Side.CLIENT)
     public static class Builder {
         private final Map<IGuiButtonState, MPGuiTexture> textures = new HashMap<>();
@@ -46,6 +47,8 @@ public class MPGuiTexturePack {
         private final IGuiVector                         textureSize;
         private final IGuiVector                         startPos;
         private final IGuiVector                         elementSize;
+
+        private GuiTextureScaleRules scaleRules = new GuiTextureScaleRules(GuiTextureScaleType.STRETCH);
 
         private Builder(ResourceLocation baseTexture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize) {
             this.baseTexture = baseTexture;
@@ -58,12 +61,18 @@ public class MPGuiTexturePack {
             return new Builder(baseTexture, textureSize, startPos, elementSize);
         }
 
+        public Builder setScaleRules(GuiTextureScaleRules scaleRules) {
+            this.scaleRules = scaleRules;
+            return this;
+        }
+
         public Builder addTexture(IGuiButtonState state, int index) {
             textures.put(state,
                     new MPGuiTexture(
                             baseTexture, textureSize,
                             GuiVector.of(startPos.x(), startPos.y() + elementSize.y() * index),
-                            elementSize
+                            elementSize,
+                            scaleRules
                     )
             );
             return this;

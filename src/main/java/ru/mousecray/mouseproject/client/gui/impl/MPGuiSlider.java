@@ -18,9 +18,13 @@ import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseDragEvent;
 import ru.mousecray.mouseproject.client.gui.misc.MPClickType;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
+import ru.mousecray.mouseproject.client.gui.misc.texture.GuiTextureScaleRules;
+import ru.mousecray.mouseproject.client.gui.misc.texture.GuiTextureScaleType;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
+import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
+import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
+import ru.mousecray.mouseproject.utils.MPStaticData;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Consumer;
 
@@ -46,7 +50,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
     private IGuiVector lastParentDefaultSize, lastParentContentSize;
 
-    public MPGuiSlider(GuiShape shape, @Nullable MPGuiTexturePack trackTexture, MPGuiTexturePack knobTexture, float knobWidth, float knobHeight, int min, int max, boolean isVertical) {
+    public MPGuiSlider(GuiShape shape, float knobWidth, float knobHeight, int min, int max, boolean isVertical) {
         super(shape);
         this.isVertical = isVertical;
         this.min = min;
@@ -55,7 +59,13 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
         class TrackButton extends MPGuiButton<TrackButton> {
             public TrackButton() {
-                super("", shape, trackTexture, SoundEvents.UI_BUTTON_CLICK, MPFontSize.NORMAL);
+                super("", shape, MPGuiTexturePack.Builder
+                        .create(
+                                MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                                GuiVector.of(230, 0), GuiVector.of(9, 4))
+                        .setScaleRules(new GuiTextureScaleRules(GuiTextureScaleType.FILL_HORIZONTAL))
+                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
+                        .build(), SoundEvents.UI_BUTTON_CLICK, MPFontSize.NORMAL);
             }
 
             @Override
@@ -72,7 +82,14 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         class KnobButton extends MPGuiButton<KnobButton> {
             public KnobButton() {
                 super("", new GuiShape(0, 0, knobWidth, knobHeight),
-                        knobTexture, SoundEvents.UI_BUTTON_CLICK, MPFontSize.NORMAL);
+                        MPGuiTexturePack.Builder.create(
+                                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                                        GuiVector.of(90, 0), GuiVector.of(5, 7)
+                                )
+                                .addTexture(GuiButtonPersistentState.NORMAL, 0)
+                                .addTexture(GuiButtonActionState.HOVER, 1)
+                                .addTexture(GuiButtonActionState.PRESSED, 2)
+                                .build(), SoundEvents.UI_BUTTON_CLICK, MPFontSize.NORMAL);
             }
 
             @Override

@@ -16,10 +16,6 @@ import ru.mousecray.mouseproject.client.gui.impl.MPGuiSlider;
 import ru.mousecray.mouseproject.client.gui.impl.container.MPGuiFreePanel;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
-import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import java.util.function.Consumer;
 
@@ -57,15 +53,6 @@ public class WalletSliderControl extends MPGuiFreePanel {
         class InnerSlider extends MPGuiSlider<InnerSlider> {
             public InnerSlider() {
                 super(new GuiShape(0, 0, width, sliderH),
-                        null,
-                        MPGuiTexturePack.Builder.create(
-                                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                                        GuiVector.of(90, 0), GuiVector.of(5, 7)
-                                )
-                                .addTexture(GuiButtonPersistentState.NORMAL, 0)
-                                .addTexture(GuiButtonActionState.HOVER, 1)
-                                .addTexture(GuiButtonActionState.PRESSED, 2)
-                                .build(),
                         knobW, sliderH, 0, 100, false);
             }
         }

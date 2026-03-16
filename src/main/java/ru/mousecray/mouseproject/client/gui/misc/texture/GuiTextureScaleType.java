@@ -1,0 +1,60 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.client.gui.misc.texture;
+
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.EnumSet;
+import java.util.Set;
+
+@SideOnly(Side.CLIENT)
+public enum GuiTextureScaleType {
+    STRETCH(0),
+    FILL(1),
+    FILL_HORIZONTAL(2),
+    FILL_VERTICAL(3),
+    STRETCH_HORIZONTAL(4),
+    STRETCH_VERTICAL(5);
+
+    private final int id;
+    GuiTextureScaleType(int id) { this.id = id; }
+
+    public int getId()          { return id; }
+
+    public Category getCategory() {
+        switch (this) {
+            case STRETCH:
+            case STRETCH_HORIZONTAL:
+            case STRETCH_VERTICAL:
+                return Category.STRETCH;
+            case FILL:
+            case FILL_HORIZONTAL:
+            case FILL_VERTICAL:
+                return Category.FILL;
+        }
+        throw new IllegalStateException("Unknown category for " + this);
+    }
+
+    public Set<Axes> getAxes() {
+        switch (this) {
+            case STRETCH:
+            case FILL:
+                return EnumSet.of(Axes.HORIZONTAL, Axes.VERTICAL);
+            case STRETCH_HORIZONTAL:
+            case FILL_HORIZONTAL:
+                return EnumSet.of(Axes.HORIZONTAL);
+            case STRETCH_VERTICAL:
+            case FILL_VERTICAL:
+                return EnumSet.of(Axes.VERTICAL);
+        }
+        throw new IllegalStateException("Unknown axes for " + this);
+    }
+
+    public enum Category {STRETCH, FILL}
+
+    public enum Axes {HORIZONTAL, VERTICAL}
+}
