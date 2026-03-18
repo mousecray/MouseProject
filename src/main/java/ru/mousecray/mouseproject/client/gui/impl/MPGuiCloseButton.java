@@ -16,8 +16,6 @@ import ru.mousecray.mouseproject.client.gui.dim.GuiVector;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.Nonnull;
@@ -35,9 +33,9 @@ public class MPGuiCloseButton extends MPGuiButton<MPGuiCloseButton> {
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                 GuiVector.of(95, 0), GuiVector.of(9)
                         )
-                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
-                        .addTexture(GuiButtonActionState.HOVER, 1)
-                        .addTexture(GuiButtonActionState.PRESSED, 2)
+                        .addTexture(GuiElementPersistentState.NORMAL, 0)
+                        .addTexture(GuiElementActionState.HOVER, 1)
+                        .addTexture(GuiElementActionState.PRESSED, 2)
                         .build(),
                 SoundEvents.UI_BUTTON_CLICK, MPFontSize.NORMAL
         );

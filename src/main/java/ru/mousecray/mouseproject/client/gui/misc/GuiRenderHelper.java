@@ -285,7 +285,7 @@ public class GuiRenderHelper {
         target.withWidth(childTemplate.width());
         target.withHeight(childTemplate.height());
 
-        calculateFlowComponentVector(target.size(), parentDefault, parentCurrent, target.size()); // flow pos + size
+        calculateFlowComponentVector(target.size(), parentDefault, parentCurrent, target.size());
 
         if (rules.isParentHorizontal()) target.withWidth(available.width());
         if (rules.isParentVertical()) target.withHeight(available.height());

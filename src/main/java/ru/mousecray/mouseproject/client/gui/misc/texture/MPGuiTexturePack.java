@@ -10,43 +10,58 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.dim.GuiVector;
 import ru.mousecray.mouseproject.client.gui.dim.IGuiVector;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
-import ru.mousecray.mouseproject.client.gui.state.IGuiButtonState;
+import ru.mousecray.mouseproject.client.gui.misc.state.MPGuiElementState;
+import ru.mousecray.mouseproject.client.gui.misc.state.MPGuiElementStateManager;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class MPGuiTexturePack {
-    public static MPGuiTexturePack EMPTY = new MPGuiTexturePack(new HashMap<>());
+    public static MPGuiTexturePack EMPTY = new MPGuiTexturePack(Collections.emptyList());
 
-    private final Map<IGuiButtonState, MPGuiTexture> textures;
+    private static class StateTexture {
+        final int          requiredMask;
+        final MPGuiTexture texture;
 
-    private MPGuiTexturePack(Map<IGuiButtonState, MPGuiTexture> textures) { this.textures = textures; }
+        StateTexture(int requiredMask, MPGuiTexture texture) {
+            this.requiredMask = requiredMask;
+            this.texture = texture;
+        }
+    }
 
-    public MPGuiTexture getTexture(IGuiButtonState state)                 { return textures.get(state); }
+    private final List<StateTexture> textures;
 
-    public MPGuiTexture getCalculatedTexture(GuiButtonActionState actionState, GuiButtonPersistentState persistentState) {
-        MPGuiTexture texture;
-        if (actionState != null) {
-            texture = textures.get(actionState.combine(persistentState));
-            if (texture == null) {
-                texture = textures.get(actionState);
-                if (texture == null) texture = textures.get(persistentState);
+    private MPGuiTexturePack(List<StateTexture> textures) {
+        this.textures = textures;
+    }
+
+    public MPGuiTexture getCalculatedTexture(MPGuiElementStateManager currentManager) {
+        for (StateTexture st : textures) {
+            if (currentManager.satisfies(st.requiredMask)) {
+                return st.texture;
             }
-        } else texture = textures.get(persistentState);
+        }
+        return null;
+    }
 
-        return texture;
+    @Nullable
+    public MPGuiTexture getTexture(MPGuiElementState state, MPGuiElementState... states) {
+        for (StateTexture st : textures) {
+            if (st.requiredMask == MPGuiElementStateManager.createMask(state, states)) return st.texture;
+        }
+        return null;
     }
 
     @SideOnly(Side.CLIENT)
     public static class Builder {
-        private final Map<IGuiButtonState, MPGuiTexture> textures = new HashMap<>();
-        private final ResourceLocation                   baseTexture;
-        private final IGuiVector                         textureSize;
-        private final IGuiVector                         startPos;
-        private final IGuiVector                         elementSize;
+        private final List<StateTexture> textures = new ArrayList<>();
+        private final ResourceLocation   baseTexture;
+        private final IGuiVector         textureSize;
+        private final IGuiVector         startPos;
+        private final IGuiVector         elementSize;
 
         private GuiTextureScaleRules scaleRules = new GuiTextureScaleRules(GuiTextureScaleType.STRETCH);
 
@@ -66,28 +81,26 @@ public class MPGuiTexturePack {
             return this;
         }
 
-        public Builder addTexture(IGuiButtonState state, int index, float opacity) {
-            textures.put(state,
-                    new MPGuiTexture(
-                            baseTexture, textureSize,
-                            GuiVector.of(startPos.x(), startPos.y() + elementSize.y() * index),
-                            elementSize,
-                            scaleRules,
-                            Math.max(0.0f, Math.min(1.0f, opacity))
-                    )
-            );
+        public Builder addTexture(int index, float opacity, MPGuiElementState... requiredStates) {
+            int mask = MPGuiElementStateManager.createMask(requiredStates);
+            textures.add(new StateTexture(mask, new MPGuiTexture(
+                    baseTexture, textureSize,
+                    GuiVector.of(startPos.x(), startPos.y() + elementSize.y() * index),
+                    elementSize,
+                    scaleRules,
+                    Math.max(0.0f, Math.min(1.0f, opacity))
+            )));
             return this;
         }
 
-        public Builder addTexture(IGuiButtonState state, int index) {
-            textures.put(state,
-                    new MPGuiTexture(
-                            baseTexture, textureSize,
-                            GuiVector.of(startPos.x(), startPos.y() + elementSize.y() * index),
-                            elementSize,
-                            scaleRules
-                    )
-            );
+        public Builder addTexture(int index, MPGuiElementState... requiredStates) {
+            int mask = MPGuiElementStateManager.createMask(requiredStates);
+            textures.add(new StateTexture(mask, new MPGuiTexture(
+                    baseTexture, textureSize,
+                    GuiVector.of(startPos.x(), startPos.y() + elementSize.y() * index),
+                    elementSize,
+                    scaleRules
+            )));
             return this;
         }
 

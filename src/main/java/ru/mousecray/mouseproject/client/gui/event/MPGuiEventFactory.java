@@ -12,6 +12,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
+import ru.mousecray.mouseproject.client.gui.misc.ScrollDirection;
 import ru.mousecray.mouseproject.client.gui.misc.SoundSourceType;
 
 @SideOnly(Side.CLIENT)
@@ -31,6 +32,16 @@ public class MPGuiEventFactory {
         event.setMouseX(x);
         event.setMouseY(y);
         event.setMoveDirection(moveDirection);
+    }
+
+    public static <T extends MPGuiElement<T>> void pushMouseScrollEvent(MPGuiMouseScrollEvent<T> event, T obj, Minecraft mc, int x, int y, ScrollDirection scrollDirection, int scrollAmount) {
+        event.setCancelled(false);
+        event.setObj(obj);
+        event.setMc(mc);
+        event.setMouseX(x);
+        event.setMouseY(y);
+        event.setScrollDirection(scrollDirection);
+        event.setScrollAmount(Math.abs(scrollAmount));
     }
 
     public static <T extends MPGuiElement<T>> void pushMouseDragEvent(MPGuiMouseDragEvent<T> event, T obj, Minecraft mc, int x, int y, MoveDirection moveDirection, int diffX, int diffY, int tickDown) {

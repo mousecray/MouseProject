@@ -21,8 +21,6 @@ import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.texture.GuiTextureScaleRules;
 import ru.mousecray.mouseproject.client.gui.misc.texture.GuiTextureScaleType;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -70,9 +68,15 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                 GuiVector.of(230, 0), GuiVector.of(18, 7))
                         .setScaleRules(trackScaleRules)
-                        .addTexture(GuiButtonPersistentState.NORMAL, 0, 0.3f)
+                        .addTexture(GuiElementPersistentState.NORMAL, 0, 0.2f)
                         .build(), SoundEvents.UI_BUTTON_CLICK, MPFontSize.NORMAL);
             }
+
+            @Override
+            protected void onMouseDragged(MPGuiMouseDragEvent<TrackButton> event) {
+
+            }
+
 
             @Override
             public void onClick(MPGuiMouseClickEvent<TrackButton> e) {
@@ -92,9 +96,9 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
                                         MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                         GuiVector.of(90, 0), GuiVector.of(5, 7)
                                 )
-                                .addTexture(GuiButtonPersistentState.NORMAL, 0)
-                                .addTexture(GuiButtonActionState.HOVER, 1)
-                                .addTexture(GuiButtonActionState.PRESSED, 2)
+                                .addTexture(GuiElementPersistentState.NORMAL, 0)
+                                .addTexture(GuiElementActionState.HOVER, 1)
+                                .addTexture(GuiElementActionState.PRESSED, 2)
                                 .build(), SoundEvents.UI_BUTTON_CLICK, MPFontSize.NORMAL);
             }
 
@@ -122,10 +126,10 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     }
 
     private void updateFromMouseX(int mouseX, int mouseY) {
-        MutableGuiShape inner = getCalculatedElementShape();
+        MutableGuiShape inner = getCalculatedShape();
 
-        float knobW = knob.getCalculatedElementShape().width();
-        float knobH = knob.getCalculatedElementShape().height();
+        float knobW = knob.getCalculatedShape().width();
+        float knobH = knob.getCalculatedShape().height();
 
         float trackLength = isVertical
                 ? inner.height() - knobH
@@ -198,11 +202,11 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     }
 
     private void recalculateKnobPosition() {
-        MutableGuiShape inner = getCalculatedElementShape();
+        MutableGuiShape inner = getCalculatedShape();
         if (inner.width() <= 0 || inner.height() <= 0) return;
 
-        float knobW = knob.getElementShape().width();
-        float knobH = knob.getElementShape().height();
+        float knobW = knob.getShape().width();
+        float knobH = knob.getShape().height();
 
         if (lastParentDefaultSize != null && lastParentContentSize != null) {
             knob.measurePreferred(

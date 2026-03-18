@@ -18,7 +18,6 @@ import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiTickEvent;
 import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
 import ru.mousecray.mouseproject.common.economy.CoinValue;
 
 import javax.annotation.Nonnull;
@@ -39,7 +38,7 @@ public class WalletCoinButton extends MPGuiSelectedButton<WalletCoinButton> {
         );
         this.coinValue = coinValue;
         cachedName = new ItemStack(coinValue.getType().getItem(), 1).getDisplayName();
-        setTextOffset(GuiVector.of(0, getElementShape().height() / 3.5f));
+        setTextOffset(GuiVector.of(0, getShape().height() / 3.5f));
         int length = coinValue.getFormattedValue(CoinValue.FormatType.SHORT).length();
         if (length > 4) setTextScaleMultiplayer((float) Math.max(0.5, 4d / length));
         setScaleRules(new GuiScaleRules(GuiScaleType.ORIGIN_VERTICAL));
@@ -57,10 +56,10 @@ public class WalletCoinButton extends MPGuiSelectedButton<WalletCoinButton> {
 
     @Override
     protected void drawButtonForegroundLayer(@Nonnull MPGuiTickEvent<WalletCoinButton> event) {
-        float width           = getCalculatedElementShape().width();
-        float height          = getCalculatedElementShape().height();
-        float x               = getCalculatedElementShape().x();
-        float y               = getCalculatedElementShape().y();
+        float width           = getCalculatedShape().width();
+        float height          = getCalculatedShape().height();
+        float x               = getCalculatedShape().x();
+        float y               = getCalculatedShape().y();
         float partialTicks    = event.getPartialTick();
         float itemDefaultSize = 16.0f;
         float scale           = Math.min(width / itemDefaultSize, height / itemDefaultSize) / 1.5f;
@@ -76,7 +75,7 @@ public class WalletCoinButton extends MPGuiSelectedButton<WalletCoinButton> {
         GlStateManager.enableRescaleNormal();
 
         if (coinValue != null) {
-            if (getActionState() == GuiButtonActionState.HOVER) {
+            if (getActionState() == GuiElementActionState.HOVER) {
                 GlStateManager.translate(0, 0, 0);
                 GlStateManager.scale(1.2f, 1.2f, 1.0f);
                 float rotationAngle = ((System.currentTimeMillis() % 2000) / 2000.0f) * 360.0f;

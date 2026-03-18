@@ -21,7 +21,6 @@ import ru.mousecray.mouseproject.client.gui.impl.container.*;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.MPGuiElementCache;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import ru.mousecray.mouseproject.common.economy.CoinHelper;
 import ru.mousecray.mouseproject.common.economy.CoinValue;
 import ru.mousecray.mouseproject.common.economy.coin.CoinType;
@@ -100,7 +99,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                         event -> { }
                 ),
                 t -> {
-                    t.applyState(GuiButtonPersistentState.DISABLED);
+                    t.applyState(GuiElementPersistentState.DISABLED);
                     t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT));
                 }
         );
@@ -113,7 +112,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                         event -> { }
                 ),
                 t -> {
-                    t.applyState(GuiButtonPersistentState.DISABLED);
+                    t.applyState(GuiElementPersistentState.DISABLED);
                     t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT));
                 }
         );
@@ -123,8 +122,8 @@ public class GuiScreenWallet extends MPGuiScreen {
                 () -> new WalletSliderControl(fontRenderer, fontSize, panelWidth, 16, maxCoinValue),
                 t -> {
                     t.onValidityChanged(isValid -> {
-                        takeAction.applyState(isValid ? GuiButtonPersistentState.NORMAL : GuiButtonPersistentState.DISABLED);
-                        putAction.applyState(isValid ? GuiButtonPersistentState.NORMAL : GuiButtonPersistentState.DISABLED);
+                        takeAction.applyState(isValid ? GuiElementPersistentState.NORMAL : GuiElementPersistentState.DISABLED);
+                        putAction.applyState(isValid ? GuiElementPersistentState.NORMAL : GuiElementPersistentState.DISABLED);
                     });
                     t.setScaleRules(new GuiScaleRules(GuiScaleType.PARENT_HORIZONTAL));
                 }
@@ -278,7 +277,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                             () -> new MPGuiLinearPanel(new GuiShape(0, 0, colWidth, groupH), LinearPanelOrientation.VERTICAL),
                             null,
                             t -> {
-                                t.setElementShape(t.getElementShape().withHeight(groupH));
+                                t.setShape(t.getShape().withHeight(groupH));
                                 t.removeAllChildren();
                             }
                     );
@@ -316,7 +315,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                             t -> t.setGaps(0, CELL_GAP),
                             t -> {
                                 t.setGridSize(rowsNum.$(), slot_count_x);
-                                t.setElementShape(t.getElementShape().withHeight(rowsNum.$() * coinH));
+                                t.setShape(t.getShape().withHeight(rowsNum.$() * coinH));
                                 t.removeAllChildren();
                             }
                     );

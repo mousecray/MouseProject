@@ -21,8 +21,6 @@ import ru.mousecray.mouseproject.client.gui.event.*;
 import ru.mousecray.mouseproject.client.gui.misc.*;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,20 +38,21 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
             pressEvent   = new MPGuiMouseClickEvent<>(MPClickType.PRESS),
             releaseEvent = new MPGuiMouseClickEvent<>(MPClickType.RELEASE),
             clickEvent   = new MPGuiMouseClickEvent<>(MPClickType.CLICK);
-    private final MPGuiMouseMoveEvent<T> moveEvent  = new MPGuiMouseMoveEvent<>();
-    private final MPGuiMouseDragEvent<T> dragEvent  = new MPGuiMouseDragEvent<>();
-    private final MPGuiSoundEvent<T>     soundEvent = new MPGuiSoundEvent<>();
+    private final MPGuiMouseMoveEvent<T>   moveEvent   = new MPGuiMouseMoveEvent<>();
+    private final MPGuiMouseScrollEvent<T> scrollEvent = new MPGuiMouseScrollEvent<>();
+    private final MPGuiMouseDragEvent<T>   dragEvent   = new MPGuiMouseDragEvent<>();
+    private final MPGuiSoundEvent<T>       soundEvent  = new MPGuiSoundEvent<>();
 
-    private final       FontRenderer             fontRenderer;
-    protected final     MPFontSize               fontSize;
-    protected           float                    textScaleMultiplayer = 1.0F;
-    private             boolean                  centered;
-    @Nullable protected GuiButtonActionState     actionState          = null;
-    @Nullable protected GuiButtonPersistentState persistentState      = GuiButtonPersistentState.NORMAL;
-    protected           StateColorContainer      colorContainer       = StateColorContainer.createDefault();
-    private             int                      tickDown             = -1;
-    private             int                      partialTick;
-    private             boolean                  hovered;
+    private final       FontRenderer              fontRenderer;
+    protected final     MPFontSize                fontSize;
+    protected           float                     textScaleMultiplayer = 1.0F;
+    private             boolean                   centered;
+    @Nullable protected GuiElementActionState     actionState          = null;
+    @Nullable protected GuiElementPersistentState persistentState      = GuiElementPersistentState.NORMAL;
+    protected           StateColorContainer       colorContainer       = StateColorContainer.createDefault();
+    private             int                       tickDown             = -1;
+    private             int                       partialTick;
+    private             boolean                   hovered;
 
     protected final MutableGuiShape elementShape = new MutableGuiShape(), calculatedElementShape = new MutableGuiShape();
     protected final MutableGuiShape calculatedInnerShape = new MutableGuiShape();
@@ -85,9 +84,9 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         addLine(text);
     }
 
-    @Override public MutableGuiShape getElementShape()           { return elementShape; }
-    @Override public MutableGuiShape getCalculatedElementShape() { return calculatedElementShape; }
-    @Override public String getText()                            { return guiString.get(); }
+    @Override public MutableGuiShape getShape()           { return elementShape; }
+    @Override public MutableGuiShape getCalculatedShape() { return calculatedElementShape; }
+    @Override public String getText()                     { return guiString.get(); }
 
 
     @Override
@@ -106,29 +105,29 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         labels.addAll(Arrays.asList(split));
     }
 
-    @Override public MPGuiString getGuiString()                              { return guiString; }
+    @Override public MPGuiString getGuiString()                               { return guiString; }
 
-    @Override public void setId(int id)                                      { this.id = id; }
-    @Override public int getId()                                             { return id; }
+    @Override public void setId(int id)                                       { this.id = id; }
+    @Override public int getId()                                              { return id; }
 
-    @Override @SuppressWarnings("unchecked") public T self()                 { return (T) this; }
+    @Override @SuppressWarnings("unchecked") public T self()                  { return (T) this; }
 
-    @Override @Nullable public GuiButtonActionState getActionState()         { return actionState; }
-    @Override @Nullable public GuiButtonPersistentState getPersistentState() { return persistentState; }
-    @Override public MPGuiTexturePack getTexturePack()                       { return MPGuiTexturePack.EMPTY; }
+    @Override @Nullable public GuiElementActionState getActionState()         { return actionState; }
+    @Override @Nullable public GuiElementPersistentState getPersistentState() { return persistentState; }
+    @Override public MPGuiTexturePack getTexturePack()                        { return MPGuiTexturePack.EMPTY; }
 
-    @Override public void setTexturePack(MPGuiTexturePack texturePack)       { }
-    @Override public void setElementShape(IGuiShape elementShape)            { this.elementShape.withShape(elementShape); }
-    @Override public GuiScaleRules getScaleRules()                           { return scaleRules; }
-    @Override public void setScaleRules(GuiScaleRules scaleRules)            { this.scaleRules = scaleRules; }
-    @Override public void setPadding(GuiPadding padding)                     { this.padding = padding; }
-    @Override public GuiPadding getPadding()                                 { return padding; }
-    @Override public void setScreen(MPGuiScreen screen)                      { this.screen = screen; }
-    @Override public MPGuiScreen getScreen()                                 { return screen; }
-    @Override public void setParent(MPGuiPanel<?> parent)                    { this.parent = parent; }
-    @Override public MPGuiPanel<?> getParent()                               { return parent; }
-    @Override public void setTextOffset(IGuiVector offset)                   { }
-    @Override public MutableGuiVector getTextOffset()                        { return new MutableGuiVector(); }
+    @Override public void setTexturePack(MPGuiTexturePack texturePack)        { }
+    @Override public void setShape(IGuiShape shape)                           { elementShape.withShape(shape); }
+    @Override public GuiScaleRules getScaleRules()                            { return scaleRules; }
+    @Override public void setScaleRules(GuiScaleRules scaleRules)             { this.scaleRules = scaleRules; }
+    @Override public void setPadding(GuiPadding padding)                      { this.padding = padding; }
+    @Override public GuiPadding getPadding()                                  { return padding; }
+    @Override public void setScreen(MPGuiScreen screen)                       { this.screen = screen; }
+    @Override public MPGuiScreen getScreen()                                  { return screen; }
+    @Override public void setParent(MPGuiPanel<?> parent)                     { this.parent = parent; }
+    @Override public MPGuiPanel<?> getParent()                                { return parent; }
+    @Override public void setTextOffset(IGuiVector offset)                    { }
+    @Override public MutableGuiVector getTextOffset()                         { return new MutableGuiVector(); }
 
 
     @Override
@@ -166,21 +165,21 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
 
 
     @Override
-    public boolean applyState(@Nullable GuiButtonPersistentState state) {
+    public boolean applyState(@Nullable GuiElementPersistentState state) {
         processVanillaPersistentState(state);
         persistentState = state;
         return true;
     }
 
-    protected boolean applyActionState(@Nullable GuiButtonActionState state) {
+    protected boolean applyActionState(@Nullable GuiElementActionState state) {
         processVanillaActionState(state);
         actionState = state;
         return true;
     }
 
-    private void processVanillaActionState(@Nullable GuiButtonActionState state) { }
+    private void processVanillaActionState(@Nullable GuiElementActionState state) { }
 
-    private void processVanillaPersistentState(@Nullable GuiButtonPersistentState state) {
+    private void processVanillaPersistentState(@Nullable GuiElementPersistentState state) {
         visible = state != null;
     }
 
@@ -206,10 +205,10 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
             if (persistentState == null
-                    || persistentState == GuiButtonPersistentState.DISABLED
-                    || actionState == GuiButtonActionState.PRESSED) return false;
+                    || persistentState == GuiElementPersistentState.DISABLED
+                    || actionState == GuiElementActionState.PRESSED) return false;
             hovered = true;
-            applyActionState(GuiButtonActionState.HOVER);
+            applyActionState(GuiElementActionState.HOVER);
             onMouseEnter(moveEvent);
             return true;
         }
@@ -220,7 +219,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     public final boolean onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
-            if (actionState == GuiButtonActionState.HOVER) applyActionState(null);
+            if (actionState == GuiElementActionState.HOVER) applyActionState(null);
             hovered = false;
             onMouseLeave(moveEvent);
             return true;
@@ -233,7 +232,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         MPGuiEventFactory.pushMouseClickEvent(releaseEvent, self(), mc, mouseX, mouseY);
         onAnyEventFire(releaseEvent);
         if (!releaseEvent.isCancelled()) {
-            if (isMouseOver()) applyActionState(GuiButtonActionState.HOVER);
+            if (isMouseOver()) applyActionState(GuiElementActionState.HOVER);
             else applyActionState(null);
             tickDown = -1;
             if (persistentState != null) {
@@ -250,7 +249,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     }
 
     @Override
-    public boolean onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
+    public final boolean onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
         MPGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
         onAnyEventFire(dragEvent);
         if (!dragEvent.isCancelled()) {
@@ -261,12 +260,20 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     }
 
     @Override
+    public final boolean onMouseScrolled0(Minecraft mc, int mouseX, int mouseY, int scroll) {
+        MPGuiEventFactory.pushMouseScrollEvent(scrollEvent, self(), mc, moveEvent.getMouseX(), moveEvent.getMouseY(), ScrollDirection.getScrollDirection(scroll), scroll);
+        onAnyEventFire(scrollEvent);
+        if (!scrollEvent.isCancelled()) return onMouseScrolled(scrollEvent);
+        return false;
+    }
+
+    @Override
     public final boolean onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
         MPGuiEventFactory.pushMouseClickEvent(pressEvent, self(), mc, mouseX, mouseY);
         onAnyEventFire(pressEvent);
         if (!pressEvent.isCancelled()) {
-            if (persistentState == null || persistentState == GuiButtonPersistentState.DISABLED) return false;
-            applyActionState(GuiButtonActionState.PRESSED);
+            if (persistentState == null || persistentState == GuiElementPersistentState.DISABLED) return false;
+            applyActionState(GuiElementActionState.PRESSED);
             tickDown = 0;
             onMousePressed(pressEvent);
             onPlaySound0(mc, mc.getSoundHandler(), soundClick, SoundSourceType.PRESS);
@@ -310,7 +317,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     }
 
 
-    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+    @Override public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
         return calculatedElementShape.contains(mouseX, mouseY);
     }
 
@@ -321,19 +328,16 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
 
     public abstract void onClick(MPGuiMouseClickEvent<T> event);
 
-    protected void onDrag(MPGuiMouseDragEvent<T> event) { }
-
-    protected void onUpdate(MPGuiTickEvent<T> event)    { }
-    protected void onMouseDragged(MPGuiMouseDragEvent<T> event) {
-        if (!event.isCancelled()) onDrag(event);
-    }
-    protected void onMouseReleased(MPGuiMouseClickEvent<T> event) { }
-    protected void onMouseEnter(MPGuiMouseMoveEvent<T> event)     { }
-    protected void onMouseLeave(MPGuiMouseMoveEvent<T> event)     { }
-    protected void onMousePressed(MPGuiMouseClickEvent<T> event)  { }
+    protected void onUpdate(MPGuiTickEvent<T> event)                  { }
+    protected void onMouseDragged(MPGuiMouseDragEvent<T> event)       { }
+    protected boolean onMouseScrolled(MPGuiMouseScrollEvent<T> event) { return false; }
+    protected void onMouseReleased(MPGuiMouseClickEvent<T> event)     { }
+    protected void onMouseEnter(MPGuiMouseMoveEvent<T> event)         { }
+    protected void onMouseLeave(MPGuiMouseMoveEvent<T> event)         { }
+    protected void onMousePressed(MPGuiMouseClickEvent<T> event)      { }
 
     protected final int getHoverState(boolean mouseOver) {
-        return persistentState == GuiButtonPersistentState.DISABLED ? 0 : mouseOver ? 2 : 1;
+        return persistentState == GuiElementPersistentState.DISABLED ? 0 : mouseOver ? 2 : 1;
     }
 
     public final boolean isMouseOver() { return hovered; }

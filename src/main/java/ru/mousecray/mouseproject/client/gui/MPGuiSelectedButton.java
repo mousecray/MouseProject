@@ -15,8 +15,6 @@ import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,14 +33,14 @@ public abstract class MPGuiSelectedButton<T extends MPGuiSelectedButton<T>> exte
                 text == null ? "" : text.get(), elementShape,
                 MPGuiTexturePack.Builder
                         .create(texture, textureSize, textureShape.pos(), textureShape.size())
-                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
-                        .addTexture(GuiButtonActionState.HOVER, 1)
-                        .addTexture(GuiButtonActionState.PRESSED, 2)
-                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.HOVER), 1)
-                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.PRESSED), 2)
-                        .addTexture(GuiButtonPersistentState.SELECTED, 3)
-                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.HOVER), 4)
-                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.PRESSED), 5)
+                        .addTexture(GuiElementPersistentState.NORMAL, 0)
+                        .addTexture(GuiElementActionState.HOVER, 1)
+                        .addTexture(GuiElementActionState.PRESSED, 2)
+                        .addTexture(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.HOVER), 1)
+                        .addTexture(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.PRESSED), 2)
+                        .addTexture(GuiElementPersistentState.SELECTED, 3)
+                        .addTexture(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.HOVER), 4)
+                        .addTexture(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.PRESSED), 5)
                         .build(),
                 SoundEvents.UI_BUTTON_CLICK, fontSize
         );
@@ -59,14 +57,14 @@ public abstract class MPGuiSelectedButton<T extends MPGuiSelectedButton<T>> exte
                 text, elementShape,
                 MPGuiTexturePack.Builder
                         .create(texture, textureSize, textureShape.pos(), textureShape.size())
-                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
-                        .addTexture(GuiButtonActionState.HOVER, 1)
-                        .addTexture(GuiButtonActionState.PRESSED, 2)
-                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.HOVER), 1)
-                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.PRESSED), 2)
-                        .addTexture(GuiButtonPersistentState.SELECTED, 3)
-                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.HOVER), 4)
-                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.PRESSED), 5)
+                        .addTexture(GuiElementPersistentState.NORMAL, 0)
+                        .addTexture(GuiElementActionState.HOVER, 1)
+                        .addTexture(GuiElementActionState.PRESSED, 2)
+                        .addTexture(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.HOVER), 1)
+                        .addTexture(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.PRESSED), 2)
+                        .addTexture(GuiElementPersistentState.SELECTED, 3)
+                        .addTexture(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.HOVER), 4)
+                        .addTexture(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.PRESSED), 5)
                         .build(),
                 SoundEvents.UI_BUTTON_CLICK, fontSize
         );
@@ -76,8 +74,8 @@ public abstract class MPGuiSelectedButton<T extends MPGuiSelectedButton<T>> exte
     @Override
     public void onClick(@Nonnull MPGuiMouseClickEvent<T> event) {
         applyState(
-                getPersistentState() == GuiButtonPersistentState.SELECTED
-                        ? GuiButtonPersistentState.NORMAL : GuiButtonPersistentState.SELECTED
+                getPersistentState() == GuiElementPersistentState.SELECTED
+                        ? GuiElementPersistentState.NORMAL : GuiElementPersistentState.SELECTED
         );
         if (onClick != null) onClick.accept(event);
     }

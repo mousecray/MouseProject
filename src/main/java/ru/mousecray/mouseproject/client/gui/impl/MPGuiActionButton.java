@@ -15,8 +15,6 @@ import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.Nonnull;
@@ -38,11 +36,11 @@ public class MPGuiActionButton extends MPGuiButton<MPGuiActionButton> {
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                 GuiVector.ZERO, GuiVector.of(80, 10)
                         )
-                        .addTexture(GuiButtonPersistentState.DISABLED, 0)
-                        .addTexture(GuiButtonPersistentState.NORMAL, 1)
-                        .addTexture(GuiButtonActionState.HOVER, 2)
-                        .addTexture(GuiButtonActionState.PRESSED, 3)
-                        .addTexture(GuiButtonPersistentState.FAIL, 4)
+                        .addTexture(GuiElementPersistentState.DISABLED, 0)
+                        .addTexture(GuiElementPersistentState.NORMAL, 1)
+                        .addTexture(GuiElementActionState.HOVER, 2)
+                        .addTexture(GuiElementActionState.PRESSED, 3)
+                        .addTexture(GuiElementPersistentState.FAIL, 4)
                         .build(),
                 SoundEvents.UI_BUTTON_CLICK, fontSize
         );
@@ -61,11 +59,11 @@ public class MPGuiActionButton extends MPGuiButton<MPGuiActionButton> {
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                 GuiVector.ZERO, GuiVector.of(80, 10)
                         )
-                        .addTexture(GuiButtonPersistentState.DISABLED, 0)
-                        .addTexture(GuiButtonPersistentState.NORMAL, 1)
-                        .addTexture(GuiButtonActionState.HOVER, 2)
-                        .addTexture(GuiButtonActionState.PRESSED, 3)
-                        .addTexture(GuiButtonPersistentState.FAIL, 4)
+                        .addTexture(GuiElementPersistentState.DISABLED, 0)
+                        .addTexture(GuiElementPersistentState.NORMAL, 1)
+                        .addTexture(GuiElementActionState.HOVER, 2)
+                        .addTexture(GuiElementActionState.PRESSED, 3)
+                        .addTexture(GuiElementPersistentState.FAIL, 4)
                         .build(),
                 SoundEvents.UI_BUTTON_CLICK, fontSize
         );

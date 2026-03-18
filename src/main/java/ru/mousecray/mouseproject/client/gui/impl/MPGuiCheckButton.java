@@ -24,8 +24,6 @@ import ru.mousecray.mouseproject.client.gui.misc.StateColorContainer;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexture;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.Nonnull;
@@ -52,14 +50,14 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                 GuiVector.of(184, 0), GuiVector.of(8)
                         )
-                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
-                        .addTexture(GuiButtonActionState.HOVER, 1)
-                        .addTexture(GuiButtonActionState.PRESSED, 2)
-                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.HOVER), 1)
-                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.PRESSED), 2)
-                        .addTexture(GuiButtonPersistentState.SELECTED, 3)
-                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.HOVER), 4)
-                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.PRESSED), 5)
+                        .addTexture(GuiElementPersistentState.NORMAL, 0)
+                        .addTexture(GuiElementActionState.HOVER, 1)
+                        .addTexture(GuiElementActionState.PRESSED, 2)
+                        .addTexture(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.HOVER), 1)
+                        .addTexture(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.PRESSED), 2)
+                        .addTexture(GuiElementPersistentState.SELECTED, 3)
+                        .addTexture(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.HOVER), 4)
+                        .addTexture(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.PRESSED), 5)
                         .build(),
                 SoundEvents.UI_BUTTON_CLICK, fontSize
         );
@@ -69,15 +67,15 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
         setGuiString(text);
         colorContainer = StateColorContainer.Builder
                 .create(14737632)
-                .addState(GuiButtonPersistentState.DISABLED, 10526880)
-                .addState(GuiButtonPersistentState.NORMAL, 14737632)
-                .addState(GuiButtonActionState.HOVER, 15592941)
-                .addState(GuiButtonActionState.PRESSED, 13948116)
-                .addState(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.HOVER), 15592941)
-                .addState(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.PRESSED), 13948116)
-                .addState(GuiButtonPersistentState.SELECTED, 14737632)
-                .addState(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.HOVER), 15592941)
-                .addState(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.PRESSED), 13948116)
+                .addState(GuiElementPersistentState.DISABLED, 10526880)
+                .addState(GuiElementPersistentState.NORMAL, 14737632)
+                .addState(GuiElementActionState.HOVER, 15592941)
+                .addState(GuiElementActionState.PRESSED, 13948116)
+                .addState(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.HOVER), 15592941)
+                .addState(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.PRESSED), 13948116)
+                .addState(GuiElementPersistentState.SELECTED, 14737632)
+                .addState(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.HOVER), 15592941)
+                .addState(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.PRESSED), 13948116)
                 .build();
     }
 
@@ -97,14 +95,14 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                 GuiVector.of(184, 0), GuiVector.of(8)
                         )
-                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
-                        .addTexture(GuiButtonActionState.HOVER, 1)
-                        .addTexture(GuiButtonActionState.PRESSED, 2)
-                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.HOVER), 1)
-                        .addTexture(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.PRESSED), 2)
-                        .addTexture(GuiButtonPersistentState.SELECTED, 3)
-                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.HOVER), 4)
-                        .addTexture(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.PRESSED), 5)
+                        .addTexture(GuiElementPersistentState.NORMAL, 0)
+                        .addTexture(GuiElementActionState.HOVER, 1)
+                        .addTexture(GuiElementActionState.PRESSED, 2)
+                        .addTexture(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.HOVER), 1)
+                        .addTexture(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.PRESSED), 2)
+                        .addTexture(GuiElementPersistentState.SELECTED, 3)
+                        .addTexture(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.HOVER), 4)
+                        .addTexture(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.PRESSED), 5)
                         .build(),
                 SoundEvents.UI_BUTTON_CLICK, fontSize
         );
@@ -113,23 +111,23 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
         this.onClick = onClick;
         colorContainer = StateColorContainer.Builder
                 .create(14737632)
-                .addState(GuiButtonPersistentState.DISABLED, 10526880)
-                .addState(GuiButtonPersistentState.NORMAL, 14737632)
-                .addState(GuiButtonActionState.HOVER, 15592941)
-                .addState(GuiButtonActionState.PRESSED, 13948116)
-                .addState(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.HOVER), 15592941)
-                .addState(GuiButtonPersistentState.NORMAL.combine(GuiButtonActionState.PRESSED), 13948116)
-                .addState(GuiButtonPersistentState.SELECTED, 14737632)
-                .addState(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.HOVER), 15592941)
-                .addState(GuiButtonPersistentState.SELECTED.combine(GuiButtonActionState.PRESSED), 13948116)
+                .addState(GuiElementPersistentState.DISABLED, 10526880)
+                .addState(GuiElementPersistentState.NORMAL, 14737632)
+                .addState(GuiElementActionState.HOVER, 15592941)
+                .addState(GuiElementActionState.PRESSED, 13948116)
+                .addState(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.HOVER), 15592941)
+                .addState(GuiElementPersistentState.NORMAL.combine(GuiElementActionState.PRESSED), 13948116)
+                .addState(GuiElementPersistentState.SELECTED, 14737632)
+                .addState(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.HOVER), 15592941)
+                .addState(GuiElementPersistentState.SELECTED.combine(GuiElementActionState.PRESSED), 13948116)
                 .build();
     }
 
     @Override
     public void onClick(@Nonnull MPGuiMouseClickEvent<MPGuiCheckButton> event) {
         applyState(
-                getPersistentState() == GuiButtonPersistentState.SELECTED
-                        ? GuiButtonPersistentState.NORMAL : GuiButtonPersistentState.SELECTED
+                getPersistentState() == GuiElementPersistentState.SELECTED
+                        ? GuiElementPersistentState.NORMAL : GuiElementPersistentState.SELECTED
         );
         if (onClick != null) onClick.accept(event);
     }
@@ -138,16 +136,16 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
     protected void drawButtonBackgroundLayer(MPGuiTickEvent<MPGuiCheckButton> event) {
         MPGuiTexture texture = getTexturePack().getCalculatedTexture(actionState, persistentState);
         if (texture != null) {
-            float scaleY  = calculatedElementShape.height() / Math.max(1f, elementShape.height());
+            float scaleY  = calculatedShape.height() / Math.max(1f, shape.height());
             float curBoxW = boxOriginalWidth * scaleY;
 
-            float boxX = calculatedElementShape.x() + calculatedElementShape.width() - curBoxW;
-            float boxY = calculatedElementShape.y();
+            float boxX = calculatedShape.x() + calculatedShape.width() - curBoxW;
+            float boxY = calculatedShape.y();
 
             texture.draw(
                     event.getMc(),
                     boxX, boxY,
-                    curBoxW, calculatedElementShape.height()
+                    curBoxW, calculatedShape.height()
             );
         }
     }
@@ -168,8 +166,8 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
             GlStateManager.scale(scale, scale, 1.0F);
             GuiRenderHelper.drawString(
                     fontrenderer, displayString,
-                    (calculatedElementShape.x()) * inverseScale + calculatedTextOffsetTemp.x() * inverseScale,
-                    calculatedElementShape.y() * inverseScale + calculatedElementShape.height() * inverseScale / 2f - (fontrenderer.FONT_HEIGHT) / 2f + calculatedTextOffsetTemp.y() * inverseScale,
+                    (calculatedShape.x()) * inverseScale + calculatedTextOffsetTemp.x() * inverseScale,
+                    calculatedShape.y() * inverseScale + calculatedShape.height() * inverseScale / 2f - (fontrenderer.FONT_HEIGHT) / 2f + calculatedTextOffsetTemp.y() * inverseScale,
                     color, fontSize != MPFontSize.SMALL
             );
             GlStateManager.popMatrix();

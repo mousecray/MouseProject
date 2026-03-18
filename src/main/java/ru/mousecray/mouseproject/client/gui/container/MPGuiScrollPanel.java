@@ -18,8 +18,6 @@ import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -58,12 +56,12 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
         }
     }
 
-    @Nullable public MPGuiPanel<?> getContent()                  { return content; }
+    @Nullable public MPGuiPanel<?> getContent()              { return content; }
 
-    @SuppressWarnings("unchecked") @Override public T self()     { return (T) this; }
-    @Override public void setElementShape(IGuiShape shape)       { elementShape.withShape(shape); }
-    @Override public MutableGuiShape getElementShape()           { return elementShape; }
-    @Override public MutableGuiShape getCalculatedElementShape() { return calculatedElementShape; }
+    @SuppressWarnings("unchecked") @Override public T self() { return (T) this; }
+    @Override public void setShape(IGuiShape shape)          { elementShape.withShape(shape); }
+    @Override public MutableGuiShape getShape()              { return elementShape; }
+    @Override public MutableGuiShape getCalculatedShape()    { return calculatedElementShape; }
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
@@ -93,7 +91,7 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
     }
 
     private float findMaxBottom(MPGuiElement<?> element) {
-        float max = element.getCalculatedElementShape().y() + element.getCalculatedElementShape().height();
+        float max = element.getCalculatedShape().y() + element.getCalculatedShape().height();
         if (element instanceof MPGuiPanel) {
             for (MPGuiElement<?> child : ((MPGuiPanel<?>) element).getChildren()) {
                 max = Math.max(max, findMaxBottom(child));
@@ -255,26 +253,26 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
         this.parent = parent;
         if (content != null) content.setParent(parent);
     }
-    @Override public MPGuiPanel<?> getParent()                                    { return parent; }
+    @Override public MPGuiPanel<?> getParent()                                     { return parent; }
 
-    @Override public void setId(int id)                                           { this.id = id; }
-    @Override public int getId()                                                  { return id; }
+    @Override public void setId(int id)                                            { this.id = id; }
+    @Override public int getId()                                                   { return id; }
 
-    @Override public GuiScaleRules getScaleRules()                                { return scaleRules; }
-    @Override public void setScaleRules(GuiScaleRules scaleRules)                 { this.scaleRules = scaleRules; }
-    @Override public void setPadding(GuiPadding padding)                          { }
-    @Override public GuiPadding getPadding()                                      { return new GuiPadding(0); }
-    @Override public void setTexturePack(MPGuiTexturePack pack)                   { }
-    @Override public MPGuiTexturePack getTexturePack()                            { return MPGuiTexturePack.EMPTY; }
+    @Override public GuiScaleRules getScaleRules()                                 { return scaleRules; }
+    @Override public void setScaleRules(GuiScaleRules scaleRules)                  { this.scaleRules = scaleRules; }
+    @Override public void setPadding(GuiPadding padding)                           { }
+    @Override public GuiPadding getPadding()                                       { return new GuiPadding(0); }
+    @Override public void setTexturePack(MPGuiTexturePack pack)                    { }
+    @Override public MPGuiTexturePack getTexturePack()                             { return MPGuiTexturePack.EMPTY; }
 
-    @Override public String getText()                                             { return ""; }
-    @Override public void setText(String text)                                    { }
-    @Override public MPGuiString getGuiString()                                   { return MPGuiString.simple(""); }
-    @Override public void setGuiString(MPGuiString guiString)                     { }
-    @Override public void setTextOffset(IGuiVector offset)                        { }
-    @Override public MutableGuiVector getTextOffset()                             { return new MutableGuiVector(); }
+    @Override public String getText()                                              { return ""; }
+    @Override public void setText(String text)                                     { }
+    @Override public MPGuiString getGuiString()                                    { return MPGuiString.simple(""); }
+    @Override public void setGuiString(MPGuiString guiString)                      { }
+    @Override public void setTextOffset(IGuiVector offset)                         { }
+    @Override public MutableGuiVector getTextOffset()                              { return new MutableGuiVector(); }
 
-    @Override public boolean applyState(@Nullable GuiButtonPersistentState state) { return true; }
-    @Override @Nullable public GuiButtonActionState getActionState()              { return null; }
-    @Override @Nullable public GuiButtonPersistentState getPersistentState()      { return GuiButtonPersistentState.NORMAL; }
+    @Override public boolean applyState(@Nullable GuiElementPersistentState state) { return true; }
+    @Override @Nullable public GuiElementActionState getActionState()              { return null; }
+    @Override @Nullable public GuiElementPersistentState getPersistentState()      { return GuiElementPersistentState.NORMAL; }
 }

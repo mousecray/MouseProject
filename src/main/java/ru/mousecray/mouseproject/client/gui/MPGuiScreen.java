@@ -39,7 +39,7 @@ public abstract class MPGuiScreen extends GuiScreen {
     protected         GuiVector          FULL_TEXTURE_SIZE;
     protected         GuiShape           BACKGROUND_SHAPE;
     private           int                currentElementID   = 0;
-    @Nullable private MPGuiElement<?>    lastHoveredElement = null;
+    private           boolean            isRootPanelHovered = false;
     @Nullable private MPGuiTextField<?>  selectedTextField  = null;
     @Nullable private MPGuiLabel<?>      selectedLabel      = null;
     @Nullable private MPGuiTextField<?>  focusedTextField   = null;
@@ -336,12 +336,12 @@ public abstract class MPGuiScreen extends GuiScreen {
         if (rootPanel != null) {
             rootPanel.onUpdate0(mc, i, j);
 
-            MPGuiElement<?> currentHoveredElement = rootPanel.findTopHovered(mc, i, j);
-
-            if (currentHoveredElement != lastHoveredElement) {
-                if (lastHoveredElement != null) lastHoveredElement.onMouseLeave0(mc, i, j);
-                if (currentHoveredElement != null) currentHoveredElement.onMouseEnter0(mc, i, j);
-                lastHoveredElement = currentHoveredElement;
+            if (rootPanel.mouseHover(mc, i, j)) {
+                if (!isRootPanelHovered) rootPanel.onMouseEnter0(mc, i, j);
+                isRootPanelHovered = true;
+            } else {
+                if (isRootPanelHovered) rootPanel.onMouseLeave0(mc, i, j);
+                isRootPanelHovered = false;
             }
         }
     }

@@ -44,8 +44,8 @@ public class MPGuiFreePanel extends MPGuiPanel<MPGuiFreePanel> {
             float childH = measureTemp.y();
 
             //3. Координаты X/Y подчиняются scaleRules (isFixed)
-            float posX = child.getScaleRules().isFixedHorizontal() ? child.getElementShape().x() : calculateFlowComponentX(parentDefaultSize, parentContentSize, child.getElementShape().x());
-            float posY = child.getScaleRules().isFixedVertical() ? child.getElementShape().y() : calculateFlowComponentY(parentDefaultSize, parentContentSize, child.getElementShape().y());
+            float posX = child.getScaleRules().isFixedHorizontal() ? child.getShape().x() : calculateFlowComponentX(parentDefaultSize, parentContentSize, child.getShape().x());
+            float posY = child.getScaleRules().isFixedVertical() ? child.getShape().y() : calculateFlowComponentY(parentDefaultSize, parentContentSize, child.getShape().y());
 
             //4. Оффсеты масштабируются
             GuiVector offset  = getChildOffset(child);

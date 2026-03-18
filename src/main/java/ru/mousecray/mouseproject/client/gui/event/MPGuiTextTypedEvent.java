@@ -12,7 +12,7 @@ import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import javax.annotation.Nullable;
 
 @SideOnly(Side.CLIENT)
-public class MPGuiTextTypedEvent<T extends MPGuiElement<T>> extends MPGuiEvent<T> {
+public class MPGuiTextTypedEvent<T extends MPGuiElement<T>> extends MPGuiKeyEvent<T> {
     private           int    cursorPos;
     private           int    selectionEnd;
     @Nullable private String oldText;

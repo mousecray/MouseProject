@@ -17,8 +17,6 @@ import ru.mousecray.mouseproject.client.gui.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonActionState;
-import ru.mousecray.mouseproject.client.gui.state.GuiButtonPersistentState;
 import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.Nullable;
@@ -44,9 +42,9 @@ public class MPGuiSimpleField extends MPGuiTextField<MPGuiSimpleField> {
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                 GuiVector.of(104, 0), GuiVector.of(80, 10)
                         )
-                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
-                        .addTexture(GuiButtonActionState.HOVER, 0)
-                        .addTexture(GuiButtonActionState.PRESSED, 0)
+                        .addTexture(GuiElementPersistentState.NORMAL, 0)
+                        .addTexture(GuiElementActionState.HOVER, 0)
+                        .addTexture(GuiElementActionState.PRESSED, 0)
                         .build(),
                 null, fontSize);
         this.onTextTyped = onTextTyped;
@@ -64,9 +62,9 @@ public class MPGuiSimpleField extends MPGuiTextField<MPGuiSimpleField> {
                                 MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                                 GuiVector.of(104, 0), GuiVector.of(80, 10)
                         )
-                        .addTexture(GuiButtonPersistentState.NORMAL, 0)
-                        .addTexture(GuiButtonActionState.HOVER, 0)
-                        .addTexture(GuiButtonActionState.PRESSED, 0)
+                        .addTexture(GuiElementPersistentState.NORMAL, 0)
+                        .addTexture(GuiElementActionState.HOVER, 0)
+                        .addTexture(GuiElementActionState.PRESSED, 0)
                         .build()
                 , null, fontSize);
         this.onTextTyped = onTextTyped;
