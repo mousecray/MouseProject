@@ -6,9 +6,13 @@
 package ru.mousecray.mouseproject.client.gui.misc.state;
 
 public enum MPGuiElementState {
-    HOVERED, PRESSED, FOCUSED, //Интерактивные
-    SELECTED, FAIL,            //Постоянные
-    DISABLED;                  //Глобальный модификатор
+    HOVERED,
+    PRESSED,
+    FOCUSED,
+    SELECTED,
+    FAIL,
+    DISABLED,
+    HIDDEN;
 
     public final int mask = 1 << ordinal();
 }

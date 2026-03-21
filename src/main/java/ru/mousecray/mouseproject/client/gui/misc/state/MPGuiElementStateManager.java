@@ -1,49 +1,56 @@
 package ru.mousecray.mouseproject.client.gui.misc.state;
 
-import javax.annotation.Nonnull;
-
 public class MPGuiElementStateManager {
-    private int states    = 0;
-    private int forbidden = 0;
+    private int
+            states    = 0,
+            forbidden = 0;
+    private Runnable changeListener;
 
     private static final int INTERACTIVE_MASK =
-            MPGuiElementState.HOVERED.mask | MPGuiElementState.PRESSED.mask | MPGuiElementState.FOCUSED.mask;
+            MPGuiElementState.HOVERED.mask |
+                    MPGuiElementState.PRESSED.mask |
+                    MPGuiElementState.FOCUSED.mask;
+
+    public void setChangeListener(Runnable listener) { changeListener = listener; }
+    private void notifyChange()                      { if (changeListener != null) changeListener.run(); }
 
     public void add(MPGuiElementState state) {
-        int bit = state.mask;
+        if ((forbidden & state.mask) != 0) return;
 
-        if ((forbidden & bit) != 0) return;
-        if (has(MPGuiElementState.DISABLED) && (INTERACTIVE_MASK & bit) != 0) return;
-        if (state == MPGuiElementState.DISABLED) states &= ~INTERACTIVE_MASK;
+        if (has(MPGuiElementState.DISABLED) || has(MPGuiElementState.HIDDEN)) {
+            if ((INTERACTIVE_MASK & state.mask) != 0) return;
+        }
 
-        states |= bit;
+        int oldStates = states;
+
+        if (state == MPGuiElementState.DISABLED || state == MPGuiElementState.HIDDEN) states &= ~INTERACTIVE_MASK;
+
+        states |= state.mask;
+
+        if (oldStates != states) notifyChange();
     }
 
-    public void remove(MPGuiElementState state) { states &= ~state.mask; }
+    public void remove(MPGuiElementState state) {
+        int oldStates = states;
+        states &= ~state.mask;
+        if (oldStates != states) notifyChange();
+    }
+
     public boolean has(MPGuiElementState state) { return (states & state.mask) != 0; }
 
     public void setForbidden(MPGuiElementState state, boolean isForbidden) {
-        int bit = state.mask;
+        int oldForbidden = forbidden;
         if (isForbidden) {
-            forbidden |= bit;
-            states &= ~bit;
-        } else forbidden &= ~bit;
+            forbidden |= state.mask;
+            remove(state);
+        } else forbidden &= ~state.mask;
     }
 
-    public boolean isForbidden(MPGuiElementState state) {
-        return (forbidden & state.mask) != 0;
-    }
+    public boolean isForbidden(MPGuiElementState state) { return (forbidden & state.mask) != 0; }
+    public boolean satisfies(int requiredMask)          { return (states & requiredMask) == requiredMask; }
 
-    public boolean satisfies(int requiredMask) { return (states & requiredMask) == requiredMask; }
-
-    public static int createMask(@Nonnull MPGuiElementState... statesToCombine) {
+    public static int createMask(MPGuiElementState... statesToCombine) {
         int mask = 0;
-        for (MPGuiElementState s : statesToCombine) mask |= s.mask;
-        return mask;
-    }
-
-    public static int createMask(@Nonnull MPGuiElementState state, MPGuiElementState... statesToCombine) {
-        int mask = state.mask;
         for (MPGuiElementState s : statesToCombine) mask |= s.mask;
         return mask;
     }

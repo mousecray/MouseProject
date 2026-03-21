@@ -77,6 +77,17 @@ public class MPGuiEventFactory {
         event.setNewText(newText);
     }
 
+    public static <T extends MPGuiElement<T>> void pushKeyEvent(MPGuiKeyEvent<T> event, T obj, Minecraft mc, int x, int y, char typedChar, int keyCode) {
+        event.setCancelled(false);
+        event.setObj(obj);
+        event.setMc(mc);
+        event.setMouseX(x);
+        event.setMouseY(y);
+        event.setTypedChar(typedChar);
+        event.setKeyCode(keyCode);
+    }
+
+
     public static <T extends MPGuiElement<T>> void pushSoundEvent(MPGuiSoundEvent<T> event, T obj, Minecraft mc, int x, int y, SoundHandler handler, SoundEvent sound, SoundSourceType source) {
         event.setCancelled(false);
         event.setObj(obj);

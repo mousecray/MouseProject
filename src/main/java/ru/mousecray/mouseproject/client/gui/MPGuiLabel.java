@@ -294,7 +294,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         event.getHandler().playSound(PositionedSoundRecord.getMasterRecord(event.getSound(), 1.0F));
     }
 
-    public void mouseReleased(int mouseX, int mouseY) { onMouseReleased0(Minecraft.getMinecraft(), mouseX, mouseY); }
+    @Override public void mouseReleased(int mouseX, int mouseY) { onMouseReleased0(Minecraft.getMinecraft(), mouseX, mouseY); }
 
     protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
         if (tickDown >= 0) {
@@ -336,7 +336,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     protected void onMouseLeave(MPGuiMouseMoveEvent<T> event)         { }
     protected void onMousePressed(MPGuiMouseClickEvent<T> event)      { }
 
-    protected final int getHoverState(boolean mouseOver) {
+    @Override protected final int getHoverState(boolean mouseOver) {
         return persistentState == GuiElementPersistentState.DISABLED ? 0 : mouseOver ? 2 : 1;
     }
 

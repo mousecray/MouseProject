@@ -14,11 +14,8 @@ public class MPGuiKeyEvent<T extends MPGuiElement<T>> extends MPGuiEvent<T> {
     private char typedChar;
     private int  keyCode;
 
-    public void setKeyData(char typedChar, int keyCode) {
-        this.typedChar = typedChar;
-        this.keyCode = keyCode;
-    }
-
-    public char getTypedChar() { return typedChar; }
-    public int getKeyCode()    { return keyCode; }
+    void setTypedChar(char typedChar) { this.typedChar = typedChar; }
+    public char getTypedChar()        { return typedChar; }
+    void setKeyCode(int keyCode)      { this.keyCode = keyCode; }
+    public int getKeyCode()           { return keyCode; }
 }

@@ -343,7 +343,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         event.getHandler().playSound(PositionedSoundRecord.getMasterRecord(event.getSound(), 1.0F));
     }
 
-    public void mouseReleased(int mouseX, int mouseY)                 { onMouseReleased0(Minecraft.getMinecraft(), mouseX, mouseY); }
+    @Override public void mouseReleased(int mouseX, int mouseY) { onMouseReleased0(Minecraft.getMinecraft(), mouseX, mouseY); }
 
     protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) { }
 
@@ -485,7 +485,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         return fr.trimStringToWidth(visibleText, relX).length() + lineScrollOffset;
     }
 
-    protected final int getHoverState(boolean mouseOver) {
+    @Override protected final int getHoverState(boolean mouseOver) {
         return persistentState == GuiElementPersistentState.DISABLED ? 0 : mouseOver ? 2 : 1;
     }
 

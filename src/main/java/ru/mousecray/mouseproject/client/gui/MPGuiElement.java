@@ -7,11 +7,14 @@ package ru.mousecray.mouseproject.client.gui;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
+import ru.mousecray.mouseproject.client.gui.misc.SoundSourceType;
 import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.misc.state.MPGuiElementStateManager;
 import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
@@ -74,11 +77,19 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     void dispatchMouseReleased(Minecraft mc, int mouseX, int mouseY, int state);
     boolean dispatchMouseDragged(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY);
     boolean dispatchMouseScrolled(Minecraft mc, int mouseX, int mouseY, int scroll);
-    boolean dispatchKeyTyped(char typedChar, int keyCode);
+    boolean dispatchKeyTyped(Minecraft mc, int mouseX, int mouseY, char typedChar, int keyCode);
+    void dispatchPlaySound(Minecraft mc, SoundHandler soundHandler, @Nullable SoundEvent sound, SoundSourceType source);
 
     //Рендеринг
     void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks);
     void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks);
     void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks);
     void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks);
+
+    //Интеграция с vanilla
+    int getHoverState(boolean mouseOver);
+    boolean mouseHover(Minecraft mc, int mouseX, int mouseY);
+    boolean mousePressed(Minecraft mc, int mouseX, int mouseY);
+    boolean mouseReleased(int mouseX, int mouseY);
+    void performClickFromVanilla();
 }

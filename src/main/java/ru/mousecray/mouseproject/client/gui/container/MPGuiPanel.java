@@ -120,27 +120,23 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         for (MPGuiElement<?> child : children) child.setScreen(screen);
     }
 
-    @Override public MPGuiScreen getScreen()                                       { return screen; }
+    @Override public MPGuiScreen getScreen()                           { return screen; }
 
-    @Nullable @Override public MPGuiPanel<?> getParent()                           { return parent.get(); }
-    @Override public void setParent(MPGuiPanel<?> parent)                          { this.parent = new WeakReference<>(parent); }
+    @Nullable @Override public MPGuiPanel<?> getParent()               { return parent.get(); }
+    @Override public void setParent(MPGuiPanel<?> parent)              { this.parent = new WeakReference<>(parent); }
 
-    @Override public MPGuiTexturePack getTexturePack()                             { return texturePack; }
-    @Override public void setTexturePack(MPGuiTexturePack texturePack)             { this.texturePack = texturePack; }
-    @Override public MutableGuiShape getShape()                                    { return elementShape; }
-    @Override public MutableGuiShape getCalculatedShape()                          { return calculatedElementShape; }
-    @Override public int getId()                                                   { return id; }
+    @Override public MPGuiTexturePack getTexturePack()                 { return texturePack; }
+    @Override public void setTexturePack(MPGuiTexturePack texturePack) { this.texturePack = texturePack; }
+    @Override public MutableGuiShape getShape()                        { return elementShape; }
+    @Override public MutableGuiShape getCalculatedShape()              { return calculatedElementShape; }
+    @Override public int getId()                                       { return id; }
 
-    @Override public String getText()                                              { return ""; }
-    @Override public void setText(String text)                                     { }
-    @Override public void setGuiString(MPGuiString guiString)                      { }
-    @Override public MPGuiString getGuiString()                                    { return MPGuiString.simple(""); }
-    @Override public void setTextOffset(IGuiVector offset)                         { }
-    @Override public MutableGuiVector getTextOffset()                              { return new MutableGuiVector(); }
-
-    @Override public boolean applyState(@Nullable GuiElementPersistentState state) { return true; }
-    @Override @Nullable public GuiElementActionState getActionState()              { return null; }
-    @Override @Nullable public GuiElementPersistentState getPersistentState()      { return GuiElementPersistentState.NORMAL; }
+    @Override public String getText()                                  { return ""; }
+    @Override public void setText(String text)                         { }
+    @Override public void setGuiString(MPGuiString guiString)          { }
+    @Override public MPGuiString getGuiString()                        { return MPGuiString.simple(""); }
+    @Override public void setTextOffset(IGuiVector offset)             { }
+    @Override public MutableGuiVector getTextOffset()                  { return new MutableGuiVector(); }
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
