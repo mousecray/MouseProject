@@ -18,19 +18,27 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.MouseProject;
+import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.components.color.MPGuiColorPack;
+import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.components.sound.MPGuiSoundPack;
+import ru.mousecray.mouseproject.client.gui.components.sound.SoundSourceType;
+import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementState;
+import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementStateManager;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexture;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.*;
-import ru.mousecray.mouseproject.client.gui.misc.*;
-import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.misc.state.MPGuiElementState;
-import ru.mousecray.mouseproject.client.gui.misc.state.MPGuiElementStateManager;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexture;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
+import ru.mousecray.mouseproject.client.gui.misc.MPClickType;
+import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
+import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
+import ru.mousecray.mouseproject.client.gui.misc.ScrollDirection;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
+import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -63,24 +71,23 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
     protected final MPFontSize       fontSize;
     protected       MPGuiString      guiString;
     private         MPGuiTexturePack texturePack;
+    protected       MPGuiColorPack   colorPack = MPGuiColorPack.CONTROL_SIMPLE();
+    private         MPGuiSoundPack   soundPack;
 
-    protected int                 tickDown             = -1;
-    protected int                 partialTick;
-    protected MutableGuiVector    textOffset           = new MutableGuiVector();
-    protected float               textScaleMultiplayer = 1.0F;
-    protected StateColorContainer colorContainer       = StateColorContainer.createDefault();
-    private   GuiScaleRules       scaleRules           = new GuiScaleRules(GuiScaleType.FLOW);
+    protected int              tickDown             = -1;
+    protected MutableGuiVector textOffset           = new MutableGuiVector();
+    protected float            textScaleMultiplayer = 1.0F;
+    private   GuiScaleRules    scaleRules           = new GuiScaleRules(GuiScaleType.FLOW);
 
-    @Nullable private final SoundEvent    soundClick;
-    @Nullable private       MPGuiPanel<?> parent;
-    private                 GuiPadding    padding = new GuiPadding(0);
-    @Nullable private       MPGuiScreen   screen;
+    @Nullable private MPGuiPanel<?> parent;
+    private           GuiPadding    padding = new GuiPadding(0);
+    @Nullable private MPGuiScreen   screen;
 
     public MPGuiButton(
             @Nullable String text,
             GuiShape shape,
-            @Nullable MPGuiTexturePack texturePack,
-            @Nullable SoundEvent soundClick,
+            MPGuiTexturePack texturePack,
+            MPGuiSoundPack soundPack,
             MPFontSize fontSize
     ) {
         super(0,
@@ -90,9 +97,25 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
 
         this.shape = shape.toMutable();
         this.fontSize = fontSize;
-        this.texturePack = texturePack == null ? MPGuiTexturePack.EMPTY : texturePack;
-        this.soundClick = soundClick;
+        setTexturePack(texturePack);
+        setSoundPack(soundPack);
         guiString = MPGuiString.simple(text);
+
+        Minecraft mc = Minecraft.getMinecraft();
+        T         th = self();
+        updateEvent.bind(mc, th);
+        drawBGEvent.bind(mc, th);
+        drawFGEvent.bind(mc, th);
+        drawLastEvent.bind(mc, th);
+        drawTextEvent.bind(mc, th);
+        pressEvent.bind(mc, th);
+        releaseEvent.bind(mc, th);
+        clickEvent.bind(mc, th);
+        moveEvent.bind(mc, th);
+        dragEvent.bind(mc, th);
+        scrollEvent.bind(mc, th);
+        keyEvent.bind(mc, th);
+        soundEvent.bind(mc, th);
 
         stateManager.setChangeListener(() -> {
             enabled = !stateManager.has(MPGuiElementState.DISABLED);
@@ -128,10 +151,19 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
         displayString = guiString.get();
     }
 
+    @Override public boolean isVisible()                               { return visible; }
+    @Override public boolean isEnabled()                               { return enabled; }
+    @Override public boolean isHovered()                               { return hovered; }
+
     @Override public MPGuiElementStateManager getStateManager()        { return stateManager; }
 
     @Override public MPGuiTexturePack getTexturePack()                 { return texturePack; }
-    @Override public void setTexturePack(MPGuiTexturePack texturePack) { this.texturePack = texturePack; }
+    @Override public void setTexturePack(MPGuiTexturePack texturePack) { this.texturePack = Objects.requireNonNull(texturePack); }
+    @Override public MPGuiSoundPack getSoundPack()                     { return soundPack; }
+    @Override public void setSoundPack(MPGuiSoundPack soundPack)       { this.soundPack = Objects.requireNonNull(soundPack); }
+    @Override public MPGuiColorPack getColorPack()                     { return colorPack; }
+    @Override public void setColorPack(MPGuiColorPack colorPack)       { this.colorPack = Objects.requireNonNull(colorPack); }
+
 
     //Геометрия
     @Override public void setShape(IGuiShape shape) { this.shape.withShape(shape); }
@@ -195,50 +227,56 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
 
     //Диспетчеризация событий
     @Override
-    public final void dispatchUpdate(Minecraft mc, int mouseX, int mouseY) {
-        if (++partialTick >= 20) partialTick = 0;
+    public final void dispatchUpdate(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         if (tickDown >= 0) ++tickDown;
 
-        MPGuiEventFactory.pushTickEvent(updateEvent, self(), mc, mouseX, mouseY, partialTick);
+        MPGuiEventFactory.pushTickEvent(updateEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(updateEvent);
         if (!updateEvent.isCancelled()) onUpdate(updateEvent);
 
         int           diffX     = mouseX - moveEvent.getMouseX();
         int           diffY     = mouseY - moveEvent.getMouseY();
         MoveDirection direction = MoveDirection.getMoveDirection(diffX, diffY);
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, self(), mc, mouseX, mouseY, direction);
+        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, direction);
 
         if (tickDown >= 0 && direction != null) dispatchMouseDragged(mc, mouseX, mouseY, direction, diffX, diffY);
     }
 
-    @Override
-    public final void dispatchProcessHover(Minecraft mc, int mouseX, int mouseY) {
-        boolean isOver = calculatedShape.contains(mouseX, mouseY);
-
-        hovered = isOver;
-
-        if (isOver) stateManager.add(MPGuiElementState.HOVERED);
-        else stateManager.remove(MPGuiElementState.HOVERED);
-    }
+    @Override public final void dispatchProcessHover(Minecraft mc, int mouseX, int mouseY) { }
 
     @Override
     public final void dispatchMouseEnter(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, self(), mc, mouseX, mouseY, null);
+        stateManager.add(MPGuiElementState.HOVERED);
+        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, null);
         onAnyEventFire(moveEvent);
-        if (!moveEvent.isCancelled()) onMouseEnter(moveEvent);
+        if (!moveEvent.isCancelled()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.ENTER);
+            onMouseEnter(moveEvent);
+        }
     }
 
     @Override
     public final void dispatchMouseLeave(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, self(), mc, mouseX, mouseY, null);
+        stateManager.remove(MPGuiElementState.HOVERED);
+        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, null);
         onAnyEventFire(moveEvent);
-        if (!moveEvent.isCancelled()) onMouseLeave(moveEvent);
+        if (!moveEvent.isCancelled()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.LEAVE);
+            onMouseLeave(moveEvent);
+        }
     }
 
     @Override
     public final boolean dispatchMousePressed(Minecraft mc, int mouseX, int mouseY, int mouseButton) {
         if (!calculatedShape.contains(mouseX, mouseY)) return false;
-        if (stateManager.has(MPGuiElementState.DISABLED) || !visible) return false;
+        if (!isEnabled() || !isVisible()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.DISABLED);
+            return false;
+        }
+
+        if (stateManager.has(MPGuiElementState.FAIL)) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.FAIL);
+        }
 
         //Интеграция Forge
         if (getScreen() != null) {
@@ -250,11 +288,13 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
 
             tickDown = 0;
             stateManager.add(MPGuiElementState.PRESSED);
-            dispatchPlaySound(mc, mc.getSoundHandler(), soundClick, SoundSourceType.PRESS);
 
-            MPGuiEventFactory.pushMouseClickEvent(pressEvent, self(), mc, mouseX, mouseY);
+            MPGuiEventFactory.pushMouseClickEvent(pressEvent, mouseX, mouseY);
             onAnyEventFire(pressEvent);
-            if (!pressEvent.isCancelled()) onMousePressed(pressEvent);
+            if (!pressEvent.isCancelled()) {
+                dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.PRESS);
+                onMousePressed(pressEvent);
+            }
 
             net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(
                     new net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Post(
@@ -272,15 +312,19 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
         tickDown = -1;
         stateManager.remove(MPGuiElementState.PRESSED);
 
-        MPGuiEventFactory.pushMouseClickEvent(releaseEvent, self(), mc, mouseX, mouseY);
+        MPGuiEventFactory.pushMouseClickEvent(releaseEvent, mouseX, mouseY);
         onAnyEventFire(releaseEvent);
 
         if (!releaseEvent.isCancelled()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.RELEASE);
             onMouseReleased(releaseEvent);
             if (calculatedShape.contains(mouseX, mouseY)) {
-                MPGuiEventFactory.pushMouseClickEvent(clickEvent, self(), mc, mouseX, mouseY);
+                MPGuiEventFactory.pushMouseClickEvent(clickEvent, mouseX, mouseY);
                 onAnyEventFire(clickEvent);
-                if (!clickEvent.isCancelled()) onClick(clickEvent);
+                if (!clickEvent.isCancelled()) {
+                    dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.CLICK);
+                    onClick(clickEvent);
+                }
             }
         }
     }
@@ -288,218 +332,121 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
     @Override
     public final boolean dispatchMouseDragged(Minecraft mc, int mouseX, int mouseY, MoveDirection dir, int diffX, int diffY) {
         if (tickDown >= 0) {
-            MPGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, dir, diffX, diffY, tickDown);
+            MPGuiEventFactory.pushMouseDragEvent(dragEvent, mouseX, mouseY, dir, diffX, diffY, tickDown);
             onAnyEventFire(dragEvent);
-            if (!dragEvent.isCancelled()) onMouseDragged(dragEvent);
-            return true;
+
+            if (!dragEvent.isCancelled()) {
+                dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.DRAG);
+                onMouseDragged(dragEvent);
+            }
+
+            return !dragEvent.isCancelled();
         }
         return false;
     }
 
     @Override
     public final boolean dispatchMouseScrolled(Minecraft mc, int mouseX, int mouseY, int scroll) {
-        MPGuiEventFactory.pushMouseScrollEvent(scrollEvent, self(), mc, mouseX, mouseY, ScrollDirection.getScrollDirection(scroll), scroll);
+        MPGuiEventFactory.pushMouseScrollEvent(scrollEvent, mouseX, mouseY, ScrollDirection.getScrollDirection(scroll), scroll);
         onAnyEventFire(scrollEvent);
-        if (!scrollEvent.isCancelled()) return onMouseScrolled(scrollEvent);
-        return false;
+
+        if (!scrollEvent.isCancelled()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.SCROLL);
+            onMouseScrolled(scrollEvent);
+        }
+
+        return scrollEvent.isConsumed();
     }
 
     @Override
     public final boolean dispatchKeyTyped(Minecraft mc, int mouseX, int mouseY, char typedChar, int keyCode) {
         if (!stateManager.has(MPGuiElementState.FOCUSED)) return false;
-        if (!stateManager.has(MPGuiElementState.FOCUSED)) return false;
 
-        MPGuiEventFactory.pushKeyEvent(keyEvent, self(), Minecraft.getMinecraft(), moveEvent.getMouseX(), moveEvent.getMouseY(), typedChar, keyCode);
+        MPGuiEventFactory.pushKeyEvent(keyEvent, mouseX, mouseY, typedChar, keyCode);
         onAnyEventFire(keyEvent);
-        if (!keyEvent.isCancelled()) onKeyTyped(keyEvent);
 
         if (!keyEvent.isCancelled() && (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER)) {
-            dispatchMousePressed(Minecraft.getMinecraft(), x + width / 2, y + height / 2, 0);
-            dispatchMouseReleased(Minecraft.getMinecraft(), x + width / 2, y + height / 2, 0);
-            return true;
+            dispatchMousePressed(mc, x + width / 2, y + height / 2, 0);
+            dispatchMouseReleased(mc, x + width / 2, y + height / 2, 0);
+            keyEvent.consume();
         }
-        return false;
+
+        if (!keyEvent.isCancelled()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.KEY_TYPED);
+            onKeyTyped(keyEvent);
+        }
+
+        return keyEvent.isConsumed();
     }
 
     @Override
-    public final void dispatchPlaySound(Minecraft mc, SoundHandler soundHandler, @Nullable SoundEvent sound, SoundSourceType source) {
+    public final void dispatchPlaySound(Minecraft mc, SoundHandler soundHandler, SoundSourceType source) {
+        SoundEvent sound = soundPack.getSound(source);
         if (sound != null) {
-            MPGuiEventFactory.pushSoundEvent(soundEvent, self(), mc, moveEvent.getMouseX(), moveEvent.getMouseY(), soundHandler, sound, source);
+            MPGuiEventFactory.pushSoundEvent(
+                    soundEvent, moveEvent.getMouseX(), moveEvent.getMouseY(), soundHandler, sound, source
+            );
             onAnyEventFire(soundEvent);
-            if (!soundEvent.isCancelled()) onPlaySound(soundEvent);
+            if (!soundEvent.isCancelled()) {
+                soundEvent.getHandler().playSound(
+                        PositionedSoundRecord.getMasterRecord(soundEvent.getSound(), 1.0F)
+                );
+            }
         }
     }
 
-    protected void onPlaySound(MPGuiSoundEvent<T> event) {
-        event.getHandler().playSound(PositionedSoundRecord.getMasterRecord(event.getSound(), 1.0F));
+    @Override
+    public void dispatchDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        MPGuiEventFactory.pushTickEvent(drawBGEvent, mouseX, mouseY, partialTicks);
+        onAnyEventFire(drawBGEvent);
+        if (!drawBGEvent.isCancelled()) onDrawBackground(drawBGEvent);
+    }
+
+    @Override
+    public void dispatchDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        MPGuiEventFactory.pushTickEvent(drawFGEvent, mouseX, mouseY, partialTicks);
+        onAnyEventFire(drawFGEvent);
+        if (!drawFGEvent.isCancelled()) onDrawForeground(drawFGEvent);
+    }
+
+    @Override
+    public void dispatchDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        MPGuiEventFactory.pushTickEvent(drawTextEvent, mouseX, mouseY, partialTicks);
+        onAnyEventFire(drawTextEvent);
+        if (!drawTextEvent.isCancelled()) onDrawText(drawTextEvent);
+    }
+
+    @Override
+    public void dispatchDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        MPGuiEventFactory.pushTickEvent(drawLastEvent, mouseX, mouseY, partialTicks);
+        onAnyEventFire(drawLastEvent);
+        if (!drawLastEvent.isCancelled()) onDrawLast(drawLastEvent);
     }
 
     protected void setTextScaleMultiplayer(float multiplayer) { textScaleMultiplayer = multiplayer; }
 
-    private void processVanillaPersistentState(@Nullable GuiElementPersistentState state) {
-        enabled = state != GuiElementPersistentState.DISABLED;
-        visible = state != null;
-    }
-
-    @Override
-    public final void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
-        if (++partialTick >= 20) partialTick = 0;
-        if (tickDown >= 0) ++tickDown;
-
-        MPGuiEventFactory.pushTickEvent(updateEvent, self(), mc, mouseX, mouseY, partialTick);
-        onAnyEventFire(updateEvent);
-        if (!updateEvent.isCancelled()) onUpdate(updateEvent);
-        int           diffX     = mouseX - moveEvent.getMouseX();
-        int           diffY     = mouseY - moveEvent.getMouseY();
-        MoveDirection direction = MoveDirection.getMoveDirection(diffX, diffY);
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, self(), mc, mouseX, mouseY, direction);
-        if (tickDown >= 0 && direction != null) {
-            onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
-        }
-    }
-
-    @Override
-    public final void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
-        onAnyEventFire(moveEvent);
-        if (!moveEvent.isCancelled()) {
-            if (actionState == GuiElementActionState.HOVER) applyActionState(null);
-            hovered = false;
-            onMouseLeave(moveEvent);
-        }
-    }
-
-    @Override
-    public final void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiEventFactory.pushMouseClickEvent(releaseEvent, self(), mc, mouseX, mouseY);
-        onAnyEventFire(releaseEvent);
-        if (!releaseEvent.isCancelled()) {
-            if (isMouseOver()) applyActionState(GuiElementActionState.HOVER);
-            else applyActionState(null);
-            tickDown = -1;
-            if (persistentState != null) {
-                onMouseReleased(releaseEvent);
-                if (isMouseOver()) {
-                    MPGuiEventFactory.pushMouseClickEvent(clickEvent, self(), mc, mouseX, mouseY);
-                    onAnyEventFire(clickEvent);
-                    if (!clickEvent.isCancelled()) onClick(clickEvent);
-                }
-            }
-        }
-    }
-
-    @Override
-    public final void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiEventFactory.pushMouseClickEvent(pressEvent, self(), mc, mouseX, mouseY);
-        onAnyEventFire(pressEvent);
-        if (!pressEvent.isCancelled()) {
-            if (persistentState == null || persistentState == GuiElementPersistentState.DISABLED) return;
-            applyActionState(GuiElementActionState.PRESSED);
-            tickDown = 0;
-            onMousePressed(pressEvent);
-            onPlaySound0(mc, mc.getSoundHandler(), soundClick, SoundSourceType.PRESS);
-        }
-    }
-
-    @Override
-    public final void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
-        if (tickDown >= 0) {
-            MPGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
-            onAnyEventFire(dragEvent);
-            if (!dragEvent.isCancelled()) {
-                onMouseDragged(dragEvent);
-            }
-        }
-    }
-
-    @Override
-    public final boolean onMouseScrolled0(Minecraft mc, int mouseX, int mouseY, int scroll) {
-        MPGuiEventFactory.pushMouseScrollEvent(scrollEvent, self(), mc, moveEvent.getMouseX(), moveEvent.getMouseY(), ScrollDirection.getScrollDirection(scroll), scroll);
-        onAnyEventFire(scrollEvent);
-        if (!scrollEvent.isCancelled()) return onMouseScrolled(scrollEvent);
-        return false;
-    }
-
-    protected final void onPlaySound0(Minecraft mc, SoundHandler soundHandler, @Nullable SoundEvent sound, SoundSourceType source) {
-        if (sound != null) {
-            MPGuiEventFactory.pushSoundEvent(soundEvent, self(), mc, moveEvent.getMouseX(), moveEvent.getMouseY(), soundHandler, sound, source);
-            onAnyEventFire(soundEvent);
-            if (!soundEvent.isCancelled()) onPlaySound(soundEvent);
-        }
-    }
-
     protected void onPlaySound(MPGuiSoundEvent<T> event) {
         event.getHandler().playSound(PositionedSoundRecord.getMasterRecord(event.getSound(), 1.0F));
     }
 
-    @Override public void mouseReleased(int mouseX, int mouseY) { onMouseReleased0(Minecraft.getMinecraft(), mouseX, mouseY); }
-
-    @Override
-    protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
-        if (tickDown >= 0) {
-            int           diffX     = mouseX - moveEvent.getMouseX();
-            int           diffY     = mouseY - moveEvent.getMouseY();
-            MoveDirection direction = MoveDirection.getMoveDirection(diffX, diffY);
-            if (direction != null) dispatchMouseDragged(mc, mouseX, mouseY, direction, diffX, diffY);
+    protected void onDrawBackground(MPGuiTickEvent<T> event) {
+        MPGuiTexture texture = texturePack.getCalculatedTexture(stateManager);
+        if (texture != null) {
+            texture.draw(
+                    event.getMc(),
+                    calculatedShape.x(), calculatedShape.y(),
+                    calculatedShape.width(), calculatedShape.height()
+            );
         }
     }
 
-    protected void onAnyEventFire(MPGuiEvent<T> event) { }
+    protected void onDrawForeground(MPGuiTickEvent<T> event) { }
 
-    public abstract void onClick(MPGuiMouseClickEvent<T> event);
-
-    @Override
-    public final void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        onDrawButton(mc, mouseX, mouseY, partialTicks);
-    }
-
-    @Override
-    public final void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawBGEvent, self(), mc, mouseX, mouseY, partialTicks);
-        onAnyEventFire(drawBGEvent);
-        if (persistentState != null && !drawBGEvent.isCancelled()) drawButtonBackgroundLayer(drawBGEvent);
-    }
-
-    @Override
-    public final void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawFGEvent, self(), mc, mouseX, mouseY, partialTicks);
-        onAnyEventFire(drawFGEvent);
-        if (persistentState != null && !drawFGEvent.isCancelled()) drawButtonForegroundLayer(drawFGEvent);
-    }
-
-    @Override
-    public final void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawTextEvent, self(), mc, mouseX, mouseY, partialTicks);
-        onAnyEventFire(drawTextEvent);
-        if (persistentState != null && !drawTextEvent.isCancelled()) drawButtonTextLayer(drawTextEvent);
-    }
-
-    @Override
-    public final void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawLastEvent, self(), mc, mouseX, mouseY, partialTicks);
-        onAnyEventFire(drawLastEvent);
-        if (persistentState != null && !drawLastEvent.isCancelled()) drawButtonLastLayer(drawLastEvent);
-    }
-
-    protected final void onDrawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        onDrawBackground(mc, mouseX, mouseY, partialTicks);
-        onDrawForeground(mc, mouseX, mouseY, partialTicks);
-        onDrawText(mc, mouseX, mouseY, partialTicks);
-        onDrawLast(mc, mouseX, mouseY, partialTicks);
-    }
-
-    protected void onUpdate(MPGuiTickEvent<T> event)               { }
-    protected void onMouseScrolled(MPGuiMouseScrollEvent<T> event) { }
-    protected void onMouseDragged(MPGuiMouseDragEvent<T> event)    { }
-    protected void onMouseReleased(MPGuiMouseClickEvent<T> event)  { }
-    protected void onMouseEnter(MPGuiMouseMoveEvent<T> event)      { }
-    protected void onMouseLeave(MPGuiMouseMoveEvent<T> event)      { }
-    protected void onMousePressed(MPGuiMouseClickEvent<T> event)   { }
-
-    protected void drawButtonTextLayer(MPGuiTickEvent<T> event) {
+    protected void onDrawText(MPGuiTickEvent<T> event) {
         String text = guiString.get();
         if (text != null && !text.isEmpty()) {
             FontRenderer fr    = event.getMc().fontRenderer;
-            int          color = colorContainer.getCalculatedColor(actionState, persistentState, packedFGColour);
+            int          color = colorPack.getCalculatedColor(stateManager, packedFGColour);
 
             float scale    = fontSize.getScale() * textScaleMultiplayer;
             float invScale = 1.0F / scale;
@@ -527,36 +474,25 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
         }
     }
 
-    @Override
-    public final void drawButtonForegroundLayer(int mouseX, int mouseY) {
-        MPGuiEventFactory.pushTickEvent(drawFGEvent, self(), Minecraft.getMinecraft(), mouseX, mouseY, Minecraft.getMinecraft().getRenderPartialTicks());
-        onAnyEventFire(drawFGEvent);
-        if (!drawFGEvent.isCancelled()) drawButtonForegroundLayer(drawFGEvent);
-    }
+    protected void onDrawLast(MPGuiTickEvent<T> event)             { }
 
-    @Override
-    public final void playPressSound(SoundHandler soundHandler) {
-        onPlaySound0(Minecraft.getMinecraft(), Minecraft.getMinecraft().getSoundHandler(), soundClick, SoundSourceType.PRESS);
-    }
+    protected void onUpdate(MPGuiTickEvent<T> event)               { }
+    protected void onMouseEnter(MPGuiMouseMoveEvent<T> event)      { }
+    protected void onMouseLeave(MPGuiMouseMoveEvent<T> event)      { }
+    protected void onMousePressed(MPGuiMouseClickEvent<T> event)   { }
+    protected void onMouseReleased(MPGuiMouseClickEvent<T> event)  { }
+    protected void onMouseDragged(MPGuiMouseDragEvent<T> event)    { }
+    protected void onMouseScrolled(MPGuiMouseScrollEvent<T> event) { }
+    protected void onKeyTyped(MPGuiKeyEvent<T> event)              { }
 
-    protected void drawButtonLastLayer(MPGuiTickEvent<T> event)       { }
-    protected void drawButtonForegroundLayer(MPGuiTickEvent<T> event) { }
+    protected void onAnyEventFire(MPGuiEvent<T> event)             { }
 
-    protected void drawButtonBackgroundLayer(MPGuiTickEvent<T> event) {
-        MPGuiTexture texture = texturePack.getCalculatedTexture(actionState, persistentState);
-        if (texture != null) {
-            texture.draw(
-                    event.getMc(),
-                    calculatedShape.x(), calculatedShape.y(),
-                    calculatedShape.width(), calculatedShape.height()
-            );
-        }
-    }
+    public abstract void onClick(MPGuiMouseClickEvent<T> event);
 
     //Интеграция с vanilla
     @Override
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
-        return enabled && visible && calculatedShape.contains(mouseX, mouseY);
+        return isEnabled() && isVisible() && calculatedShape.contains(mouseX, mouseY);
     }
 
     @Override
@@ -564,7 +500,7 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
         dispatchMouseReleased(Minecraft.getMinecraft(), mouseX, mouseY, 0);
     }
 
-    @Override public final int getHoverState(boolean mouseOver) { return !enabled ? 0 : mouseOver ? 2 : 1; }
+    @Override public final int getHoverState(boolean mouseOver) { return !isEnabled() ? 0 : mouseOver ? 2 : 1; }
 
     @Override
     public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) {
@@ -578,5 +514,30 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
                         " It set now, but actual element size will be updated on the next gui size calculation."
         );
         this.width = width;
+    }
+
+    @Override
+    public final void playPressSound(SoundHandler soundHandler) {
+        dispatchPlaySound(Minecraft.getMinecraft(), Minecraft.getMinecraft().getSoundHandler(), SoundSourceType.PRESS);
+    }
+
+    @Override
+    public final void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        dispatchDraw(mc, mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    public void drawButtonForegroundLayer(int mouseX, int mouseY) {
+        dispatchDrawForeground(Minecraft.getMinecraft(), mouseX, mouseY, Minecraft.getMinecraft().getRenderPartialTicks());
+    }
+
+    @Override
+    protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
+        if (tickDown >= 0) {
+            int           diffX     = mouseX - moveEvent.getMouseX();
+            int           diffY     = mouseY - moveEvent.getMouseY();
+            MoveDirection direction = MoveDirection.getMoveDirection(diffX, diffY);
+            if (direction != null) dispatchMouseDragged(mc, mouseX, mouseY, direction, diffX, diffY);
+        }
     }
 }

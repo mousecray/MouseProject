@@ -13,11 +13,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.MPGuiScreen;
+import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.dim.*;
-import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
-import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;

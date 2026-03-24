@@ -8,16 +8,17 @@ package ru.mousecray.mouseproject.client.gui;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundHandler;
-import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import ru.mousecray.mouseproject.client.gui.components.color.MPGuiColorPack;
+import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.components.sound.MPGuiSoundPack;
+import ru.mousecray.mouseproject.client.gui.components.sound.SoundSourceType;
+import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementStateManager;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
-import ru.mousecray.mouseproject.client.gui.misc.SoundSourceType;
-import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.misc.state.MPGuiElementStateManager;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -41,11 +42,19 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     void setText(@Nullable String text);
     MPGuiString getGuiString();
     void setGuiString(MPGuiString guiString);
+    boolean isVisible();
+    boolean isEnabled();
+    boolean isHovered();
 
     MPGuiElementStateManager getStateManager();
 
     MPGuiTexturePack getTexturePack();
     void setTexturePack(MPGuiTexturePack texturePack);
+    MPGuiSoundPack getSoundPack();
+    void setSoundPack(MPGuiSoundPack texturePack);
+    MPGuiColorPack getColorPack();
+    void setColorPack(MPGuiColorPack colorPack);
+
 
     //Геометрия
     void setShape(IGuiShape shape);
@@ -68,7 +77,7 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     void offsetCalculatedShape(float dx, float dy);
 
     //Диспетчеризация событий
-    void dispatchUpdate(Minecraft mc, int mouseX, int mouseY);
+    void dispatchUpdate(Minecraft mc, int mouseX, int mouseY, float partialTicks);
     void dispatchProcessHover(Minecraft mc, int mouseX, int mouseY);
     void dispatchMouseEnter(Minecraft mc, int mouseX, int mouseY);
     void dispatchMouseLeave(Minecraft mc, int mouseX, int mouseY);
@@ -78,18 +87,26 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     boolean dispatchMouseDragged(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY);
     boolean dispatchMouseScrolled(Minecraft mc, int mouseX, int mouseY, int scroll);
     boolean dispatchKeyTyped(Minecraft mc, int mouseX, int mouseY, char typedChar, int keyCode);
-    void dispatchPlaySound(Minecraft mc, SoundHandler soundHandler, @Nullable SoundEvent sound, SoundSourceType source);
+    void dispatchPlaySound(Minecraft mc, SoundHandler soundHandler, SoundSourceType source);
 
     //Рендеринг
-    void onDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks);
-    void onDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks);
-    void onDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks);
-    void onDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks);
+    default void dispatchDraw(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        if (isVisible()) {
+            dispatchDrawBackground(mc, mouseX, mouseY, partialTicks);
+            dispatchDrawForeground(mc, mouseX, mouseY, partialTicks);
+            dispatchDrawText(mc, mouseX, mouseY, partialTicks);
+            dispatchDrawLast(mc, mouseX, mouseY, partialTicks);
+        }
+    }
+    void dispatchDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks);
+    void dispatchDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks);
+    void dispatchDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks);
+    void dispatchDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks);
 
     //Интеграция с vanilla
     int getHoverState(boolean mouseOver);
     boolean mouseHover(Minecraft mc, int mouseX, int mouseY);
     boolean mousePressed(Minecraft mc, int mouseX, int mouseY);
-    boolean mouseReleased(int mouseX, int mouseY);
+    void mouseReleased(int mouseX, int mouseY);
     void performClickFromVanilla();
 }

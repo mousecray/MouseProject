@@ -10,10 +10,10 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.MPGuiLabel;
+import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.dim.GuiShape;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
-import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 
 import javax.annotation.Nullable;
 

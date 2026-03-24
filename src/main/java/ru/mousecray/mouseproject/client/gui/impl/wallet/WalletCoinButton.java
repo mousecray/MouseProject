@@ -10,13 +10,13 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.client.gui.MPGuiSelectedButton;
+import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.dim.GuiScaleRules;
 import ru.mousecray.mouseproject.client.gui.dim.GuiScaleType;
 import ru.mousecray.mouseproject.client.gui.dim.GuiShape;
 import ru.mousecray.mouseproject.client.gui.dim.GuiVector;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiTickEvent;
-import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.common.economy.CoinValue;
 

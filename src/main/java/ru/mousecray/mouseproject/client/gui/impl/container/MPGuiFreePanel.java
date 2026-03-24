@@ -14,8 +14,8 @@ import ru.mousecray.mouseproject.client.gui.dim.*;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.calculateFlowComponentX;
-import static ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper.calculateFlowComponentY;
+import static ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper.calculateFlowComponentX;
+import static ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper.calculateFlowComponentY;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault

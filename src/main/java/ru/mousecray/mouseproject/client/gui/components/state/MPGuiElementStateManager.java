@@ -1,4 +1,9 @@
-package ru.mousecray.mouseproject.client.gui.misc.state;
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.client.gui.components.state;
 
 public class MPGuiElementStateManager {
     private int

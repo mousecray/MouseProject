@@ -1,4 +1,9 @@
-package ru.mousecray.mouseproject.client.gui.misc.texture;
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.client.gui.components.texture;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -7,7 +12,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 @SideOnly(Side.CLIENT)
-public enum GuiTextureScaleType {
+public enum MPGuiTextureScaleType {
     STRETCH(0),
     FILL(1),
 
@@ -25,9 +30,9 @@ public enum GuiTextureScaleType {
     SINGLE_VERTICAL_BOTTOM(11);
 
     private final int id;
-    GuiTextureScaleType(int id) { this.id = id; }
+    MPGuiTextureScaleType(int id) { this.id = id; }
 
-    public int getId()          { return id; }
+    public int getId()            { return id; }
 
     public Category getCategory() {
         switch (this) {

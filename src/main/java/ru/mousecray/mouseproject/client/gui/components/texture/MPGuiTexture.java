@@ -1,4 +1,9 @@
-package ru.mousecray.mouseproject.client.gui.misc.texture;
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
+package ru.mousecray.mouseproject.client.gui.components.texture;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -6,17 +11,17 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.dim.IGuiVector;
-import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 
 @SideOnly(Side.CLIENT)
 public class MPGuiTexture {
-    private final ResourceLocation     texture;
-    private final IGuiVector           textureSize;
-    private final IGuiVector           startPos;
-    private final IGuiVector           endPos;
-    private final GuiTextureScaleRules scaleRules;
-    private final float                opacity;
+    private final ResourceLocation       texture;
+    private final IGuiVector             textureSize;
+    private final IGuiVector             startPos;
+    private final IGuiVector             endPos;
+    private final MPGuiTextureScaleRules scaleRules;
+    private final float                  opacity;
 
     private float   lastWidth  = -1;
     private float   lastHeight = -1;
@@ -24,30 +29,30 @@ public class MPGuiTexture {
     private int     quadCount  = 0;
 
     public MPGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize) {
-        this(texture, textureSize, startPos, elementSize, new GuiTextureScaleRules(GuiTextureScaleType.STRETCH), 1.0f);
+        this(texture, textureSize, startPos, elementSize, new MPGuiTextureScaleRules(MPGuiTextureScaleType.STRETCH), 1.0f);
     }
 
-    public MPGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize, GuiTextureScaleRules scaleRules) {
+    public MPGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize, MPGuiTextureScaleRules scaleRules) {
         this(texture, textureSize, startPos, elementSize, scaleRules, 1.0f);
     }
 
-    public MPGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize, GuiTextureScaleRules scaleRules, float opacity) {
+    public MPGuiTexture(ResourceLocation texture, IGuiVector textureSize, IGuiVector startPos, IGuiVector elementSize, MPGuiTextureScaleRules scaleRules, float opacity) {
         this.texture = texture;
         this.textureSize = textureSize;
         this.startPos = startPos;
         endPos = elementSize;
-        this.scaleRules = scaleRules != null ? scaleRules : new GuiTextureScaleRules(GuiTextureScaleType.STRETCH);
+        this.scaleRules = scaleRules != null ? scaleRules : new MPGuiTextureScaleRules(MPGuiTextureScaleType.STRETCH);
         this.opacity = opacity;
     }
 
-    public ResourceLocation getTexture()        { return texture; }
-    public IGuiVector getTextureSize()          { return textureSize; }
-    public IGuiVector getStartPos()             { return startPos; }
-    public IGuiVector getElementSize()          { return endPos; }
-    public GuiTextureScaleRules getScaleRules() { return scaleRules; }
-    public float getOpacity()                   { return opacity; }
+    public ResourceLocation getTexture()          { return texture; }
+    public IGuiVector getTextureSize()            { return textureSize; }
+    public IGuiVector getStartPos()               { return startPos; }
+    public IGuiVector getElementSize()            { return endPos; }
+    public MPGuiTextureScaleRules getScaleRules() { return scaleRules; }
+    public float getOpacity()                     { return opacity; }
 
-    public void bind(TextureManager manager)    { manager.bindTexture(texture); }
+    public void bind(TextureManager manager)      { manager.bindTexture(texture); }
 
     public void draw(Minecraft mc, float x, float y, float width, float height) {
         if (width <= 0 || height <= 0 || opacity <= 0.001f) return;
@@ -90,10 +95,10 @@ public class MPGuiTexture {
         lastHeight = height;
         quadCount = 0;
 
-        GuiTextureScaleRules.ScaleMode     modeX   = scaleRules.getModeX();
-        GuiTextureScaleRules.ScaleMode     modeY   = scaleRules.getModeY();
-        GuiTextureScaleRules.TextureAnchor anchorX = scaleRules.getAnchorX();
-        GuiTextureScaleRules.TextureAnchor anchorY = scaleRules.getAnchorY();
+        MPGuiTextureScaleRules.ScaleMode     modeX   = scaleRules.getModeX();
+        MPGuiTextureScaleRules.ScaleMode     modeY   = scaleRules.getModeY();
+        MPGuiTextureScaleRules.TextureAnchor anchorX = scaleRules.getAnchorX();
+        MPGuiTextureScaleRules.TextureAnchor anchorY = scaleRules.getAnchorY();
 
         float texW  = endPos.x();
         float texH  = endPos.y();
@@ -107,8 +112,8 @@ public class MPGuiTexture {
         float uvRatioX   = 1.0f / multX;
         float uvRatioY   = 1.0f / multY;
 
-        int stepsX            = (modeX == GuiTextureScaleRules.ScaleMode.FILL && scaledTexW > 0) ? (int) Math.ceil(width / scaledTexW) : 1;
-        int stepsY            = (modeY == GuiTextureScaleRules.ScaleMode.FILL && scaledTexH > 0) ? (int) Math.ceil(height / scaledTexH) : 1;
+        int stepsX            = (modeX == MPGuiTextureScaleRules.ScaleMode.FILL && scaledTexW > 0) ? (int) Math.ceil(width / scaledTexW) : 1;
+        int stepsY            = (modeY == MPGuiTextureScaleRules.ScaleMode.FILL && scaledTexH > 0) ? (int) Math.ceil(height / scaledTexH) : 1;
         int requiredArraySize = stepsX * stepsY * 8;
 
         if (bakedQuads.length < requiredArraySize) bakedQuads = new float[requiredArraySize];
@@ -117,18 +122,18 @@ public class MPGuiTexture {
         while (xCursor < width) {
             float drawX = xCursor, drawW = 0, uvX = 0, uvW = 0;
 
-            if (modeX == GuiTextureScaleRules.ScaleMode.STRETCH) {
+            if (modeX == MPGuiTextureScaleRules.ScaleMode.STRETCH) {
                 drawW = width;
                 uvW = texW;
                 xCursor = width;
-            } else if (modeX == GuiTextureScaleRules.ScaleMode.FILL) {
+            } else if (modeX == MPGuiTextureScaleRules.ScaleMode.FILL) {
                 drawW = Math.min(scaledTexW, width - xCursor);
                 uvW = drawW * uvRatioX;
                 xCursor += scaledTexW;
             } else {
                 float boxStart = 0;
-                if (anchorX == GuiTextureScaleRules.TextureAnchor.CENTER) boxStart = (width - scaledTexW) / 2f;
-                else if (anchorX == GuiTextureScaleRules.TextureAnchor.MAX) boxStart = width - scaledTexW;
+                if (anchorX == MPGuiTextureScaleRules.TextureAnchor.CENTER) boxStart = (width - scaledTexW) / 2f;
+                else if (anchorX == MPGuiTextureScaleRules.TextureAnchor.MAX) boxStart = width - scaledTexW;
 
                 float dStart = Math.max(0, boxStart);
                 float dEnd   = Math.min(width, boxStart + scaledTexW);
@@ -147,18 +152,18 @@ public class MPGuiTexture {
                 while (yCursor < height) {
                     float drawY = yCursor, drawH = 0, uvY = 0, uvH = 0;
 
-                    if (modeY == GuiTextureScaleRules.ScaleMode.STRETCH) {
+                    if (modeY == MPGuiTextureScaleRules.ScaleMode.STRETCH) {
                         drawH = height;
                         uvH = texH;
                         yCursor = height;
-                    } else if (modeY == GuiTextureScaleRules.ScaleMode.FILL) {
+                    } else if (modeY == MPGuiTextureScaleRules.ScaleMode.FILL) {
                         drawH = Math.min(scaledTexH, height - yCursor);
                         uvH = drawH * uvRatioY;
                         yCursor += scaledTexH;
                     } else {
                         float boxStart = 0;
-                        if (anchorY == GuiTextureScaleRules.TextureAnchor.CENTER) boxStart = (height - scaledTexH) / 2f;
-                        else if (anchorY == GuiTextureScaleRules.TextureAnchor.MAX) boxStart = height - scaledTexH;
+                        if (anchorY == MPGuiTextureScaleRules.TextureAnchor.CENTER) boxStart = (height - scaledTexH) / 2f;
+                        else if (anchorY == MPGuiTextureScaleRules.TextureAnchor.MAX) boxStart = height - scaledTexH;
 
                         float dStart = Math.max(0, boxStart);
                         float dEnd   = Math.min(height, boxStart + scaledTexH);

@@ -12,18 +12,18 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.client.gui.MPGuiButton;
+import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.components.color.MPGuiColorPack;
+import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexture;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.dim.GuiScaleRules;
 import ru.mousecray.mouseproject.client.gui.dim.GuiScaleType;
 import ru.mousecray.mouseproject.client.gui.dim.GuiShape;
 import ru.mousecray.mouseproject.client.gui.dim.GuiVector;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiTickEvent;
-import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
-import ru.mousecray.mouseproject.client.gui.misc.StateColorContainer;
-import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexture;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.Nonnull;
@@ -65,7 +65,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
         setScaleRules(new GuiScaleRules(GuiScaleType.ORIGIN_VERTICAL));
         this.onClick = onClick;
         setGuiString(text);
-        colorContainer = StateColorContainer.Builder
+        colorPack = MPGuiColorPack.Builder
                 .create(14737632)
                 .addState(GuiElementPersistentState.DISABLED, 10526880)
                 .addState(GuiElementPersistentState.NORMAL, 14737632)
@@ -109,7 +109,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
         boxOriginalWidth = elementShape.width();
         setScaleRules(new GuiScaleRules(GuiScaleType.ORIGIN_VERTICAL));
         this.onClick = onClick;
-        colorContainer = StateColorContainer.Builder
+        colorPack = MPGuiColorPack.Builder
                 .create(14737632)
                 .addState(GuiElementPersistentState.DISABLED, 10526880)
                 .addState(GuiElementPersistentState.NORMAL, 14737632)
@@ -133,7 +133,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
     }
 
     @Override
-    protected void drawButtonBackgroundLayer(MPGuiTickEvent<MPGuiCheckButton> event) {
+    protected void onDrawBackground(MPGuiTickEvent<MPGuiCheckButton> event) {
         MPGuiTexture texture = getTexturePack().getCalculatedTexture(actionState, persistentState);
         if (texture != null) {
             float scaleY  = calculatedShape.height() / Math.max(1f, shape.height());
@@ -154,7 +154,7 @@ public class MPGuiCheckButton extends MPGuiButton<MPGuiCheckButton> {
     protected void drawButtonTextLayer(@Nonnull MPGuiTickEvent<MPGuiCheckButton> event) {
         if (displayString != null) {
             FontRenderer fontrenderer = event.getMc().fontRenderer;
-            int          color        = colorContainer.getCalculatedColor(actionState, persistentState, packedFGColour);
+            int          color        = colorPack.getCalculatedColor(actionState, persistentState, packedFGColour);
 
             float scale        = fontSize.getScale() * textScaleMultiplayer;
             float inverseScale = 1.0F / scale;

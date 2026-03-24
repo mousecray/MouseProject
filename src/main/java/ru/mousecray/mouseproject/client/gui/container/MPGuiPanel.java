@@ -7,64 +7,40 @@ package ru.mousecray.mouseproject.client.gui.container;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLabel;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.MPGuiScreen;
 import ru.mousecray.mouseproject.client.gui.MPGuiTextField;
+import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.components.color.MPGuiColorPack;
+import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.components.sound.MPGuiSoundPack;
+import ru.mousecray.mouseproject.client.gui.components.sound.SoundSourceType;
+import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementState;
+import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementStateManager;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexture;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.*;
-import ru.mousecray.mouseproject.client.gui.misc.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.misc.MPClickType;
 import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
-import ru.mousecray.mouseproject.client.gui.misc.SoundSourceType;
-import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexture;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
+import ru.mousecray.mouseproject.client.gui.misc.ScrollDirection;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElement<T> {
-    protected final List<MPGuiElement<?>> children = new ArrayList<>();
-
-    private final Map<MPGuiElement<?>, GuiMargin> childMargins = new WeakHashMap<>();
-    private final Map<MPGuiElement<?>, GuiVector> childOffsets = new WeakHashMap<>();
-
-    private GuiPadding    padding    = new GuiPadding(0);
-    private GuiScaleRules scaleRules = new GuiScaleRules(GuiScaleType.FLOW);
-
-    private final MutableGuiShape elementShape;
-    private final MutableGuiShape calculatedElementShape = new MutableGuiShape();
-
-    protected final MutableGuiVector measureTemp        = new MutableGuiVector();
-    protected final MutableGuiShape  childAvailableTemp = new MutableGuiShape();
-    protected final MutableGuiShape  innerShapeTemp     = new MutableGuiShape();
-    protected final float[]          marginTemp         = new float[4];
-
-    private MPGuiScreen                  screen;
-    private WeakReference<MPGuiPanel<?>> parent;
-    private MPGuiTexturePack             texturePack = MPGuiTexturePack.EMPTY;
-    private int                          id;
-
-    private int     tickDown = -1;
-    private int     partialTick;
-    private boolean hovered;
-
-    @Nullable private MPGuiElement<?> lastHoveredElement  = null;
-    @Nullable private MPGuiElement<?> lastSelectedElement = null;
-
     private final MPGuiTickEvent<T>
             updateEvent   = new MPGuiTickEvent<>(),
             drawBGEvent   = new MPGuiTickEvent<>(),
@@ -76,22 +52,120 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             releaseEvent = new MPGuiMouseClickEvent<>(MPClickType.RELEASE),
             clickEvent   = new MPGuiMouseClickEvent<>(MPClickType.CLICK);
     private final MPGuiMouseMoveEvent<T>   moveEvent   = new MPGuiMouseMoveEvent<>();
-    private final MPGuiMouseScrollEvent<T> scrollEvent = new MPGuiMouseScrollEvent<>();
     private final MPGuiMouseDragEvent<T>   dragEvent   = new MPGuiMouseDragEvent<>();
+    private final MPGuiMouseScrollEvent<T> scrollEvent = new MPGuiMouseScrollEvent<>();
+    private final MPGuiKeyEvent<T>         keyEvent    = new MPGuiKeyEvent<>();
     private final MPGuiSoundEvent<T>       soundEvent  = new MPGuiSoundEvent<>();
 
-    public MPGuiPanel(GuiShape elementShape) {
-        this.elementShape = elementShape.toMutable();
+    protected final List<MPGuiElement<?>> children = new ArrayList<>();
+
+    private final Map<MPGuiElement<?>, GuiMargin> childMargins = new WeakHashMap<>();
+    private final Map<MPGuiElement<?>, GuiVector> childOffsets = new WeakHashMap<>();
+
+    private GuiPadding    padding    = new GuiPadding(0);
+    private GuiScaleRules scaleRules = new GuiScaleRules(GuiScaleType.FLOW);
+
+    private final   MutableGuiShape shape;
+    private final   MutableGuiShape calculatedShape      = new MutableGuiShape();
+    protected final MutableGuiShape calculatedInnerShape = new MutableGuiShape();
+
+    protected final MutableGuiVector measureTemp        = new MutableGuiVector();
+    protected final MutableGuiShape  childAvailableTemp = new MutableGuiShape();
+    protected final MutableGuiShape  innerShapeTemp     = new MutableGuiShape();
+    protected final float[]          marginTemp         = new float[4];
+
+    private MPGuiScreen   screen;
+    private MPGuiPanel<?> parent;
+
+    private int     id;
+    private boolean enabled, visible, hovered;
+
+    protected MPGuiTexturePack texturePack = MPGuiTexturePack.EMPTY;
+    protected MPGuiColorPack   colorPack   = MPGuiColorPack.CONTROL_SIMPLE();
+    protected MPGuiSoundPack   soundPack   = MPGuiSoundPack.EMPTY;
+
+    protected final MPGuiElementStateManager stateManager = new MPGuiElementStateManager();
+
+    @Nullable private MPGuiElement<?> lastHoveredElement  = null;
+    @Nullable private MPGuiElement<?> lastSelectedElement = null;
+    private           int             tickDown            = -1;
+
+    public MPGuiPanel(GuiShape shape) {
+        this.shape = shape.toMutable();
+        stateManager.setForbidden(MPGuiElementState.FOCUSED, true);
+
+        Minecraft mc = Minecraft.getMinecraft();
+        T         th = self();
+        updateEvent.bind(mc, th);
+        drawBGEvent.bind(mc, th);
+        drawFGEvent.bind(mc, th);
+        drawLastEvent.bind(mc, th);
+        drawTextEvent.bind(mc, th);
+        pressEvent.bind(mc, th);
+        releaseEvent.bind(mc, th);
+        clickEvent.bind(mc, th);
+        moveEvent.bind(mc, th);
+        dragEvent.bind(mc, th);
+        scrollEvent.bind(mc, th);
+        keyEvent.bind(mc, th);
+        soundEvent.bind(mc, th);
+
+        stateManager.setChangeListener(() -> {
+            enabled = !stateManager.has(MPGuiElementState.DISABLED);
+            visible = !stateManager.has(MPGuiElementState.HIDDEN);
+            hovered = stateManager.has(MPGuiElementState.HOVERED);
+        });
     }
 
-    public List<MPGuiElement<?>> getChildren()                    { return children; }
+    public List<MPGuiElement<?>> getChildren()               { return children; }
 
-    @Override public void setShape(IGuiShape shape)               { elementShape.withShape(shape); }
-    @SuppressWarnings("unchecked") @Override public T self()      { return (T) this; }
-    @Override public void setPadding(GuiPadding padding)          { this.padding = padding; }
-    @Override public GuiPadding getPadding()                      { return padding; }
-    @Override public void setScaleRules(GuiScaleRules scaleRules) { this.scaleRules = scaleRules; }
+    @SuppressWarnings("unchecked") @Override public T self() { return (T) this; }
+
+    //Идентификация и иерархия
+    @Override public void setId(int id) { this.id = id; }
+    @Override public int getId()                       { return id; }
+    @Override @Nullable public MPGuiScreen getScreen() { return screen; }
+
+    @Override
+    public void setScreen(@Nullable MPGuiScreen screen) {
+        this.screen = screen;
+        for (MPGuiElement<?> child : children) child.setScreen(screen);
+    }
+
+    @Override @Nullable public MPGuiPanel<?> getParent()            { return parent; }
+    @Override public void setParent(@Nullable MPGuiPanel<?> parent) { this.parent = parent; }
+
+    //Данные и состояние
+    @Override public String getText() { return ""; }
+    @Override public void setText(@Nullable String text)               { }
+    @Override public MPGuiString getGuiString()                        { return MPGuiString.simple(""); }
+    @Override public void setGuiString(MPGuiString guiString)          { }
+
+    @Override public boolean isVisible()                               { return visible; }
+    @Override public boolean isEnabled()                               { return enabled; }
+    @Override public boolean isHovered()                               { return hovered; }
+
+    @Override public MPGuiElementStateManager getStateManager()        { return stateManager; }
+
+    @Override public MPGuiTexturePack getTexturePack()                 { return texturePack; }
+    @Override public void setTexturePack(MPGuiTexturePack texturePack) { this.texturePack = Objects.requireNonNull(texturePack); }
+    @Override public MPGuiSoundPack getSoundPack()                     { return soundPack; }
+    @Override public void setSoundPack(MPGuiSoundPack soundPack)       { this.soundPack = Objects.requireNonNull(soundPack); }
+    @Override public MPGuiColorPack getColorPack()                     { return colorPack; }
+    @Override public void setColorPack(MPGuiColorPack colorPack)       { this.colorPack = Objects.requireNonNull(colorPack); }
+
+    //Геометрия
+    @Override public void setShape(IGuiShape shape) { this.shape.withShape(shape); }
+    @Override public MutableGuiShape getShape()                   { return shape; }
+    @Override public MutableGuiShape getCalculatedShape()         { return calculatedShape; }
+    @Override public MutableGuiShape getCalculatedInnerShape()    { return calculatedInnerShape; }
+
     @Override public GuiScaleRules getScaleRules()                { return scaleRules; }
+    @Override public void setScaleRules(GuiScaleRules scaleRules) { this.scaleRules = scaleRules; }
+    @Override public GuiPadding getPadding()                      { return padding; }
+    @Override public void setPadding(GuiPadding padding)          { this.padding = padding; }
+    @Override public MutableGuiVector getTextOffset()             { return new MutableGuiVector(); }
+    @Override public void setTextOffset(IGuiVector offset)        { }
 
     public void addChild(MPGuiElement<?> child, @Nullable GuiMargin margin, @Nullable GuiVector offset) {
         children.add(child);
@@ -105,55 +179,38 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         }
     }
 
-    public void addChild(MPGuiElement<?> child) {
-        addChild(child, GuiMargin.ZERO, GuiVector.ZERO);
-    }
+    public void addChild(MPGuiElement<?> child)               { addChild(child, GuiMargin.ZERO, GuiVector.ZERO); }
 
     protected GuiMargin getChildMargin(MPGuiElement<?> child) { return childMargins.getOrDefault(child, GuiMargin.ZERO); }
     protected GuiVector getChildOffset(MPGuiElement<?> child) { return childOffsets.getOrDefault(child, GuiVector.ZERO); }
 
-    @Override public void setId(int id)                       { this.id = id; }
-
-    @Override
-    public void setScreen(MPGuiScreen screen) {
-        this.screen = screen;
-        for (MPGuiElement<?> child : children) child.setScreen(screen);
+    @Nullable
+    public MPGuiElement<?> getLastSelectedElementRecursively() {
+        if (lastSelectedElement instanceof MPGuiPanel) {
+            MPGuiElement<?> nested = ((MPGuiPanel<?>) lastSelectedElement).getLastSelectedElementRecursively();
+            return nested != null ? nested : lastSelectedElement;
+        }
+        return lastSelectedElement;
     }
-
-    @Override public MPGuiScreen getScreen()                           { return screen; }
-
-    @Nullable @Override public MPGuiPanel<?> getParent()               { return parent.get(); }
-    @Override public void setParent(MPGuiPanel<?> parent)              { this.parent = new WeakReference<>(parent); }
-
-    @Override public MPGuiTexturePack getTexturePack()                 { return texturePack; }
-    @Override public void setTexturePack(MPGuiTexturePack texturePack) { this.texturePack = texturePack; }
-    @Override public MutableGuiShape getShape()                        { return elementShape; }
-    @Override public MutableGuiShape getCalculatedShape()              { return calculatedElementShape; }
-    @Override public int getId()                                       { return id; }
-
-    @Override public String getText()                                  { return ""; }
-    @Override public void setText(String text)                         { }
-    @Override public void setGuiString(MPGuiString guiString)          { }
-    @Override public MPGuiString getGuiString()                        { return MPGuiString.simple(""); }
-    @Override public void setTextOffset(IGuiVector offset)             { }
-    @Override public MutableGuiVector getTextOffset()                  { return new MutableGuiVector(); }
 
     @Override
     public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
         GuiRenderHelper.calculateFlowComponentShape(
-                calculatedElementShape, parentDefaultSize, parentContentSize,
-                elementShape, scaleRules, available
+                calculatedShape, parentDefaultSize, parentContentSize,
+                shape, scaleRules, available
         );
 
-        if (calculatedElementShape.width() <= 0 || calculatedElementShape.height() <= 0) return;
+        if (calculatedShape.width() <= 0 || calculatedShape.height() <= 0) return;
 
         float padL = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getLeft());
         float padT = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getTop());
         float padR = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getRight());
         float padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getBottom());
 
-        innerShapeTemp.withShape(calculatedElementShape);
-        innerShapeTemp.grow(-padL, -padT, -padR, -padB);
+        calculatedInnerShape.withShape(calculatedShape);
+        calculatedInnerShape.grow(-padL, -padT, -padR, -padB);
+
+        innerShapeTemp.withShape(calculatedInnerShape);
 
         layoutChildren(parentDefaultSize, parentContentSize, innerShapeTemp);
     }
@@ -161,38 +218,236 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     protected abstract void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner);
 
     @Override
-    public void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result) {
-        GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
+    public void measurePreferred(
+            IGuiVector parentDefaultSize, IGuiVector parentContentSize,
+            float suggestedX, float suggestedY, MutableGuiVector result
+    ) {
+        GuiRenderHelper.measurePreferredWithScaleRules(
+                parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, shape, scaleRules
+        );
         GuiRenderHelper.addPaddingToPreferred(parentDefaultSize, parentContentSize, result, getPadding(), scaleRules);
     }
 
     @Override
-    public void onUpdate0(Minecraft mc, int mouseX, int mouseY) {
-        if (++partialTick >= 20) partialTick = 0;
+    public void offsetCalculatedShape(float dx, float dy) {
+        calculatedShape.offset(dx, dy);
+        calculatedInnerShape.offset(dx, dy);
+        for (MPGuiElement<?> child : children) child.offsetCalculatedShape(dx, dy);
+    }
+
+    //Диспетчеризация событий
+    @Override
+    public final void dispatchUpdate(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         if (tickDown >= 0) ++tickDown;
 
-        MPGuiEventFactory.pushTickEvent(updateEvent, self(), mc, mouseX, mouseY, partialTick);
+        MPGuiEventFactory.pushTickEvent(updateEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(updateEvent);
-        if (!updateEvent.isCancelled()) {
-            onUpdate(updateEvent);
-            for (MPGuiElement<?> child : children) child.onUpdate0(mc, mouseX, mouseY);
-        }
+        if (!updateEvent.isCancelled()) onUpdate(updateEvent);
+
         int           diffX     = mouseX - moveEvent.getMouseX();
         int           diffY     = mouseY - moveEvent.getMouseY();
         MoveDirection direction = MoveDirection.getMoveDirection(diffX, diffY);
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, self(), mc, mouseX, mouseY, direction);
-        if (tickDown >= 0 && direction != null) {
-            onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
+        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, direction);
+
+        if (tickDown >= 0 && direction != null) dispatchMouseDragged(mc, mouseX, mouseY, direction, diffX, diffY);
+
+        for (MPGuiElement<?> child : children) child.dispatchUpdate(mc, mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    public final void dispatchProcessHover(Minecraft mc, int mouseX, int mouseY) {
+        if (!isVisible()) return;
+
+        MPGuiElement<?> currentHovered = null;
+
+        if (calculatedShape.contains(mouseX, mouseY)) {
+            for (int k = children.size() - 1; k >= 0; k--) {
+                MPGuiElement<?> child = children.get(k);
+                if (child.getCalculatedShape().contains(mouseX, mouseY) && child.isVisible()) {
+                    currentHovered = child;
+                    break;
+                }
+            }
         }
 
-        for (MPGuiElement<?> child : children) {
-            if (child.mouseHover(mc, mouseX, mouseY)) {
-                if (child != lastHoveredElement) {
-                    if (lastHoveredElement != null) lastHoveredElement.onMouseLeave0(mc, mouseX, mouseY);
-                    child.onMouseEnter0(mc, mouseX, mouseY);
-                    lastHoveredElement = child;
+        if (lastHoveredElement != currentHovered) {
+            if (lastHoveredElement != null) lastHoveredElement.dispatchMouseLeave(mc, mouseX, mouseY);
+            if (currentHovered != null) currentHovered.dispatchMouseEnter(mc, mouseX, mouseY);
+            lastHoveredElement = currentHovered;
+        }
+
+        if (currentHovered != null) currentHovered.dispatchProcessHover(mc, mouseX, mouseY);
+    }
+
+    @Override
+    public final void dispatchMouseEnter(Minecraft mc, int mouseX, int mouseY) {
+        stateManager.add(MPGuiElementState.HOVERED);
+        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, null);
+        onAnyEventFire(moveEvent);
+        if (!moveEvent.isCancelled()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.ENTER);
+            onMouseEnter(moveEvent);
+        }
+    }
+
+    @Override
+    public final void dispatchMouseLeave(Minecraft mc, int mouseX, int mouseY) {
+        if (lastHoveredElement != null) {
+            lastHoveredElement.dispatchMouseLeave(mc, mouseX, mouseY);
+            lastHoveredElement = null;
+        }
+
+        stateManager.remove(MPGuiElementState.HOVERED);
+        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, null);
+        onAnyEventFire(moveEvent);
+        if (!moveEvent.isCancelled()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.LEAVE);
+            onMouseLeave(moveEvent);
+        }
+    }
+
+    @Override
+    public final boolean dispatchMousePressed(Minecraft mc, int mouseX, int mouseY, int mouseButton) {
+        if (!calculatedShape.contains(mouseX, mouseY)) return false;
+
+        if (!isEnabled() || !isVisible()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.DISABLED);
+            return false;
+        }
+
+        if (stateManager.has(MPGuiElementState.FAIL)) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.FAIL);
+        }
+
+        MPGuiEventFactory.pushMouseClickEvent(pressEvent, mouseX, mouseY);
+        onAnyEventFire(pressEvent);
+        if (pressEvent.isCancelled()) return true;
+
+        for (int k = children.size() - 1; k >= 0; k--) {
+            MPGuiElement<?> child = children.get(k);
+            if (child.dispatchMousePressed(mc, mouseX, mouseY, mouseButton)) {
+                lastSelectedElement = child;
+                return true;
+            }
+        }
+
+        tickDown = 0;
+        stateManager.add(MPGuiElementState.PRESSED);
+
+        dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.PRESS);
+        onMousePressed(pressEvent);
+        return true;
+    }
+
+    @Override
+    public final void dispatchMouseReleased(Minecraft mc, int mouseX, int mouseY, int state) {
+        if (lastSelectedElement != null) {
+            lastSelectedElement.dispatchMouseReleased(mc, mouseX, mouseY, state);
+            lastSelectedElement = null;
+            return;
+        }
+
+        tickDown = -1;
+        stateManager.remove(MPGuiElementState.PRESSED);
+
+        MPGuiEventFactory.pushMouseClickEvent(releaseEvent, mouseX, mouseY);
+        onAnyEventFire(releaseEvent);
+        if (!releaseEvent.isCancelled()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.RELEASE);
+            onMouseReleased(releaseEvent);
+            if (calculatedShape.contains(mouseX, mouseY)) {
+                MPGuiEventFactory.pushMouseClickEvent(clickEvent, mouseX, mouseY);
+                onAnyEventFire(clickEvent);
+                if (!clickEvent.isCancelled()) {
+                    dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.CLICK);
+                    onClick(clickEvent);
                 }
-                break;
+            }
+        }
+    }
+
+    @Override
+    public final boolean dispatchMouseDragged(Minecraft mc, int mouseX, int mouseY, MoveDirection dir, int diffX, int diffY) {
+        if (lastSelectedElement != null) {
+            return lastSelectedElement.dispatchMouseDragged(mc, mouseX, mouseY, dir, diffX, diffY);
+        }
+
+        if (tickDown >= 0) {
+            MPGuiEventFactory.pushMouseDragEvent(dragEvent, mouseX, mouseY, dir, diffX, diffY, tickDown);
+            onAnyEventFire(dragEvent);
+            if (!dragEvent.isCancelled()) {
+                dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.DRAG);
+                onMouseDragged(dragEvent);
+            }
+            return !dragEvent.isCancelled();
+        }
+        return false;
+    }
+
+    @Override
+    public final boolean dispatchMouseScrolled(Minecraft mc, int mouseX, int mouseY, int scroll) {
+        if (!calculatedShape.contains(mouseX, mouseY) || !isVisible()) return false;
+
+        for (int k = children.size() - 1; k >= 0; k--) {
+            MPGuiElement<?> child = children.get(k);
+            if (child.getCalculatedShape().contains(mouseX, mouseY)) {
+                if (child.dispatchMouseScrolled(mc, mouseX, mouseY, scroll)) return true;
+            }
+        }
+
+        MPGuiEventFactory.pushMouseScrollEvent(
+                scrollEvent, mouseX, mouseY, ScrollDirection.getScrollDirection(scroll), scroll
+        );
+        onAnyEventFire(scrollEvent);
+        if (!scrollEvent.isCancelled()) {
+            dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.SCROLL);
+            onMouseScrolled(scrollEvent);
+        }
+
+        return scrollEvent.isConsumed();
+    }
+
+    @Override
+    public final boolean dispatchKeyTyped(Minecraft mc, int mouseX, int mouseY, char typedChar, int keyCode) {
+        if (!isVisible()) return false;
+
+        for (MPGuiElement<?> child : children) {
+            if (child.dispatchKeyTyped(mc, mouseX, mouseY, typedChar, keyCode)) return true;
+        }
+
+        if (stateManager.has(MPGuiElementState.FOCUSED)) {
+            MPGuiEventFactory.pushKeyEvent(keyEvent, mouseX, mouseY, typedChar, keyCode);
+            onAnyEventFire(keyEvent);
+
+            if (!keyEvent.isCancelled() &&
+                    (keyCode == org.lwjgl.input.Keyboard.KEY_RETURN || keyCode == org.lwjgl.input.Keyboard.KEY_NUMPADENTER)
+            ) {
+                dispatchMousePressed(mc, mouseX, mouseY, 0);
+                dispatchMouseReleased(mc, mouseX, mouseY, 0);
+                keyEvent.consume();
+            }
+
+            if (!keyEvent.isCancelled()) {
+                dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.KEY_TYPED);
+                onKeyTyped(keyEvent);
+            }
+            return keyEvent.isConsumed();
+        }
+        return false;
+    }
+
+    @Override
+    public final void dispatchPlaySound(Minecraft mc, SoundHandler soundHandler, SoundSourceType source) {
+        SoundEvent sound = soundPack.getSound(source);
+        if (sound != null) {
+            MPGuiEventFactory.pushSoundEvent(
+                    soundEvent, moveEvent.getMouseX(), moveEvent.getMouseY(), soundHandler, sound, source
+            );
+            onAnyEventFire(soundEvent);
+            if (!soundEvent.isCancelled()) {
+                soundEvent.getHandler().playSound(
+                        PositionedSoundRecord.getMasterRecord(soundEvent.getSound(), 1.0F)
+                );
             }
         }
     }
@@ -202,85 +457,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     @Override
     public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) { return calculatedElementShape.contains(mouseX, mouseY); }
 
-    public final boolean isMouseOver() { return hovered; }
-
-    @Override
-    public void onMouseEnter0(Minecraft mc, int mouseX, int mouseY) {
-        onAnyEventFire(moveEvent);
-        if (!moveEvent.isCancelled()) {
-            hovered = true;
-            onMouseEnter(moveEvent);
-        }
-    }
-
-    @Override
-    public void onMouseLeave0(Minecraft mc, int mouseX, int mouseY) {
-        onAnyEventFire(moveEvent);
-        if (!moveEvent.isCancelled()) {
-            hovered = false;
-            onMouseLeave(moveEvent);
-        }
-    }
-
-    @Override
-    public boolean onMouseScrolled0(Minecraft mc, int mouseX, int mouseY, int scroll) {
-        if (!calculatedElementShape.contains(mouseX, mouseY)) return false;
-
-        for (int k = children.size() - 1; k >= 0; k--) {
-            MPGuiElement<?> child = children.get(k);
-            if (child.mouseHover(mc, mouseX, mouseY) && child.onMouseScrolled0(mc, mouseX, mouseY, scroll)) return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiEventFactory.pushMouseClickEvent(pressEvent, self(), mc, mouseX, mouseY);
-        onAnyEventFire(pressEvent);
-        if (!pressEvent.isCancelled()) {
-            tickDown = 0;
-            onMousePressed(pressEvent);
-            onPlaySound0(mc, mc.getSoundHandler(), soundClick, SoundSourceType.PRESS);
-            for (MPGuiElement<?> child : children) {
-                if (child.mousePressed(mc, mouseX, mouseY)) {
-                    lastSelectedElement = child;
-                    lastSelectedElement.onMousePressed0(mc, mouseX, mouseY);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiEventFactory.pushMouseClickEvent(releaseEvent, self(), mc, mouseX, mouseY);
-        onAnyEventFire(releaseEvent);
-        if (!releaseEvent.isCancelled()) {
-            tickDown = -1;
-            onMouseReleased(releaseEvent);
-            if (lastSelectedElement != null) {
-                lastSelectedElement.onMouseReleased0(mc, mouseX, mouseY);
-                lastSelectedElement = null;
-            }
-            if (isMouseOver()) {
-                MPGuiEventFactory.pushMouseClickEvent(clickEvent, self(), mc, mouseX, mouseY);
-                onAnyEventFire(clickEvent);
-                if (!clickEvent.isCancelled()) onClick(clickEvent);
-            }
-        }
-    }
-
-    @Override
-    public void onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
-        if (tickDown >= 0) {
-            MPGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
-            onAnyEventFire(dragEvent);
-            if (!dragEvent.isCancelled()) {
-                if (lastSelectedElement != null) {
-                    lastSelectedElement.onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
-                } else onMouseDragged(dragEvent);
-            }
-        }
-    }
+    public final boolean isMouseOver()                             { return hovered; }
 
     protected void onUpdate(MPGuiTickEvent<T> event)               { }
     protected void onMouseScrolled(MPGuiMouseScrollEvent<T> event) { }
@@ -338,12 +515,6 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             else if (child instanceof GuiLabel) screen.getLabelList().add((GuiLabel) child);
             else if (child instanceof MPGuiTextField<?>) screen.getFieldsList().add((MPGuiTextField<?>) child);
         }
-    }
-
-    @Override
-    public void offsetCalculatedShape(float dx, float dy) {
-        calculatedElementShape.offset(dx, dy);
-        for (MPGuiElement<?> child : children) child.offsetCalculatedShape(dx, dy);
     }
 
     public void removeAllChildren() {

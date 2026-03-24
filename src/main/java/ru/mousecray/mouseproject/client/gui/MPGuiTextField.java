@@ -20,13 +20,19 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
+import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.components.color.MPGuiColorPack;
+import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.components.sound.SoundSourceType;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexture;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.*;
-import ru.mousecray.mouseproject.client.gui.misc.*;
-import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexture;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
+import ru.mousecray.mouseproject.client.gui.misc.MPClickType;
+import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
+import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
+import ru.mousecray.mouseproject.client.gui.misc.ScrollDirection;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -58,7 +64,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     protected final MutableGuiShape calculatedInnerShape = new MutableGuiShape();
     protected final MPFontSize      fontSize;
 
-    protected StateColorContainer colorContainer = StateColorContainer.Builder
+    protected MPGuiColorPack colorContainer = MPGuiColorPack.Builder
             .create(14737632)
             .addState(GuiElementPersistentState.DISABLED, 7368816)
             .build();
@@ -203,13 +209,13 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         if (++partialTick >= 20) partialTick = 0;
         if (tickDown >= 0) ++tickDown;
 
-        MPGuiEventFactory.pushTickEvent(updateEvent, self(), mc, mouseX, mouseY, partialTick);
+        MPGuiEventFactory.pushTickEvent(updateEvent, mouseX, mouseY, partialTick);
         onAnyEventFire(updateEvent);
         if (!updateEvent.isCancelled()) onUpdate(updateEvent);
         int           diffX     = mouseX - moveEvent.getMouseX();
         int           diffY     = mouseY - moveEvent.getMouseY();
         MoveDirection direction = MoveDirection.getMoveDirection(diffX, diffY);
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, self(), mc, mouseX, mouseY, direction);
+        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, direction);
         if (tickDown >= 0 && direction != null) {
             onMouseDragged0(mc, mouseX, mouseY, direction, diffX, diffY);
         }
@@ -226,7 +232,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
         if (result) {
             MPGuiEventFactory.pushTextTypedEvent(
-                    textTypedEvent, self(), Minecraft.getMinecraft(),
+                    textTypedEvent,
                     moveEvent.getMouseX(), moveEvent.getMouseY(),
                     getCursorPosition(), getSelectionEnd(),
                     oldText, getText()
@@ -275,7 +281,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     @Override
     public final boolean onMouseReleased0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiEventFactory.pushMouseClickEvent(releaseEvent, self(), mc, mouseX, mouseY);
+        MPGuiEventFactory.pushMouseClickEvent(releaseEvent, mouseX, mouseY);
         onAnyEventFire(releaseEvent);
         if (!releaseEvent.isCancelled()) {
             if (isMouseOver()) applyActionState(GuiElementActionState.HOVER);
@@ -284,7 +290,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             if (persistentState != null) {
                 onMouseReleased(releaseEvent);
                 if (isMouseOver()) {
-                    MPGuiEventFactory.pushMouseClickEvent(clickEvent, self(), mc, mouseX, mouseY);
+                    MPGuiEventFactory.pushMouseClickEvent(clickEvent, mouseX, mouseY);
                     onAnyEventFire(clickEvent);
                     if (!clickEvent.isCancelled()) onClick(clickEvent);
                 }
@@ -297,7 +303,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override
     public final boolean onMouseDragged0(Minecraft mc, int mouseX, int mouseY, MoveDirection direction, int diffX, int diffY) {
         if (tickDown >= 0) {
-            MPGuiEventFactory.pushMouseDragEvent(dragEvent, self(), mc, mouseX, mouseY, direction, diffX, diffY, tickDown);
+            MPGuiEventFactory.pushMouseDragEvent(dragEvent, mouseX, mouseY, direction, diffX, diffY, tickDown);
             onAnyEventFire(dragEvent);
             if (!dragEvent.isCancelled()) {
                 onMouseDragged(dragEvent);
@@ -309,7 +315,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     @Override
     public final boolean onMouseScrolled0(Minecraft mc, int mouseX, int mouseY, int scroll) {
-        MPGuiEventFactory.pushMouseScrollEvent(scrollEvent, self(), mc, moveEvent.getMouseX(), moveEvent.getMouseY(), ScrollDirection.getScrollDirection(scroll), scroll);
+        MPGuiEventFactory.pushMouseScrollEvent(scrollEvent, moveEvent.getMouseX(), moveEvent.getMouseY(), ScrollDirection.getScrollDirection(scroll), scroll);
         onAnyEventFire(scrollEvent);
         if (!scrollEvent.isCancelled()) return onMouseScrolled(scrollEvent);
         return false;
@@ -317,7 +323,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     @Override
     public final boolean onMousePressed0(Minecraft mc, int mouseX, int mouseY) {
-        MPGuiEventFactory.pushMouseClickEvent(pressEvent, self(), mc, mouseX, mouseY);
+        MPGuiEventFactory.pushMouseClickEvent(pressEvent, mouseX, mouseY);
         onAnyEventFire(pressEvent);
         if (!pressEvent.isCancelled()) {
             if (persistentState == null
@@ -333,7 +339,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     protected final void onPlaySound0(Minecraft mc, SoundHandler soundHandler, @Nullable SoundEvent sound, SoundSourceType source) {
         if (sound != null) {
-            MPGuiEventFactory.pushSoundEvent(soundEvent, self(), mc, moveEvent.getMouseX(), moveEvent.getMouseY(), soundHandler, sound, source);
+            MPGuiEventFactory.pushSoundEvent(soundEvent, moveEvent.getMouseX(), moveEvent.getMouseY(), soundHandler, sound, source);
             onAnyEventFire(soundEvent);
             if (!soundEvent.isCancelled()) onPlaySound(soundEvent);
         }
@@ -343,7 +349,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         event.getHandler().playSound(PositionedSoundRecord.getMasterRecord(event.getSound(), 1.0F));
     }
 
-    @Override public void mouseReleased(int mouseX, int mouseY) { onMouseReleased0(Minecraft.getMinecraft(), mouseX, mouseY); }
+    @Override public void mouseReleased(int mouseX, int mouseY)       { onMouseReleased0(Minecraft.getMinecraft(), mouseX, mouseY); }
 
     protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) { }
 
@@ -393,25 +399,25 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     }
 
     protected final void onDrawTextBoxBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawBGEvent, self(), mc, mouseX, mouseY, partialTicks);
+        MPGuiEventFactory.pushTickEvent(drawBGEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawBGEvent);
         if (persistentState != null && !drawBGEvent.isCancelled()) drawTextBoxBackgroundLayer(drawBGEvent);
     }
 
     protected final void onDrawTextBoxForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawFGEvent, self(), mc, mouseX, mouseY, partialTicks);
+        MPGuiEventFactory.pushTickEvent(drawFGEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawFGEvent);
         if (persistentState != null && !drawFGEvent.isCancelled()) drawTextBoxForegroundLayer(drawFGEvent);
     }
 
     protected final void onDrawTextBoxText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawTextEvent, self(), mc, mouseX, mouseY, partialTicks);
+        MPGuiEventFactory.pushTickEvent(drawTextEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawTextEvent);
         if (persistentState != null && !drawTextEvent.isCancelled()) drawTextBoxTextLayer(drawTextEvent);
     }
 
     protected final void onDrawTextBoxLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        MPGuiEventFactory.pushTickEvent(drawLastEvent, self(), mc, mouseX, mouseY, partialTicks);
+        MPGuiEventFactory.pushTickEvent(drawLastEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawLastEvent);
         if (persistentState != null && !drawLastEvent.isCancelled()) drawTextBoxLastLayer(drawLastEvent);
     }
@@ -493,7 +499,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     public final void drawTextBoxForegroundLayer(int mouseX, int mouseY) {
         MPGuiEventFactory.pushTickEvent(
-                drawFGEvent, self(), Minecraft.getMinecraft(), mouseX, mouseY,
+                drawFGEvent, mouseX, mouseY,
                 Minecraft.getMinecraft().getRenderPartialTicks()
         );
         onAnyEventFire(drawFGEvent);
@@ -681,7 +687,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     @Override
     public void setText(String text) {
-        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent, self(), Minecraft.getMinecraft(),
+        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent,
                 moveEvent.getMouseX(), moveEvent.getMouseY(), getCursorPosition(), getSelectionEnd(), getText(), text);
         onAnyEventFire(textTypedEvent);
         if (!textTypedEvent.isCancelled()) {
@@ -693,7 +699,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override
     public void writeText(String textToWrite) {
         String newText = internalWriteText(textToWrite);
-        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent, self(), Minecraft.getMinecraft(),
+        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent,
                 moveEvent.getMouseX(), moveEvent.getMouseY(), getCursorPosition(), getSelectionEnd(),
                 getText(), newText);
         onAnyEventFire(textTypedEvent);
@@ -706,7 +712,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override
     public void deleteFromCursor(int num) {
         String newText = internalDeleteFromCursor(num);
-        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent, self(), Minecraft.getMinecraft(),
+        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent,
                 moveEvent.getMouseX(), moveEvent.getMouseY(), getCursorPosition(), getSelectionEnd(),
                 getText(), newText);
         onAnyEventFire(textTypedEvent);

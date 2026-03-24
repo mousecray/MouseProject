@@ -8,6 +8,7 @@ package ru.mousecray.mouseproject.client.gui.impl.wallet;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiNumberField;
@@ -15,7 +16,6 @@ import ru.mousecray.mouseproject.client.gui.impl.MPGuiSimpleField;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiSlider;
 import ru.mousecray.mouseproject.client.gui.impl.container.MPGuiFreePanel;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
-import ru.mousecray.mouseproject.client.gui.misc.lang.MPGuiString;
 
 import java.util.function.Consumer;
 

@@ -11,6 +11,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.MPGuiButton;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexturePack;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTextureScaleRules;
+import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTextureScaleType;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiEventFactory;
@@ -18,9 +21,6 @@ import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.event.MPGuiMouseDragEvent;
 import ru.mousecray.mouseproject.client.gui.misc.MPClickType;
 import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
-import ru.mousecray.mouseproject.client.gui.misc.texture.GuiTextureScaleRules;
-import ru.mousecray.mouseproject.client.gui.misc.texture.GuiTextureScaleType;
-import ru.mousecray.mouseproject.client.gui.misc.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -55,10 +55,10 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
         this.max = Math.max(max, min);
         range = this.max - min;
 
-        GuiTextureScaleRules trackScaleRules = isVertical
-                ? new GuiTextureScaleRules(GuiTextureScaleType.FILL_VERTICAL, GuiTextureScaleType.SINGLE_HORIZONTAL_LEFT)
+        MPGuiTextureScaleRules trackScaleRules = isVertical
+                ? new MPGuiTextureScaleRules(MPGuiTextureScaleType.FILL_VERTICAL, MPGuiTextureScaleType.SINGLE_HORIZONTAL_LEFT)
                 .setMultipliers(0.7f, 0.5f)
-                : new GuiTextureScaleRules(GuiTextureScaleType.FILL_HORIZONTAL, GuiTextureScaleType.SINGLE_VERTICAL_TOP)
+                : new MPGuiTextureScaleRules(MPGuiTextureScaleType.FILL_HORIZONTAL, MPGuiTextureScaleType.SINGLE_VERTICAL_TOP)
                 .setMultipliers(0.5f, 0.7f);
 
         class TrackButton extends MPGuiButton<TrackButton> {
@@ -153,7 +153,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     private void fireClickEvent(MPGuiMouseClickEvent<?> original) {
         if (onClick != null) {
             MPGuiEventFactory.pushMouseClickEvent(
-                    clickEvent, self(), original.getMc(), original.getMouseX(), original.getMouseY()
+                    clickEvent, original.getMouseX(), original.getMouseY()
             );
             onClick.accept(clickEvent);
         }
@@ -161,7 +161,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
 
     private void fireDragEvent(MPGuiMouseDragEvent<?> original) {
         if (onDrag != null) {
-            MPGuiEventFactory.pushMouseDragEvent(dragEvent, self(), original.getMc(),
+            MPGuiEventFactory.pushMouseDragEvent(dragEvent,
                     original.getMouseX(), original.getMouseY(),
                     original.getMoveDirection(), original.getDiffX(), original.getDiffY(),
                     original.getTickDown());
