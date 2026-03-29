@@ -8,6 +8,7 @@ package ru.mousecray.mouseproject.client.gui;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.components.color.MPGuiColorPack;
@@ -18,6 +19,7 @@ import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementStateMa
 import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
+import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.misc.MoveDirection;
 
 import javax.annotation.Nullable;
@@ -45,6 +47,8 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     boolean isVisible();
     boolean isEnabled();
     boolean isHovered();
+    boolean isFocused();
+    boolean canBeFocused();
 
     MPGuiElementStateManager getStateManager();
 
@@ -54,7 +58,12 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     void setSoundPack(MPGuiSoundPack texturePack);
     MPGuiColorPack getColorPack();
     void setColorPack(MPGuiColorPack colorPack);
-
+    FontRenderer getFontRenderer();
+    void setFontRenderer(@Nullable FontRenderer fontRenderer);
+    MPFontSize getFontSize();
+    void setFontSize(MPFontSize fontSize);
+    float getTextScaleMultiplayer();
+    void setTextScaleMultiplayer(float multiplayer);
 
     //Геометрия
     void setShape(IGuiShape shape);
@@ -109,4 +118,6 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     boolean mousePressed(Minecraft mc, int mouseX, int mouseY);
     void mouseReleased(int mouseX, int mouseY);
     void performClickFromVanilla();
+    void playPressSound(SoundHandler soundHandler);
+    boolean isMouseOver();
 }

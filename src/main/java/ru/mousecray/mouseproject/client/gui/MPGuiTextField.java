@@ -495,7 +495,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         return persistentState == GuiElementPersistentState.DISABLED ? 0 : mouseOver ? 2 : 1;
     }
 
-    public final boolean isMouseOver() { return hovered; }
+    @Override public final boolean isMouseOver() { return hovered; }
 
     public final void drawTextBoxForegroundLayer(int mouseX, int mouseY) {
         MPGuiEventFactory.pushTickEvent(

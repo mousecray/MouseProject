@@ -9,6 +9,7 @@ public class MPGuiElementStateManager {
     private int
             states    = 0,
             forbidden = 0;
+    private boolean  forbiddenLocked = false;
     private Runnable changeListener;
 
     private static final int INTERACTIVE_MASK =
@@ -44,7 +45,12 @@ public class MPGuiElementStateManager {
     public boolean has(MPGuiElementState state) { return (states & state.mask) != 0; }
 
     public void setForbidden(MPGuiElementState state, boolean isForbidden) {
-        int oldForbidden = forbidden;
+        if (forbiddenLocked) {
+            throw new IllegalStateException(
+                    "Forbidden states cannot be modified after " +
+                            "the element has been added to the GUI tree (setParent/setScreen)!"
+            );
+        }
         if (isForbidden) {
             forbidden |= state.mask;
             remove(state);
@@ -58,5 +64,9 @@ public class MPGuiElementStateManager {
         int mask = 0;
         for (MPGuiElementState s : statesToCombine) mask |= s.mask;
         return mask;
+    }
+
+    public void lockForbidden() {
+        forbiddenLocked = true;
     }
 }

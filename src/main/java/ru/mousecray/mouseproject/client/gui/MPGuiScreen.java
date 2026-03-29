@@ -17,41 +17,49 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementState;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiScrollPanel;
 import ru.mousecray.mouseproject.client.gui.dim.*;
 import ru.mousecray.mouseproject.client.gui.impl.MPGuiSlider;
 import ru.mousecray.mouseproject.client.gui.impl.container.MPGuiAnchorPanel;
+import ru.mousecray.mouseproject.client.gui.misc.MPFontSize;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public abstract class MPGuiScreen extends GuiScreen {
-    protected         ResourceLocation   TEXTURES;
-    protected         GuiVector          FULL_TEXTURE_SIZE;
-    protected         GuiShape           BACKGROUND_SHAPE;
-    private           int                currentElementID   = 0;
-    private           boolean            isRootPanelHovered = false;
-    @Nullable private MPGuiTextField<?>  selectedTextField  = null;
-    @Nullable private MPGuiLabel<?>      selectedLabel      = null;
-    @Nullable private MPGuiTextField<?>  focusedTextField   = null;
-    protected         List<GuiTextField> textFieldList      = new ObjectArrayList<>();
-    private           int                guiLeft, guiTop;
+    protected ResourceLocation TEXTURES;
+    protected GuiVector        FULL_TEXTURE_SIZE;
+    protected GuiShape         BACKGROUND_SHAPE;
+    private   int              currentElementID = 0;
+
+    protected       List<GuiTextField>     textFieldList  = new ObjectArrayList<>();
+    protected final List<MPGuiElement<?>>  focusOrderList = new ObjectArrayList<>();
+    private final   Map<Integer, Runnable> globalKeybinds = new HashMap<>();
+
+    private int guiLeft, guiTop;
     protected GuiShape guiShape, guiContentShape;
     protected     GuiVector guiBound;
     private final String    screenName;
-    protected     GuiVector guiDefaultSize;
-    protected     GuiVector guiDefaultBound;
+    protected     GuiVector guiDefaultSize, guiDefaultBound;
 
-    private MPGuiAnchorPanel rootPanel;
+    @Nullable private MPGuiAnchorPanel rootPanel;
+    private           int              currentFocusIndex = -1;
+
+    protected MPFontSize fontSize = MPFontSize.NORMAL;
 
     protected MPGuiScreen(String screenName, GuiVector guiDefaultSize, GuiVector guiDefaultBound) {
         this.screenName = screenName;
@@ -59,16 +67,21 @@ public abstract class MPGuiScreen extends GuiScreen {
         this.guiDefaultBound = guiDefaultBound;
     }
 
+    public List<GuiButton> getButtonList()       { return buttonList; }
+    public List<GuiLabel> getLabelList()         { return labelList; }
+    public List<GuiTextField> getFieldsList()    { return textFieldList; }
+    public String getScreenName()                { return screenName; }
+    public FontRenderer getFontRenderer()        { return fontRenderer; }
+    public MPFontSize getFontSize()              { return fontSize; }
+    public void setFontSize(MPFontSize fontSize) { this.fontSize = Objects.requireNonNull(fontSize); }
+    public int genNextElementID()                { return ++currentElementID; }
+
     @Override
     public void initGui() {
         super.initGui();
         guiLeft = (int) guiContentShape.x();
         guiTop = (int) guiContentShape.y();
     }
-
-    public List<GuiButton> getButtonList()    { return buttonList; }
-    public List<GuiLabel> getLabelList()      { return labelList; }
-    public List<GuiTextField> getFieldsList() { return textFieldList; }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
@@ -88,10 +101,7 @@ public abstract class MPGuiScreen extends GuiScreen {
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
 
-        rootPanel.onDrawBackground(mc, mouseX, mouseY, partialTicks);
-        rootPanel.onDrawForeground(mc, mouseX, mouseY, partialTicks);
-        rootPanel.onDrawText(mc, mouseX, mouseY, partialTicks);
-        rootPanel.onDrawLast(mc, mouseX, mouseY, partialTicks);
+        if (rootPanel != null) rootPanel.dispatchDraw(mc, mouseX, mouseY, partialTicks);
 
         RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.pushMatrix();
@@ -176,10 +186,6 @@ public abstract class MPGuiScreen extends GuiScreen {
         return null;
     }
 
-    public int genNextElementID()         { return ++currentElementID; }
-    public String getScreenName()         { return screenName; }
-    public FontRenderer getFontRenderer() { return fontRenderer; }
-
     protected void resetGui() {
         currentElementID = 0;
         rootPanel = new MPGuiAnchorPanel(new GuiShape(0, 0, guiDefaultSize.x(), guiDefaultSize.y()));
@@ -190,107 +196,9 @@ public abstract class MPGuiScreen extends GuiScreen {
         textFieldList.clear();
     }
 
-    @Override
-    public void onGuiClosed() {
-        super.onGuiClosed();
+    public void addGlobalKeybind(int keyCode, Runnable action) {
+        globalKeybinds.put(keyCode, action);
     }
-
-    @Override
-    public void handleMouseInput() throws IOException {
-        super.handleMouseInput();
-
-        int scroll = Mouse.getEventDWheel();
-        if (scroll != 0) {
-            int mouseX = Mouse.getEventX() * width / mc.displayWidth;
-            int mouseY = height - Mouse.getEventY() * height / mc.displayHeight - 1;
-
-            if (rootPanel != null) rootPanel.onMouseScrolled0(mc, mouseX, mouseY, scroll);
-        }
-    }
-
-    @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        boolean handled = false;
-        if (focusedTextField != null) handled = focusedTextField.onKeyTyped0(typedChar, keyCode);
-        if (!handled) super.keyTyped(typedChar, keyCode);
-    }
-
-    @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        if (mouseButton == 0) {
-            for (int i = 0; i < buttonList.size(); ++i) {
-                MPGuiButton<?> guibutton = (MPGuiButton<?>) buttonList.get(i);
-                if (guibutton.mousePressed(mc, mouseX, mouseY)) {
-                    net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Pre event = new net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Pre(this, guibutton, buttonList);
-                    if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event)) break;
-                    GuiButton button = event.getButton();
-                    if (button instanceof MPGuiButton) guibutton = ((MPGuiButton<?>) button);
-                    else break;
-                    selectedButton = guibutton;
-                    guibutton.onMousePressed0(mc, mouseX, mouseY);
-                    actionPerformed(guibutton);
-                    if (equals(mc.currentScreen))
-                        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent.Post(this, button, buttonList));
-                }
-            }
-            for (GuiTextField guiTextField : textFieldList) {
-                MPGuiTextField<?> gf = (MPGuiTextField<?>) guiTextField;
-                if (gf.mousePressed(mc, mouseX, mouseY)) {
-                    selectedTextField = gf;
-                    gf.onMousePressed0(mc, mouseX, mouseY);
-                    onClickTextField(gf);
-                }
-            }
-            for (GuiLabel guiLabel : labelList) {
-                MPGuiLabel<?> gl = (MPGuiLabel<?>) guiLabel;
-                if (gl.mousePressed(mc, mouseX, mouseY)) {
-                    selectedLabel = gl;
-                    gl.onMousePressed0(mc, mouseX, mouseY);
-                    onClickLabel(gl);
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
-        if (selectedButton != null && state == 0) {
-            ((MPGuiButton<?>) selectedButton).onMouseReleased0(mc, mouseX, mouseY);
-            selectedButton = null;
-        }
-        if (selectedTextField != null && state == 0) {
-            selectedTextField.onMouseReleased0(mc, mouseX, mouseY);
-            selectedTextField = null;
-        }
-        if (selectedLabel != null && state == 0) {
-            selectedLabel.onMouseReleased0(mc, mouseX, mouseY);
-            selectedLabel = null;
-        }
-
-        boolean focusHandled = false;
-        for (GuiTextField guiTextField : textFieldList) {
-            MPGuiTextField<?> tf = (MPGuiTextField<?>) guiTextField;
-            if (tf.mouseHover(mc, mouseX, mouseY)) {
-                if (focusedTextField != null && focusedTextField != guiTextField) focusedTextField.setFocused(false);
-                focusedTextField = tf;
-                focusedTextField.setFocused(true);
-                focusHandled = true;
-            }
-        }
-
-        if (!focusHandled) {
-            if (focusedTextField != null) {
-                focusedTextField.setFocused(false);
-                focusedTextField = null;
-            }
-        }
-    }
-
-    @Override protected final void actionPerformed(GuiButton button) { onClickButton(((MPGuiButton<?>) button)); }
-
-    protected void onClickButton(MPGuiButton<?> button)              { }
-    protected void onClickTextField(MPGuiTextField<?> field)         { }
-    protected void onClickLabel(MPGuiLabel<?> label)                 { }
 
     public void bake() {
         if (rootPanel != null) {
@@ -299,7 +207,18 @@ public abstract class MPGuiScreen extends GuiScreen {
             buttonList.clear();
             labelList.clear();
             textFieldList.clear();
+            focusOrderList.clear();
+            currentFocusIndex = -1;
+
             rootPanel.collectElements();
+            collectFocusableElements(rootPanel);
+        }
+    }
+
+    private void collectFocusableElements(MPGuiPanel<?> panel) {
+        for (MPGuiElement<?> child : panel.getChildren()) {
+            if (!child.getStateManager().isForbidden(MPGuiElementState.FOCUSED)) focusOrderList.add(child);
+            if (child instanceof MPGuiPanel) collectFocusableElements((MPGuiPanel<?>) child);
         }
     }
 
@@ -330,19 +249,115 @@ public abstract class MPGuiScreen extends GuiScreen {
 
     @Override
     public void updateScreen() {
-        int i = Mouse.getEventX() * width / mc.displayWidth;
-        int j = height - Mouse.getEventY() * height / mc.displayHeight - 1;
-
+        super.updateScreen();
         if (rootPanel != null) {
-            rootPanel.onUpdate0(mc, i, j);
+            int mouseX = Mouse.getEventX() * width / mc.displayWidth;
+            int mouseY = height - Mouse.getEventY() * height / mc.displayHeight - 1;
 
-            if (rootPanel.mouseHover(mc, i, j)) {
-                if (!isRootPanelHovered) rootPanel.onMouseEnter0(mc, i, j);
-                isRootPanelHovered = true;
-            } else {
-                if (isRootPanelHovered) rootPanel.onMouseLeave0(mc, i, j);
-                isRootPanelHovered = false;
-            }
+            rootPanel.dispatchProcessHover(mc, mouseX, mouseY);
+
+            rootPanel.dispatchUpdate(mc, mouseX, mouseY, mc.getRenderPartialTicks());
         }
     }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        boolean handled = false;
+
+        if (rootPanel != null) {
+            handled = rootPanel.dispatchMousePressed(mc, mouseX, mouseY, mouseButton);
+
+            if (handled) {
+                MPGuiElement<?> clicked = rootPanel.getLastSelectedElementRecursively();
+                if (clicked != null) setFocusTo(clicked);
+            }
+        }
+
+        if (!handled) super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        if (rootPanel != null) rootPanel.dispatchMouseReleased(mc, mouseX, mouseY, state);
+        super.mouseReleased(mouseX, mouseY, state);
+    }
+
+    @Override
+    public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+        int scroll = Mouse.getEventDWheel();
+        if (scroll != 0 && rootPanel != null) {
+            int mouseX = Mouse.getEventX() * width / mc.displayWidth;
+            int mouseY = height - Mouse.getEventY() * height / mc.displayHeight - 1;
+            rootPanel.dispatchMouseScrolled(mc, mouseX, mouseY, scroll);
+        }
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (globalKeybinds.containsKey(keyCode)) {
+            globalKeybinds.get(keyCode).run();
+            return;
+        }
+
+        if (keyCode == Keyboard.KEY_TAB && !focusOrderList.isEmpty()) {
+            boolean shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+
+            if (currentFocusIndex >= 0 && currentFocusIndex < focusOrderList.size()) {
+                focusOrderList.get(currentFocusIndex).getStateManager().remove(MPGuiElementState.FOCUSED);
+            }
+
+            if (shift) {
+                currentFocusIndex = currentFocusIndex - 1 < 0 ? focusOrderList.size() - 1 : currentFocusIndex - 1;
+            } else {
+                currentFocusIndex = (currentFocusIndex + 1) % focusOrderList.size();
+            }
+
+            focusOrderList.get(currentFocusIndex).getStateManager().add(MPGuiElementState.FOCUSED);
+            return;
+        }
+
+        boolean handled = false;
+        if (rootPanel != null) {
+            int mouseX = Mouse.getEventX() * width / mc.displayWidth;
+            int mouseY = height - Mouse.getEventY() * height / mc.displayHeight - 1;
+            handled = rootPanel.dispatchKeyTyped(mc, mouseX, mouseY, typedChar, keyCode);
+        }
+
+        if (!handled) super.keyTyped(typedChar, keyCode);
+    }
+
+    @Override
+    protected final void actionPerformed(GuiButton button) throws IOException {
+        if (button instanceof MPGuiElement) {
+            ((MPGuiElement<?>) button).performClickFromVanilla();
+            onClickButton(((MPGuiButton<?>) button));
+        } else super.actionPerformed(button);
+    }
+
+    public void rebuildFocusList() {
+        focusOrderList.clear();
+        currentFocusIndex = -1;
+        if (rootPanel != null) collectFocusableElements(rootPanel);
+    }
+
+    private void setFocusTo(MPGuiElement<?> element) {
+        if (element.getStateManager().isForbidden(MPGuiElementState.FOCUSED)) return;
+
+        if (currentFocusIndex >= 0 && currentFocusIndex < focusOrderList.size()) {
+            focusOrderList.get(currentFocusIndex).getStateManager().remove(MPGuiElementState.FOCUSED);
+        }
+
+        int index = focusOrderList.indexOf(element);
+        if (index != -1) {
+            currentFocusIndex = index;
+            element.getStateManager().add(MPGuiElementState.FOCUSED);
+        }
+    }
+
+    @Override public void onGuiClosed()                      { super.onGuiClosed(); }
+
+    protected void onClickButton(MPGuiButton<?> button)      { }
+    protected void onClickTextField(MPGuiTextField<?> field) { }
+    protected void onClickLabel(MPGuiLabel<?> label)         { }
 }

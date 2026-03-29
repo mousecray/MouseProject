@@ -11,6 +11,8 @@ import ru.mousecray.mouseproject.Tags;
 
 @SideOnly(Side.CLIENT)
 public interface MPGuiString {
+    MPGuiString EMPTY = simple("");
+    
     String get();
 
     static MPGuiString simple(String text) {
