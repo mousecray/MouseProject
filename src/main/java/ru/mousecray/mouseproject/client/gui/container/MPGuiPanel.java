@@ -83,9 +83,9 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     private int     id;
     private boolean enabled, visible, hovered;
 
-    protected MPGuiTexturePack texturePack = MPGuiTexturePack.EMPTY;
+    protected MPGuiTexturePack texturePack = MPGuiTexturePack.EMPTY();
     protected MPGuiColorPack   colorPack   = MPGuiColorPack.CONTROL_SIMPLE();
-    protected MPGuiSoundPack   soundPack   = MPGuiSoundPack.EMPTY;
+    protected MPGuiSoundPack   soundPack   = MPGuiSoundPack.EMPTY();
 
     protected final MPGuiElementStateManager stateManager = new MPGuiElementStateManager();
 
@@ -146,27 +146,45 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
     //Данные и состояние
     @Override public String getText() { return ""; }
-    @Override public void setText(@Nullable String text)               { }
-    @Override public MPGuiString getGuiString()                        { return MPGuiString.simple(""); }
-    @Override public void setGuiString(MPGuiString guiString)          { }
+    @Override public void setText(@Nullable String text)        { }
+    @Override public MPGuiString getGuiString()                 { return MPGuiString.EMPTY(); }
+    @Override public void setGuiString(MPGuiString guiString)   { }
 
-    @Override public boolean isVisible()                               { return visible; }
-    @Override public boolean isEnabled()                               { return enabled; }
-    @Override public boolean isHovered()                               { return hovered; }
-    @Override public boolean isFocused()                               { return stateManager.has(MPGuiElementState.FOCUSED); }
-    @Override public boolean canBeFocused()                            { return !stateManager.isForbidden(MPGuiElementState.FOCUSED); }
+    @Override public boolean isVisible()                        { return visible; }
+    @Override public boolean isEnabled()                        { return enabled; }
+    @Override public boolean isHovered()                        { return hovered; }
+    @Override public boolean isFocused()                        { return stateManager.has(MPGuiElementState.FOCUSED); }
+    @Override public boolean canBeFocused()                     { return !stateManager.isForbidden(MPGuiElementState.FOCUSED); }
 
-    @Override public MPGuiElementStateManager getStateManager()        { return stateManager; }
+    @Override public MPGuiElementStateManager getStateManager() { return stateManager; }
 
-    @Override public MPGuiTexturePack getTexturePack()                 { return texturePack; }
-    @Override public void setTexturePack(MPGuiTexturePack texturePack) { this.texturePack = Objects.requireNonNull(texturePack); }
-    @Override public MPGuiSoundPack getSoundPack()                     { return soundPack; }
-    @Override public void setSoundPack(MPGuiSoundPack soundPack)       { this.soundPack = Objects.requireNonNull(soundPack); }
-    @Override public MPGuiColorPack getColorPack()                     { return colorPack; }
-    @Override public void setColorPack(MPGuiColorPack colorPack)       { this.colorPack = Objects.requireNonNull(colorPack); }
+    @Override public MPGuiTexturePack getTexturePack()          { return texturePack; }
+
+    @Override
+    public void setTexturePack(MPGuiTexturePack texturePack) {
+        Objects.requireNonNull(texturePack, "texturePack cannot be null. Use MPGuiTexturePack.EMPTY() instead.");
+        this.texturePack = texturePack;
+    }
+
+    @Override public MPGuiSoundPack getSoundPack() { return soundPack; }
+
+    @Override
+    public void setSoundPack(MPGuiSoundPack soundPack) {
+        Objects.requireNonNull(soundPack, "soundPack cannot be null. Use MPGuiSoundPack.EMPTY() instead.");
+
+        this.soundPack = soundPack;
+    }
+
+    @Override public MPGuiColorPack getColorPack() { return colorPack; }
+
+    @Override
+    public void setColorPack(MPGuiColorPack colorPack) {
+        Objects.requireNonNull(colorPack, "colorPack cannot be null. Use MPGuiColorPack.EMPTY() instead.");
+        this.colorPack = colorPack;
+    }
+    
     @Override
     public FontRenderer getFontRenderer() {
-        if (fontRenderer != null) return fontRenderer;
         if (getScreen() != null) return getScreen().getFontRenderer();
         return Minecraft.getMinecraft().fontRenderer;
     }

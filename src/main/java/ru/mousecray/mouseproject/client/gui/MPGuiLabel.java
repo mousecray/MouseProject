@@ -70,9 +70,9 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     @Nullable protected FontRenderer     fontRenderer;
     @Nullable protected MPFontSize       fontSize;
     protected           MPGuiString      guiString;
-    private             MPGuiTexturePack texturePack = MPGuiTexturePack.EMPTY;
+    private             MPGuiTexturePack texturePack = MPGuiTexturePack.EMPTY();
     protected           MPGuiColorPack   colorPack   = MPGuiColorPack.CONTROL_SIMPLE();
-    private             MPGuiSoundPack   soundPack   = MPGuiSoundPack.EMPTY;
+    private             MPGuiSoundPack   soundPack   = MPGuiSoundPack.CONTROL_SIMPLE();
 
     protected int              tickDown             = -1;
     protected MutableGuiVector textOffset           = new MutableGuiVector();
@@ -86,7 +86,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     private           GuiPadding    padding = new GuiPadding(0);
     @Nullable private MPGuiScreen   screen;
 
-    public MPGuiLabel(MPGuiString text, GuiShape shape) {
+    public MPGuiLabel(GuiShape shape) {
         super(
                 Minecraft.getMinecraft().fontRenderer, 0,
                 (int) shape.x(), (int) shape.y(),
@@ -117,8 +117,6 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
             visible = !stateManager.has(MPGuiElementState.HIDDEN);
             hovered = stateManager.has(MPGuiElementState.HOVERED);
         });
-
-        setGuiString(text);
     }
 
     @SuppressWarnings("unchecked") @Override public T self() { return (T) this; }
@@ -157,28 +155,47 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
 
     @Override
     public void setGuiString(MPGuiString guiString) {
+        Objects.requireNonNull(guiString, "guiString cannot be null. Use MPGuiString.EMPTY() instead.");
         this.guiString = guiString;
         labels.clear();
         String[] split = guiString.get().split("\n");
         labels.addAll(Arrays.asList(split));
     }
 
-    @Override public boolean isVisible()                               { return visible; }
-    @Override public boolean isEnabled()                               { return enabled; }
-    @Override public boolean isHovered()                               { return hovered; }
-    @Override public boolean isFocused()                               { return stateManager.has(MPGuiElementState.FOCUSED); }
-    @Override public boolean canBeFocused()                            { return !stateManager.isForbidden(MPGuiElementState.FOCUSED); }
-    public void setCentered(boolean centered)                          { this.centered = centered; }
-    public boolean isCentered()                                        { return centered; }
+    @Override public boolean isVisible()                        { return visible; }
+    @Override public boolean isEnabled()                        { return enabled; }
+    @Override public boolean isHovered()                        { return hovered; }
+    @Override public boolean isFocused()                        { return stateManager.has(MPGuiElementState.FOCUSED); }
+    @Override public boolean canBeFocused()                     { return !stateManager.isForbidden(MPGuiElementState.FOCUSED); }
+    public void setCentered(boolean centered)                   { this.centered = centered; }
+    public boolean isCentered()                                 { return centered; }
 
-    @Override public MPGuiElementStateManager getStateManager()        { return stateManager; }
+    @Override public MPGuiElementStateManager getStateManager() { return stateManager; }
 
-    @Override public MPGuiTexturePack getTexturePack()                 { return texturePack; }
-    @Override public void setTexturePack(MPGuiTexturePack texturePack) { this.texturePack = Objects.requireNonNull(texturePack); }
-    @Override public MPGuiSoundPack getSoundPack()                     { return soundPack; }
-    @Override public void setSoundPack(MPGuiSoundPack soundPack)       { this.soundPack = Objects.requireNonNull(soundPack); }
-    @Override public MPGuiColorPack getColorPack()                     { return colorPack; }
-    @Override public void setColorPack(MPGuiColorPack colorPack)       { this.colorPack = Objects.requireNonNull(colorPack); }
+    @Override public MPGuiTexturePack getTexturePack()          { return texturePack; }
+
+    @Override
+    public void setTexturePack(MPGuiTexturePack texturePack) {
+        Objects.requireNonNull(texturePack, "texturePack cannot be null. Use MPGuiTexturePack.EMPTY() instead.");
+        this.texturePack = texturePack;
+    }
+
+    @Override public MPGuiSoundPack getSoundPack() { return soundPack; }
+
+    @Override
+    public void setSoundPack(MPGuiSoundPack soundPack) {
+        Objects.requireNonNull(soundPack, "soundPack cannot be null. Use MPGuiSoundPack.EMPTY() instead.");
+
+        this.soundPack = soundPack;
+    }
+
+    @Override public MPGuiColorPack getColorPack() { return colorPack; }
+
+    @Override
+    public void setColorPack(MPGuiColorPack colorPack) {
+        Objects.requireNonNull(colorPack, "colorPack cannot be null. Use MPGuiColorPack.EMPTY() instead.");
+        this.colorPack = colorPack;
+    }
 
     @Override
     public FontRenderer getFontRenderer() {
@@ -215,6 +232,9 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         }
         fontSize = size;
     }
+
+    @Override public float getTextScaleMultiplayer()                 { return textScaleMultiplayer; }
+    @Override public void setTextScaleMultiplayer(float multiplayer) { textScaleMultiplayer = multiplayer; }
 
     //Геометрия
     @Override public void setShape(IGuiShape shape) { this.shape.withShape(shape); }

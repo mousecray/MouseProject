@@ -7,7 +7,6 @@ package ru.mousecray.mouseproject.client.gui.components.sound;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -17,9 +16,9 @@ import javax.annotation.Nullable;
 
 @SideOnly(Side.CLIENT)
 public class MPGuiSoundPack {
-    public static MPGuiSoundPack EMPTY = new MPGuiSoundPack(Object2ObjectMaps.emptyMap());
+    public static MPGuiSoundPack EMPTY() { return new MPGuiSoundPack(new Object2ObjectArrayMap<>()); }
 
-    public MPGuiSoundPack CONTROL_SIMPLE() {
+    public static MPGuiSoundPack CONTROL_SIMPLE() {
         return Builder.create().addSound(SoundSourceType.PRESS, SoundEvents.UI_BUTTON_CLICK).build();
     }
 

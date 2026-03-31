@@ -14,16 +14,24 @@ import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementStateMa
 
 @SideOnly(Side.CLIENT)
 public class MPGuiColorPack {
+    public static MPGuiColorPack EMPTY() {
+        return Builder.create(0).build();
+    }
+
+    public static MPGuiColorPack CONTROL_SIMPLE() {
+        return Builder.create(14737632).addColor(10526880, MPGuiElementState.DISABLED).build();
+    }
+
+    public static MPGuiColorPack TEXT_FIELD_SIMPLE() {
+        return Builder.create(14737632).addColor(7368816, MPGuiElementState.DISABLED).build();
+    }
+
     private final Int2IntMap colors;
     private final int        defaultColor;
 
     private MPGuiColorPack(int defaultColor, Int2IntMap colors) {
         this.defaultColor = defaultColor;
         this.colors = colors;
-    }
-
-    public static MPGuiColorPack CONTROL_SIMPLE() {
-        return Builder.create(14737632).addColor(10526880, MPGuiElementState.DISABLED).build();
     }
 
     public int getDefaultColor() { return defaultColor; }

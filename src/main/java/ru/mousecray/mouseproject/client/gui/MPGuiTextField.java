@@ -20,10 +20,14 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
+import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.components.color.MPGuiColorPack;
 import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.components.sound.MPGuiSoundPack;
 import ru.mousecray.mouseproject.client.gui.components.sound.SoundSourceType;
+import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementState;
+import ru.mousecray.mouseproject.client.gui.components.state.MPGuiElementStateManager;
 import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexture;
 import ru.mousecray.mouseproject.client.gui.components.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.container.MPGuiPanel;
@@ -36,6 +40,7 @@ import ru.mousecray.mouseproject.client.gui.misc.ScrollDirection;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -54,61 +59,196 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             pressEvent   = new MPGuiMouseClickEvent<>(MPClickType.PRESS),
             releaseEvent = new MPGuiMouseClickEvent<>(MPClickType.RELEASE),
             clickEvent   = new MPGuiMouseClickEvent<>(MPClickType.CLICK);
-    private final   MPGuiMouseMoveEvent<T>   moveEvent      = new MPGuiMouseMoveEvent<>();
-    private final   MPGuiMouseScrollEvent<T> scrollEvent    = new MPGuiMouseScrollEvent<>();
-    private final   MPGuiMouseDragEvent<T>   dragEvent      = new MPGuiMouseDragEvent<>();
-    private final   MPGuiTextTypedEvent<T>   textTypedEvent = new MPGuiTextTypedEvent<>();
-    private final   MPGuiSoundEvent<T>       soundEvent     = new MPGuiSoundEvent<>();
-    protected final MutableGuiShape          elementShape   = new MutableGuiShape(),
-            calculatedElementShape                          = new MutableGuiShape();
-    protected final MutableGuiShape calculatedInnerShape = new MutableGuiShape();
-    protected final MPFontSize      fontSize;
+    private final MPGuiMouseMoveEvent<T>   moveEvent      = new MPGuiMouseMoveEvent<>();
+    private final MPGuiMouseDragEvent<T>   dragEvent      = new MPGuiMouseDragEvent<>();
+    private final MPGuiMouseScrollEvent<T> scrollEvent    = new MPGuiMouseScrollEvent<>();
+    private final MPGuiKeyEvent<T>         keyEvent       = new MPGuiKeyEvent<>();
+    private final MPGuiSoundEvent<T>       soundEvent     = new MPGuiSoundEvent<>();
+    private final MPGuiTextTypedEvent<T>   textTypedEvent = new MPGuiTextTypedEvent<>();
 
-    protected MPGuiColorPack colorContainer = MPGuiColorPack.Builder
-            .create(14737632)
-            .addState(GuiElementPersistentState.DISABLED, 7368816)
-            .build();
+    protected final MPGuiElementStateManager stateManager = new MPGuiElementStateManager();
 
-    @Nullable private GuiElementActionState     actionState     = null;
-    @Nullable private GuiElementPersistentState persistentState = GuiElementPersistentState.NORMAL;
-    private final     MPGuiTexturePack          texturePack;
+    protected final MutableGuiShape
+            shape,
+            calculatedShape      = new MutableGuiShape(),
+            calculatedInnerShape = new MutableGuiShape();
+    protected final MutableGuiVector calculatedTextOffsetTemp = new MutableGuiVector();
 
-    private                 int           tickDown    = -1;
-    private                 int           partialTick;
-    private                 boolean       isSelecting = false;
-    @Nullable private final SoundEvent    soundClick;
-    private                 MPGuiString   placeholder = MPGuiString.simple("");
-    private                 MPGuiString   guiString   = MPGuiString.simple("");
-    private                 boolean       hovered;
-    private                 GuiScaleRules scaleRules  = new GuiScaleRules(GuiScaleType.FLOW);
-    private                 MPGuiPanel<?> parent;
-    private                 GuiPadding    padding     = new GuiPadding(0);
-    private                 MPGuiScreen   screen;
+    @Nullable protected FontRenderer fontRenderer;
+    @Nullable protected MPFontSize   fontSize;
+    protected           MPGuiString  guiString   = MPGuiString.EMPTY();
+    protected           MPGuiString  placeholder = MPGuiString.EMPTY();
 
-    public MPGuiTextField(FontRenderer fontRenderer,
-                          @Nullable String placeholder, @Nullable String defaultText,
-                          GuiShape elementShape,
-                          @Nullable MPGuiTexturePack texturePack,
-                          @Nullable SoundEvent soundClick, MPFontSize fontSize) {
+    private   MPGuiTexturePack texturePack = MPGuiTexturePack.EMPTY();
+    protected MPGuiColorPack   colorPack   = MPGuiColorPack.TEXT_FIELD_SIMPLE();
+    private   MPGuiSoundPack   soundPack   = MPGuiSoundPack.EMPTY();
+
+    protected int              tickDown             = -1;
+    protected MutableGuiVector textOffset           = new MutableGuiVector();
+    protected float            textScaleMultiplayer = 1.0F;
+    private   GuiScaleRules    scaleRules           = new GuiScaleRules(GuiScaleType.FLOW);
+
+    private boolean hasSelection = false;
+    private boolean enabled      = true, visible = true, hovered = false;
+
+    private MPGuiPanel<?> parent;
+    private GuiPadding    padding = new GuiPadding(0);
+    private MPGuiScreen   screen;
+
+    public MPGuiTextField(MPGuiString placeholder, GuiShape shape) {
         super(
-                0, fontRenderer, (int) elementShape.x(), (int) elementShape.y(),
-                (int) elementShape.width(), (int) elementShape.height()
+                0, Minecraft.getMinecraft().fontRenderer, (int) shape.x(), (int) shape.y(),
+                (int) shape.width(), (int) shape.height()
         );
-        this.elementShape.withShape(elementShape);
-        this.fontSize = fontSize;
-        if (defaultText == null) defaultText = "";
-        setText(defaultText);
-        setMaxStringLength(999);
-        setEnableBackgroundDrawing(true);
-        this.placeholder = MPGuiString.simple(placeholder);
-        this.texturePack = texturePack == null ? MPGuiTexturePack.EMPTY : texturePack;
-        this.soundClick = soundClick;
+        this.shape = shape.toMutable();
+
+        Minecraft mc = Minecraft.getMinecraft();
+        T         th = self();
+        updateEvent.bind(mc, th);
+        drawBGEvent.bind(mc, th);
+        drawFGEvent.bind(mc, th);
+        drawLastEvent.bind(mc, th);
+        drawTextEvent.bind(mc, th);
+        pressEvent.bind(mc, th);
+        releaseEvent.bind(mc, th);
+        clickEvent.bind(mc, th);
+        moveEvent.bind(mc, th);
+        dragEvent.bind(mc, th);
+        scrollEvent.bind(mc, th);
+        keyEvent.bind(mc, th);
+        soundEvent.bind(mc, th);
+
+        stateManager.setChangeListener(() -> {
+            enabled = !stateManager.has(MPGuiElementState.DISABLED);
+            visible = !stateManager.has(MPGuiElementState.HIDDEN);
+            hovered = stateManager.has(MPGuiElementState.HOVERED);
+        });
+
+        super.setEnableBackgroundDrawing(true);
     }
 
-    @Override public void setId(int id)                      { this.id = id; }
-    @Override public int getId()                             { return id; }
-
     @SuppressWarnings("unchecked") @Override public T self() { return (T) this; }
+
+    //Идентификация и иерархия
+    @Override public void setId(int id) { this.id = id; }
+    @Override public int getId()                       { return id; }
+    @Override @Nullable public MPGuiScreen getScreen() { return screen; }
+
+    @Override
+    public void setScreen(@Nullable MPGuiScreen screen) {
+        this.screen = screen;
+        if (screen != null) stateManager.lockForbidden();
+    }
+
+    @Override @Nullable public MPGuiPanel<?> getParent() { return parent; }
+
+    @Override
+    public void setParent(@Nullable MPGuiPanel<?> parent) {
+        this.parent = parent;
+        if (parent != null) stateManager.lockForbidden();
+    }
+
+    //Данные и состояние
+    @Override public String getText() { return guiString.get(); }
+
+    @Override
+    public void setText(String rawText) {
+        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent,
+                moveEvent.getMouseX(), moveEvent.getMouseY(),
+                getCursorPosition(), getSelectionEnd(), getText(), rawText
+        );
+        onAnyEventFire(textTypedEvent);
+        if (!textTypedEvent.isCancelled()) {
+            guiString = MPGuiString.simple(rawText);
+            super.setText(rawText);
+        }
+    }
+
+    @Override public MPGuiString getGuiString() { return guiString; }
+
+    @Override
+    public void setGuiString(MPGuiString guiString) {
+        Objects.requireNonNull(guiString, "guiString cannot be null. Use MPGuiString.EMPTY() instead.");
+        this.guiString = guiString;
+        super.setText(guiString.get());
+    }
+
+    @Override public boolean isVisible()                        { return visible; }
+    @Override public boolean isEnabled()                        { return enabled; }
+    @Override public boolean isHovered()                        { return hovered; }
+    @Override public boolean isFocused()                        { return stateManager.has(MPGuiElementState.FOCUSED); }
+    @Override public boolean canBeFocused()                     { return !stateManager.isForbidden(MPGuiElementState.FOCUSED); }
+    public boolean isHasSelection()                             { return hasSelection; }
+
+    @Override public MPGuiElementStateManager getStateManager() { return stateManager; }
+
+    @Override public MPGuiTexturePack getTexturePack()          { return texturePack; }
+
+    @Override
+    public void setTexturePack(MPGuiTexturePack texturePack) {
+        Objects.requireNonNull(texturePack, "texturePack cannot be null. Use MPGuiTexturePack.EMPTY() instead.");
+        this.texturePack = texturePack;
+    }
+
+    @Override public MPGuiSoundPack getSoundPack() { return soundPack; }
+
+    @Override
+    public void setSoundPack(MPGuiSoundPack soundPack) {
+        Objects.requireNonNull(soundPack, "soundPack cannot be null. Use MPGuiSoundPack.EMPTY() instead.");
+
+        this.soundPack = soundPack;
+    }
+
+    @Override public MPGuiColorPack getColorPack() { return colorPack; }
+
+    @Override
+    public void setColorPack(MPGuiColorPack colorPack) {
+        Objects.requireNonNull(colorPack, "colorPack cannot be null. Use MPGuiColorPack.EMPTY() instead.");
+        this.colorPack = colorPack;
+    }
+
+    @Override
+    public FontRenderer getFontRenderer() {
+        if (fontRenderer != null) return fontRenderer;
+        if (getScreen() != null) return getScreen().getFontRenderer();
+        return Minecraft.getMinecraft().fontRenderer;
+    }
+
+    @Override
+    public void setFontRenderer(@Nullable FontRenderer fr) {
+        if (getScreen() != null) {
+            MouseProject.LOGGER.warn(
+                    "FontRenderer cannot be setup immediately to MPGuiElement that added to container." +
+                            " It set now, but actual element size will be updated on the next gui size calculation."
+            );
+        }
+        fontRenderer = fr;
+    }
+
+    @Override
+    public MPFontSize getFontSize() {
+        if (fontSize != null) return fontSize;
+        if (getScreen() != null) return getScreen().getFontSize();
+        return MPFontSize.NORMAL;
+    }
+
+    @Override
+    public void setFontSize(MPFontSize size) {
+        if (getScreen() != null) {
+            MouseProject.LOGGER.warn(
+                    "FontSize cannot be setup immediately to MPGuiElement that added to container." +
+                            " It set now, but actual element size will be updated on the next gui size calculation."
+            );
+        }
+        fontSize = size;
+    }
+
+    @Override public float getTextScaleMultiplayer()                 { return textScaleMultiplayer; }
+    @Override public void setTextScaleMultiplayer(float multiplayer) { textScaleMultiplayer = multiplayer; }
+
+    //Геометрия
+    //TODO:
+    
     public MutableGuiShape getDrawShape()                    { return elementShape; }
     @Override public MutableGuiShape getShape()              { return elementShape; }
     public MutableGuiShape getCalculatedDrawShape()          { return calculatedElementShape; }
@@ -150,56 +290,18 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         GuiRenderHelper.addPaddingToPreferred(parentDefaultSize, parentContentSize, result, getPadding(), scaleRules);
     }
 
-    @Override public void setTexturePack(MPGuiTexturePack texturePack) { }
-    @Override public void setShape(IGuiShape shape)                    { elementShape.withShape(shape); }
-    @Override public GuiScaleRules getScaleRules()                     { return scaleRules; }
-    @Override public void setScaleRules(GuiScaleRules scaleRules)      { this.scaleRules = scaleRules; }
-    @Override public void setPadding(GuiPadding padding)               { this.padding = padding; }
-    @Override public GuiPadding getPadding()                           { return padding; }
-    @Override public void setScreen(MPGuiScreen screen)                { this.screen = screen; }
-    @Override public MPGuiScreen getScreen()                           { return screen; }
-    @Override public void setParent(MPGuiPanel<?> parent)              { this.parent = parent; }
-    @Override public MPGuiPanel<?> getParent()                         { return parent; }
-    @Override public void setTextOffset(IGuiVector offset)             { }
-    @Override public MutableGuiVector getTextOffset()                  { return new MutableGuiVector(); }
+    @Override public void setShape(IGuiShape shape)               { elementShape.withShape(shape); }
+    @Override public GuiScaleRules getScaleRules()                { return scaleRules; }
+    @Override public void setScaleRules(GuiScaleRules scaleRules) { this.scaleRules = scaleRules; }
+    @Override public void setPadding(GuiPadding padding)          { this.padding = padding; }
+    @Override public GuiPadding getPadding()                      { return padding; }
+    @Override public void setTextOffset(IGuiVector offset)        { }
+    @Override public MutableGuiVector getTextOffset()             { return new MutableGuiVector(); }
 
     @Override
-    public void setGuiString(MPGuiString guiString) {
-        this.guiString = guiString;
-        super.setText(guiString.get());
-    }
-    @Override public MPGuiString getGuiString()                               { return guiString; }
-
-
-    @Override @Nullable public GuiElementActionState getActionState()         { return actionState; }
-    @Override @Nullable public GuiElementPersistentState getPersistentState() { return persistentState; }
-    @Override public MPGuiTexturePack getTexturePack()                        { return texturePack; }
-
-    @Override
-    public boolean applyState(@Nullable GuiElementPersistentState state) {
-        processVanillaPersistentState(state);
-        persistentState = state;
-        return true;
-    }
-
-    @Override
-    public final void setEnableBackgroundDrawing(boolean enableBackgroundDrawingIn) {
-        super.setEnableBackgroundDrawing(true);
-    }
-
-    protected boolean applyActionState(@Nullable GuiElementActionState state) {
-        processVanillaActionState(state);
-        actionState = state;
-        return true;
-    }
-
-    private void processVanillaActionState(@Nullable GuiElementActionState state) {
-
-    }
-
-    private void processVanillaPersistentState(@Nullable GuiElementPersistentState state) {
-        setEnabled(state != GuiElementPersistentState.DISABLED);
-        setVisible(state != null);
+    public final void setEnableBackgroundDrawing(boolean enableBackgroundDrawing) {
+        MouseProject.LOGGER.warn("backgroundDrawing is permanently enabled for MPGuiTextField. " +
+                "If you are attempting to set it manually, please keep in mind that doing so will have no effect.");
     }
 
     protected void onAnyEventFire(MPGuiEvent<T> event) { }
@@ -442,22 +544,22 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     protected void onUpdate(MPGuiTickEvent<T> event) { }
 
     protected void onMouseDragged(MPGuiMouseDragEvent<T> event) {
-        if (isSelecting) {
+        if (hasSelection) {
             setSelectionPos(getCharIndexAtMouse(event.getMouseX()));
             event.setCancelled(true);
         }
     }
 
     protected void onMouseReleased(MPGuiMouseClickEvent<T> event) {
-        isSelecting = false;
+        hasSelection = false;
     }
     protected boolean onMouseScrolled(MPGuiMouseScrollEvent<T> event) { return false; }
     protected void onMouseEnter(MPGuiMouseMoveEvent<T> event)         { }
     protected void onMouseLeave(MPGuiMouseMoveEvent<T> event)         { }
 
     protected void onMousePressed(MPGuiMouseClickEvent<T> event) {
-        isSelecting = checkIsOnText(event.getMouseX(), event.getMouseY());
-        if (isSelecting) {
+        hasSelection = checkIsOnText(event.getMouseX(), event.getMouseY());
+        if (hasSelection) {
             int index = getCharIndexAtMouse(event.getMouseX());
             setCursorPosition(index);
         }
@@ -683,17 +785,6 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
         tessellator.draw();
         GlStateManager.disableColorLogic();
         GlStateManager.enableTexture2D();
-    }
-
-    @Override
-    public void setText(String text) {
-        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent,
-                moveEvent.getMouseX(), moveEvent.getMouseY(), getCursorPosition(), getSelectionEnd(), getText(), text);
-        onAnyEventFire(textTypedEvent);
-        if (!textTypedEvent.isCancelled()) {
-            guiString = MPGuiString.simple(text);
-            super.setText(text);
-        }
     }
 
     @Override

@@ -7,7 +7,6 @@ package ru.mousecray.mouseproject.client.gui.components.texture;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -20,7 +19,7 @@ import javax.annotation.Nullable;
 
 @SideOnly(Side.CLIENT)
 public class MPGuiTexturePack {
-    public static MPGuiTexturePack EMPTY = new MPGuiTexturePack(Int2ObjectMaps.emptyMap());
+    public static MPGuiTexturePack EMPTY() { return new MPGuiTexturePack(new Int2ObjectArrayMap<>()); }
 
     private final Int2ObjectMap<MPGuiTexture> textures;
 
