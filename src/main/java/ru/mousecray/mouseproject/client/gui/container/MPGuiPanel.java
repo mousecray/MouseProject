@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.input.Keyboard;
 import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.MPGuiScreen;
@@ -80,8 +81,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     private MPGuiScreen   screen;
     private MPGuiPanel<?> parent;
 
-    private int     id;
-    private boolean enabled, visible, hovered;
+    private int id;
 
     protected MPGuiTexturePack texturePack = MPGuiTexturePack.EMPTY();
     protected MPGuiColorPack   colorPack   = MPGuiColorPack.CONTROL_SIMPLE();
@@ -112,12 +112,6 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         scrollEvent.bind(mc, th);
         keyEvent.bind(mc, th);
         soundEvent.bind(mc, th);
-
-        stateManager.setChangeListener(() -> {
-            enabled = !stateManager.has(MPGuiElementState.DISABLED);
-            visible = !stateManager.has(MPGuiElementState.HIDDEN);
-            hovered = stateManager.has(MPGuiElementState.HOVERED);
-        });
     }
 
     public List<MPGuiElement<?>> getChildren()               { return children; }
@@ -132,7 +126,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     @Override
     public void setScreen(@Nullable MPGuiScreen screen) {
         this.screen = screen;
-        if (screen != null) stateManager.lockForbidden();
+        stateManager.lockForbidden(screen != null || getParent() != null);
         for (MPGuiElement<?> child : children) child.setScreen(screen);
     }
 
@@ -141,20 +135,12 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     @Override
     public void setParent(@Nullable MPGuiPanel<?> parent) {
         this.parent = parent;
-        if (parent != null) stateManager.lockForbidden();
+        stateManager.lockForbidden(parent != null || getScreen() != null);
     }
 
     //Данные и состояние
-    @Override public String getText() { return ""; }
-    @Override public void setText(@Nullable String text)        { }
-    @Override public MPGuiString getGuiString()                 { return MPGuiString.EMPTY(); }
+    @Override public MPGuiString getGuiString() { return MPGuiString.EMPTY(); }
     @Override public void setGuiString(MPGuiString guiString)   { }
-
-    @Override public boolean isVisible()                        { return visible; }
-    @Override public boolean isEnabled()                        { return enabled; }
-    @Override public boolean isHovered()                        { return hovered; }
-    @Override public boolean isFocused()                        { return stateManager.has(MPGuiElementState.FOCUSED); }
-    @Override public boolean canBeFocused()                     { return !stateManager.isForbidden(MPGuiElementState.FOCUSED); }
 
     @Override public MPGuiElementStateManager getStateManager() { return stateManager; }
 
@@ -171,7 +157,6 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     @Override
     public void setSoundPack(MPGuiSoundPack soundPack) {
         Objects.requireNonNull(soundPack, "soundPack cannot be null. Use MPGuiSoundPack.EMPTY() instead.");
-
         this.soundPack = soundPack;
     }
 
@@ -182,7 +167,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         Objects.requireNonNull(colorPack, "colorPack cannot be null. Use MPGuiColorPack.EMPTY() instead.");
         this.colorPack = colorPack;
     }
-    
+
     @Override
     public FontRenderer getFontRenderer() {
         if (getScreen() != null) return getScreen().getFontRenderer();
@@ -209,8 +194,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     }
 
     //Геометрия
-    @Override public void setShape(IGuiShape shape) { this.shape.withShape(shape); }
-    @Override public MutableGuiShape getShape()                   { return shape; }
+    @Override public MutableGuiShape getShape() { return shape; }
     @Override public MutableGuiShape getCalculatedShape()         { return calculatedShape; }
     @Override public MutableGuiShape getCalculatedInnerShape()    { return calculatedInnerShape; }
 
@@ -219,7 +203,6 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     @Override public GuiPadding getPadding()                      { return padding; }
     @Override public void setPadding(GuiPadding padding)          { this.padding = padding; }
     @Override public MutableGuiVector getTextOffset()             { return new MutableGuiVector(); }
-    @Override public void setTextOffset(IGuiVector offset)        { }
 
     public void addChild(MPGuiElement<?> child, @Nullable GuiMargin margin, @Nullable GuiVector offset) {
         children.add(child);
@@ -248,39 +231,32 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     }
 
     @Override
-    public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
+    public void calculate(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape available) {
         GuiRenderHelper.calculateFlowComponentShape(
-                calculatedShape, parentDefaultSize, parentContentSize,
+                calculatedShape, pDefSize, pContentSize,
                 shape, scaleRules, available
         );
 
         if (calculatedShape.width() <= 0 || calculatedShape.height() <= 0) return;
 
-        float padL = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getLeft());
-        float padT = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getTop());
-        float padR = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, padding.getRight());
-        float padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, padding.getBottom());
+        GuiPadding pad  = getPadding();
+        float      padL = GuiRenderHelper.calculateFlowComponentX(pDefSize, pContentSize, pad.getLeft());
+        float      padT = GuiRenderHelper.calculateFlowComponentY(pDefSize, pContentSize, pad.getTop());
+        float      padR = GuiRenderHelper.calculateFlowComponentX(pDefSize, pContentSize, pad.getRight());
+        float      padB = GuiRenderHelper.calculateFlowComponentY(pDefSize, pContentSize, pad.getBottom());
 
         calculatedInnerShape.withShape(calculatedShape);
         calculatedInnerShape.grow(-padL, -padT, -padR, -padB);
 
         innerShapeTemp.withShape(calculatedInnerShape);
 
-        layoutChildren(parentDefaultSize, parentContentSize, innerShapeTemp);
+        layoutChildren(pDefSize, pContentSize, innerShapeTemp);
     }
+
+    @Override public void calculateTextOffset(IGuiVector pDefSize, IGuiVector pContentSize) { }
+    @Override public void setupShapeToVanilla(IGuiShape result)                             { }
 
     protected abstract void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner);
-
-    @Override
-    public void measurePreferred(
-            IGuiVector parentDefaultSize, IGuiVector parentContentSize,
-            float suggestedX, float suggestedY, MutableGuiVector result
-    ) {
-        GuiRenderHelper.measurePreferredWithScaleRules(
-                parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, shape, scaleRules
-        );
-        GuiRenderHelper.addPaddingToPreferred(parentDefaultSize, parentContentSize, result, getPadding(), scaleRules);
-    }
 
     @Override
     public void offsetCalculatedShape(float dx, float dy) {
@@ -473,18 +449,11 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
             MPGuiEventFactory.pushKeyEvent(keyEvent, mouseX, mouseY, typedChar, keyCode);
             onAnyEventFire(keyEvent);
 
-            if (!keyEvent.isCancelled() &&
-                    (keyCode == org.lwjgl.input.Keyboard.KEY_RETURN || keyCode == org.lwjgl.input.Keyboard.KEY_NUMPADENTER)
-            ) {
-                dispatchMousePressed(mc, mouseX, mouseY, 0);
-                dispatchMouseReleased(mc, mouseX, mouseY, 0);
-                keyEvent.consume();
-            }
-
             if (!keyEvent.isCancelled()) {
                 dispatchPlaySound(mc, mc.getSoundHandler(), SoundSourceType.KEY_TYPED);
                 onKeyTyped(keyEvent);
             }
+
             return keyEvent.isConsumed();
         }
         return false;
@@ -498,11 +467,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
                     soundEvent, moveEvent.getMouseX(), moveEvent.getMouseY(), soundHandler, sound, source
             );
             onAnyEventFire(soundEvent);
-            if (!soundEvent.isCancelled()) {
-                soundEvent.getHandler().playSound(
-                        PositionedSoundRecord.getMasterRecord(soundEvent.getSound(), 1.0F)
-                );
-            }
+            if (!soundEvent.isCancelled()) onPlaySound(soundEvent);
         }
     }
 
@@ -582,51 +547,35 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     protected void onMouseReleased(MPGuiMouseClickEvent<T> event)  { }
     protected void onMouseDragged(MPGuiMouseDragEvent<T> event)    { }
     protected void onMouseScrolled(MPGuiMouseScrollEvent<T> event) { }
-    protected void onKeyTyped(MPGuiKeyEvent<T> event)              { }
 
-    protected void onAnyEventFire(MPGuiEvent<T> event)             { }
+    protected void onKeyTyped(MPGuiKeyEvent<T> event) {
+        if (!event.isCancelled() && (event.getKeyCode() == Keyboard.KEY_RETURN || event.getKeyCode() == Keyboard.KEY_NUMPADENTER)) {
+            MutableGuiShape calcShape = getCalculatedShape();
+            dispatchMousePressed(event.getMc(), (int) (calcShape.x() + calcShape.width() / 2), (int) (calcShape.y() + calcShape.height() / 2), 0);
+            dispatchMouseReleased(event.getMc(), (int) (calcShape.x() + calcShape.width() / 2), (int) (calcShape.y() + calcShape.height() / 2), 0);
+            event.consume();
+        }
+    }
+
+    protected void onAnyEventFire(MPGuiEvent<T> event) { }
 
     public abstract void onClick(MPGuiMouseClickEvent<T> event);
 
     //Интеграция с vanilla
     @Override
-    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
-        return isEnabled() && isVisible() && calculatedShape.contains(mouseX, mouseY);
-    }
-
-    @Override
-    public void mouseReleased(int mouseX, int mouseY) {
-        dispatchMouseReleased(Minecraft.getMinecraft(), mouseX, mouseY, 0);
-    }
-
-    @Override
-    public int getHoverState(boolean mouseOver) {
-        return !isEnabled() ? 0 : mouseOver ? 2 : 1;
-    }
-
-    @Override
     public boolean mouseHover(Minecraft mc, int mouseX, int mouseY) {
-        return calculatedShape.contains(mouseX, mouseY);
+        return MPGuiElement.super.mouseHover(mc, mouseX, mouseY);
     }
 
     @Override
-    public final void playPressSound(SoundHandler soundHandler) {
-        dispatchPlaySound(Minecraft.getMinecraft(), Minecraft.getMinecraft().getSoundHandler(), SoundSourceType.PRESS);
+    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+        return MPGuiElement.super.mousePressed(mc, mouseX, mouseY);
     }
 
-    @Override public final boolean isMouseOver() { return hovered; }
-
-    @Override
-    public void performClickFromVanilla() {
-        if (!isEnabled() || !isVisible()) return;
-
-        int centerX = (int) (calculatedShape.x() + calculatedShape.width() / 2f);
-        int centerY = (int) (calculatedShape.y() + calculatedShape.height() / 2f);
-
-        Minecraft mc = Minecraft.getMinecraft();
-        dispatchMousePressed(mc, centerX, centerY, 0);
-        dispatchMouseReleased(mc, centerX, centerY, 0);
-    }
+    @Override public final int getHoverState(boolean mouseOver)           { return MPGuiElement.super.getHoverState(mouseOver); }
+    @Override public void mouseReleased(int mouseX, int mouseY)           { MPGuiElement.super.mouseReleased(mouseX, mouseY); }
+    @Override public final void playPressSound(SoundHandler soundHandler) { MPGuiElement.super.playPressSound(soundHandler); }
+    @Override public boolean isMouseOver()                                { return MPGuiElement.super.isMouseOver(); }
 
     public void collectElements() {
         if (screen == null) return;

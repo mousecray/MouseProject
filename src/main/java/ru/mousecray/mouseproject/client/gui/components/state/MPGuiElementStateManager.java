@@ -66,7 +66,5 @@ public class MPGuiElementStateManager {
         return mask;
     }
 
-    public void lockForbidden() {
-        forbiddenLocked = true;
-    }
+    public void lockForbidden(boolean lock) { forbiddenLocked = lock; }
 }

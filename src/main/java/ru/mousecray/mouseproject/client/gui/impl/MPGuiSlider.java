@@ -247,10 +247,10 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     }
 
     @Override
-    public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        lastParentDefaultSize = parentDefaultSize;
-        lastParentContentSize = parentContentSize;
+    public void calculate(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape available) {
+        lastParentDefaultSize = pDefSize;
+        lastParentContentSize = pContentSize;
 
-        super.calculate(parentDefaultSize, parentContentSize, available);
+        super.calculate(pDefSize, pContentSize, available);
     }
 }

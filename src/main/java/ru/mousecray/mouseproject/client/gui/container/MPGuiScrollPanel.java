@@ -64,16 +64,16 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
     @Override public MutableGuiShape getCalculatedShape()    { return calculatedElementShape; }
 
     @Override
-    public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
+    public void calculate(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape available) {
         GuiRenderHelper.calculateFlowComponentShape(
-                calculatedElementShape, parentDefaultSize, parentContentSize,
+                calculatedElementShape, pDefSize, pContentSize,
                 elementShape, scaleRules, available
         );
 
         if (content != null) {
             MutableGuiShape contentAvail = calculatedElementShape.copy().toMutable();
             contentAvail.withHeight(99999f);
-            content.calculate(parentDefaultSize, parentContentSize, contentAvail);
+            content.calculate(pDefSize, pContentSize, contentAvail);
 
             contentHeight = calculateTrueContentHeight();
 
@@ -237,9 +237,9 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
     }
 
     @Override
-    public void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result) {
-        GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
-        GuiRenderHelper.addPaddingToPreferred(parentDefaultSize, parentContentSize, result, getPadding(), scaleRules);
+    public void measurePreferred(IGuiVector pDefSize, IGuiVector pContentSize, float sugX, float sugY, MutableGuiVector result) {
+        GuiRenderHelper.measurePreferredWithScaleRules(pDefSize, pContentSize, sugX, sugY, result, elementShape, scaleRules);
+        GuiRenderHelper.addPaddingToPreferred(pDefSize, pContentSize, result, getPadding(), scaleRules);
     }
 
     @Override public void setScreen(MPGuiScreen screen) {

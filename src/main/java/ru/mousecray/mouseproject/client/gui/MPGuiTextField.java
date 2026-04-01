@@ -137,7 +137,7 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override
     public void setScreen(@Nullable MPGuiScreen screen) {
         this.screen = screen;
-        if (screen != null) stateManager.lockForbidden();
+        stateManager.lockForbidden(screen != null || getParent() != null);
     }
 
     @Override @Nullable public MPGuiPanel<?> getParent() { return parent; }
@@ -145,39 +145,34 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override
     public void setParent(@Nullable MPGuiPanel<?> parent) {
         this.parent = parent;
-        if (parent != null) stateManager.lockForbidden();
+        stateManager.lockForbidden(parent != null || getScreen() != null);
     }
 
     //Данные и состояние
-    @Override public String getText() { return guiString.get(); }
-
-    @Override
-    public void setText(String rawText) {
-        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent,
-                moveEvent.getMouseX(), moveEvent.getMouseY(),
-                getCursorPosition(), getSelectionEnd(), getText(), rawText
-        );
-        onAnyEventFire(textTypedEvent);
-        if (!textTypedEvent.isCancelled()) {
-            guiString = MPGuiString.simple(rawText);
-            super.setText(rawText);
-        }
-    }
-
     @Override public MPGuiString getGuiString() { return guiString; }
 
     @Override
     public void setGuiString(MPGuiString guiString) {
         Objects.requireNonNull(guiString, "guiString cannot be null. Use MPGuiString.EMPTY() instead.");
-        this.guiString = guiString;
-        super.setText(guiString.get());
+        MPGuiEventFactory.pushTextTypedEvent(textTypedEvent,
+                moveEvent.getMouseX(), moveEvent.getMouseY(),
+                getCursorPosition(), getSelectionEnd(), getText(), guiString.get()
+        );
+        onAnyEventFire(textTypedEvent);
+        if (!textTypedEvent.isCancelled()) {
+            this.guiString = guiString;
+            super.setText(guiString.get());
+        }
     }
 
-    @Override public boolean isVisible()                        { return visible; }
-    @Override public boolean isEnabled()                        { return enabled; }
-    @Override public boolean isHovered()                        { return hovered; }
-    @Override public boolean isFocused()                        { return stateManager.has(MPGuiElementState.FOCUSED); }
-    @Override public boolean canBeFocused()                     { return !stateManager.isForbidden(MPGuiElementState.FOCUSED); }
+    public String getPlaceholder()                           { return placeholder.get(); }
+    public void setPlaceholder(@Nullable String placeholder) { this.placeholder = MPGuiString.simple(placeholder); }
+
+    public void setPlaceholder(MPGuiString placeholder) {
+        Objects.requireNonNull(placeholder, "placeholder cannot be null. Use MPGuiString.EMPTY() instead.");
+        this.placeholder = placeholder;
+    }
+
     public boolean isHasSelection()                             { return hasSelection; }
 
     @Override public MPGuiElementStateManager getStateManager() { return stateManager; }
@@ -195,7 +190,6 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override
     public void setSoundPack(MPGuiSoundPack soundPack) {
         Objects.requireNonNull(soundPack, "soundPack cannot be null. Use MPGuiSoundPack.EMPTY() instead.");
-
         this.soundPack = soundPack;
     }
 
@@ -247,56 +241,38 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
     @Override public void setTextScaleMultiplayer(float multiplayer) { textScaleMultiplayer = multiplayer; }
 
     //Геометрия
-    //TODO:
-    
-    public MutableGuiShape getDrawShape()                    { return elementShape; }
-    @Override public MutableGuiShape getShape()              { return elementShape; }
-    public MutableGuiShape getCalculatedDrawShape()          { return calculatedElementShape; }
-    @Override public MutableGuiShape getCalculatedShape()    { return calculatedElementShape; }
-    @Nullable public String getPlaceholder()                 { return placeholder.get(); }
-    public void setPlaceholder(@Nullable String placeholder) { this.placeholder = MPGuiString.simple(placeholder); }
-    public void setPlaceholder(MPGuiString placeholder)      { this.placeholder = placeholder; }
+    @Override public MutableGuiShape getShape() { return shape; }
+    @Override public MutableGuiShape getCalculatedShape()         { return calculatedShape; }
+    @Override public MutableGuiShape getCalculatedInnerShape()    { return calculatedInnerShape; }
+
+    @Override public GuiScaleRules getScaleRules()                { return scaleRules; }
+    @Override public void setScaleRules(GuiScaleRules scaleRules) { this.scaleRules = Objects.requireNonNull(scaleRules); }
+    @Override public GuiPadding getPadding()                      { return padding; }
+    @Override public void setPadding(GuiPadding padding)          { this.padding = Objects.requireNonNull(padding); }
+    @Override public MutableGuiVector getTextOffset()             { return textOffset; }
 
     @Override
-    public void calculate(IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiShape available) {
-        GuiRenderHelper.calculateFlowComponentShape(calculatedElementShape, parentDefaultSize, parentContentSize, elementShape, scaleRules, available);
+    public void calculateTextOffset(IGuiVector pDefSize, IGuiVector pContentSize) {
+        GuiRenderHelper.calculateFlowComponentVector(
+                calculatedTextOffsetTemp, pDefSize, pContentSize, getTextOffset()
+        );
+    }
 
-        GuiPadding pad  = getPadding();
-        float      padL = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getLeft());
-        float      padT = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getTop());
-        float      padR = GuiRenderHelper.calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getRight());
-        float      padB = GuiRenderHelper.calculateFlowComponentY(parentDefaultSize, parentContentSize, pad.getBottom());
-
-        calculatedInnerShape.withShape(calculatedElementShape);
-        calculatedInnerShape.grow(-padL, -padT, -padR, -padB);
-
-        x = (int) calculatedElementShape.x();
-        y = (int) calculatedElementShape.y();
-        width = (int) calculatedElementShape.width();
-        height = (int) calculatedElementShape.height();
+    @Override
+    public void setupShapeToVanilla(IGuiShape result) {
+        x = (int) result.x();
+        y = (int) result.y();
+        width = (int) result.width();
+        height = (int) result.height();
     }
 
     @Override
     public void offsetCalculatedShape(float dx, float dy) {
-        calculatedElementShape.offset(dx, dy);
+        calculatedShape.offset(dx, dy);
         calculatedInnerShape.offset(dx, dy);
-        x = (int) calculatedElementShape.x();
-        y = (int) calculatedElementShape.y();
+        x = (int) calculatedShape.x();
+        y = (int) calculatedShape.y();
     }
-
-    @Override
-    public void measurePreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result) {
-        GuiRenderHelper.measurePreferredWithScaleRules(parentDefaultSize, parentContentSize, suggestedX, suggestedY, result, elementShape, scaleRules);
-        GuiRenderHelper.addPaddingToPreferred(parentDefaultSize, parentContentSize, result, getPadding(), scaleRules);
-    }
-
-    @Override public void setShape(IGuiShape shape)               { elementShape.withShape(shape); }
-    @Override public GuiScaleRules getScaleRules()                { return scaleRules; }
-    @Override public void setScaleRules(GuiScaleRules scaleRules) { this.scaleRules = scaleRules; }
-    @Override public void setPadding(GuiPadding padding)          { this.padding = padding; }
-    @Override public GuiPadding getPadding()                      { return padding; }
-    @Override public void setTextOffset(IGuiVector offset)        { }
-    @Override public MutableGuiVector getTextOffset()             { return new MutableGuiVector(); }
 
     @Override
     public final void setEnableBackgroundDrawing(boolean enableBackgroundDrawing) {
@@ -304,6 +280,8 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
                 "If you are attempting to set it manually, please keep in mind that doing so will have no effect.");
     }
 
+    //Диспетчеризация событий
+    //TODO:
     protected void onAnyEventFire(MPGuiEvent<T> event) { }
 
     @Override
