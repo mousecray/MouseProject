@@ -45,14 +45,14 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
 
     //Данные и состояние
     default String getText() { return getGuiString().get(); }
-    default void setText(@Nullable String text) { setGuiString(MPGuiString.simple(text)); }
+    default void setText(String text) { setGuiString(MPGuiString.simple(text)); }
     MPGuiString getGuiString();
     void setGuiString(MPGuiString guiString);
-    default boolean isVisible()                 { return !getStateManager().has(MPGuiElementState.HIDDEN); }
-    default boolean isEnabled()                 { return !getStateManager().has(MPGuiElementState.DISABLED); }
-    default boolean isHovered()                 { return getStateManager().has(MPGuiElementState.HOVERED); }
-    default boolean isFocused()                 { return getStateManager().has(MPGuiElementState.FOCUSED); }
-    default boolean canBeFocused()              { return !getStateManager().isForbidden(MPGuiElementState.FOCUSED); }
+    default boolean isVisible()       { return !getStateManager().has(MPGuiElementState.HIDDEN); }
+    default boolean isEnabled()       { return !getStateManager().has(MPGuiElementState.DISABLED); }
+    default boolean isHovered()       { return getStateManager().has(MPGuiElementState.HOVERED); }
+    default boolean isFocused()       { return getStateManager().has(MPGuiElementState.FOCUSED); }
+    default boolean canBeFocused()    { return !getStateManager().isForbidden(MPGuiElementState.FOCUSED); }
 
     MPGuiElementStateManager getStateManager();
 
@@ -80,7 +80,7 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     GuiPadding getPadding();
     void setPadding(GuiPadding padding);
     MutableGuiVector getTextOffset();
-    default void setTextOffset(IGuiVector offset) { offset.withVector(offset); }
+    default void setTextOffset(IGuiVector offset) { getTextOffset().withVector(offset); }
 
     default void calculate(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape available) {
         MutableGuiShape calcShape = getCalculatedShape();
@@ -104,6 +104,8 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
         calculateTextOffset(pDefSize, pContentSize);
 
         setupShapeToVanilla(calcShape);
+
+        onCalculated(pDefSize, pContentSize, calcInnerShape);
     }
 
     default void measurePreferred(IGuiVector pDefSize, IGuiVector pContentSize, float sugX, float sugY, MutableGuiVector result) {
@@ -116,8 +118,9 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     }
 
     void offsetCalculatedShape(float dx, float dy);
-    void calculateTextOffset(IGuiVector pDefSize, IGuiVector pContentSize);
-    void setupShapeToVanilla(IGuiShape result);
+    default void calculateTextOffset(IGuiVector pDefSize, IGuiVector pContentSize)                    { }
+    default void setupShapeToVanilla(IGuiShape result)                                                { }
+    default void onCalculated(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape innerCalcShape) { }
 
     //Диспетчеризация событий
     void dispatchUpdate(Minecraft mc, int mouseX, int mouseY, float partialTicks);

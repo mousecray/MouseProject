@@ -80,7 +80,6 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     private   GuiScaleRules    scaleRules           = new GuiScaleRules(GuiScaleType.FLOW);
 
     private boolean centered;
-    private boolean enabled = true, visible = true, hovered = false;
 
     @Nullable private MPGuiPanel<?> parent;
     private           GuiPadding    padding = new GuiPadding(0);
@@ -112,11 +111,7 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
         keyEvent.bind(mc, th);
         soundEvent.bind(mc, th);
 
-        stateManager.setChangeListener(() -> {
-            enabled = !stateManager.has(MPGuiElementState.DISABLED);
-            visible = !stateManager.has(MPGuiElementState.HIDDEN);
-            hovered = stateManager.has(MPGuiElementState.HOVERED);
-        });
+        stateManager.setChangeListener(() -> visible = !stateManager.has(MPGuiElementState.HIDDEN));
     }
 
     @SuppressWarnings("unchecked") @Override public T self() { return (T) this; }

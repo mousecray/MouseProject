@@ -20,7 +20,6 @@ import org.lwjgl.input.Keyboard;
 import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.client.gui.MPGuiElement;
 import ru.mousecray.mouseproject.client.gui.MPGuiScreen;
-import ru.mousecray.mouseproject.client.gui.components.GuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.components.color.MPGuiColorPack;
 import ru.mousecray.mouseproject.client.gui.components.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.components.sound.MPGuiSoundPack;
@@ -231,30 +230,10 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     }
 
     @Override
-    public void calculate(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape available) {
-        GuiRenderHelper.calculateFlowComponentShape(
-                calculatedShape, pDefSize, pContentSize,
-                shape, scaleRules, available
-        );
-
-        if (calculatedShape.width() <= 0 || calculatedShape.height() <= 0) return;
-
-        GuiPadding pad  = getPadding();
-        float      padL = GuiRenderHelper.calculateFlowComponentX(pDefSize, pContentSize, pad.getLeft());
-        float      padT = GuiRenderHelper.calculateFlowComponentY(pDefSize, pContentSize, pad.getTop());
-        float      padR = GuiRenderHelper.calculateFlowComponentX(pDefSize, pContentSize, pad.getRight());
-        float      padB = GuiRenderHelper.calculateFlowComponentY(pDefSize, pContentSize, pad.getBottom());
-
-        calculatedInnerShape.withShape(calculatedShape);
-        calculatedInnerShape.grow(-padL, -padT, -padR, -padB);
-
-        innerShapeTemp.withShape(calculatedInnerShape);
-
+    public void onCalculated(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape innerCalcShape) {
+        innerShapeTemp.withShape(innerCalcShape);
         layoutChildren(pDefSize, pContentSize, innerShapeTemp);
     }
-
-    @Override public void calculateTextOffset(IGuiVector pDefSize, IGuiVector pContentSize) { }
-    @Override public void setupShapeToVanilla(IGuiShape result)                             { }
 
     protected abstract void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner);
 
