@@ -5,8 +5,6 @@
 
 package ru.mousecray.mouseproject.client.gui.dim;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -14,28 +12,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public final class GuiVector implements IGuiVector {
     public static final GuiVector ZERO = new GuiVector(0f, 0f);
 
-    private static final Long2ObjectMap<GuiVector> cache = new Long2ObjectOpenHashMap<>(32768);
-
-    /**
-     * @return кешированное значение от -500.00 до +500.00
-     * (всегда округляется до 0.01)
-     */
-    @SuppressWarnings("ManualMinMaxCalculation")
     public static GuiVector of(float x, float y) {
-        float cx = x < -500f ? -500f : (x > 500f ? 500f : x);
-        float cy = y < -500f ? -500f : (y > 500f ? 500f : y);
-
-        int ix = Math.round(cx * 100f);
-        int iy = Math.round(cy * 100f);
-
-        long key = ((long) (ix + 50000)) * 100001L + (iy + 50000);
-
-        GuiVector cached = cache.get(key);
-        if (cached != null) return cached;
-
-        GuiVector vec = new GuiVector(ix * 0.01f, iy * 0.01f);
-        cache.put(key, vec);
-        return vec;
+        if (x == 0f && y == 0f) return ZERO;
+        return new GuiVector(x, y);
     }
 
     @SuppressWarnings("SuspiciousNameCombination") public static GuiVector of(float x) { return of(x, x); }

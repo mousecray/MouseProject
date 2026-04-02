@@ -7,6 +7,7 @@ package ru.mousecray.mouseproject.client.gui.components;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -135,7 +136,7 @@ public class GuiRenderHelper {
         GlStateManager.enableTexture2D();
     }
 
-    public static void drawTooltip(String line, Minecraft mc, int mouseX, int mouseY, MPFontSize fontSize) {
+    public static void drawTooltip(String line, Minecraft mc, int mouseX, int mouseY, MPFontSize fontSize, ScaledResolution sc) {
         if (line != null && !line.isEmpty()) {
             float scale        = fontSize.getScale();
             float inverseScale = 1.0F / scale;
@@ -162,6 +163,15 @@ public class GuiRenderHelper {
 
             float borderSize  = 3;
             float borderSize2 = 4;
+
+
+            float screenW = sc.getScaledWidth() * inverseScale;
+            float screenH = sc.getScaledHeight() * inverseScale;
+
+            if (tooltipX + tooltipTextWidth + borderSize > screenW) tooltipX = (int) (screenW - tooltipTextWidth - borderSize);
+            if (tooltipX - borderSize2 < 0) tooltipX = (int) borderSize2;
+            if (tooltipY + tooltipHeight + borderSize > screenH) tooltipY = (int) (screenH - tooltipHeight - borderSize);
+            if (tooltipY - borderSize2 < 0) tooltipY = (int) borderSize2;
 
             //Верхняя тёмная линия
             GuiRenderHelper.drawGradientRect(

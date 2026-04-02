@@ -43,7 +43,7 @@ public final class MutableGuiVector implements IGuiVector {
     public IGuiVector withVector(IGuiVector newVec) {
         withX(newVec.x());
         withY(newVec.y());
-        return null;
+        return this;
     }
 
     @Override

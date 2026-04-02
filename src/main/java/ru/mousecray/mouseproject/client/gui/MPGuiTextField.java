@@ -496,22 +496,26 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             FontRenderer fr     = getFontRenderer();
             int          pColor = colorPack.getCalculatedColor(stateManager, 0x686868);
 
-            float scale        = fontSize.getScale() * textScaleMultiplayer;
-            float inverseScale = 1.0F / scale;
+            MPFontSize fs           = getFontSize();
+            float      scale        = fs.getScale() * textScaleMultiplayer;
+            float      inverseScale = 1.0F / scale;
 
             float innerX = calculatedInnerShape.x();
             float innerY = calculatedInnerShape.y();
             float innerH = calculatedInnerShape.height();
 
-            float textX = innerX * inverseScale;
-            float textY = (innerY + innerH / 2f) * inverseScale - (fr.FONT_HEIGHT / 1.4f) * inverseScale;
+            float logicalX = innerX * inverseScale;
+            float logicalY = (innerY + innerH / 2f) * inverseScale - (fr.FONT_HEIGHT / 1.4f) * inverseScale;
+
+            float textX = Math.round(logicalX * scale) / scale;
+            float textY = Math.round(logicalY * scale) / scale;
 
             GlStateManager.pushMatrix();
             GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
             GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
             GlStateManager.scale(scale, scale, 1.0F);
 
-            GuiRenderHelper.drawString(fr, placeholder.get(), textX, textY, pColor, fontSize != MPFontSize.SMALL);
+            GuiRenderHelper.drawString(fr, placeholder.get(), textX, textY, pColor, fs != MPFontSize.SMALL);
 
             GlStateManager.popMatrix();
         } else {
@@ -525,72 +529,70 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
         FontRenderer fontRenderer = getFontRenderer();
         int          textColor    = colorPack.getCalculatedColor(stateManager, 0xFFFFFF);
-        String       visibleText  = getText();
-        int          cursorPos    = getCursorPosition() - lineScrollOffset;
+        String       fullText     = getText();
+
+        int cursorPos       = getCursorPosition() - lineScrollOffset;
+        int selectionEndPos = getSelectionEnd() - lineScrollOffset;
 
         float innerX = calculatedInnerShape.x();
         float innerY = calculatedInnerShape.y();
         float innerH = calculatedInnerShape.height();
 
-        float textX = innerX * inverseScale;
-        float textY = (innerY + innerH / 2f) * inverseScale - (fontRenderer.FONT_HEIGHT / 1.4f) * inverseScale;
+        int scaledAvailableWidth = (int) (calculatedInnerShape.width() * inverseScale);
 
-        int selectionEndPos = getSelectionEnd() - lineScrollOffset;
+        float logicalX = innerX * inverseScale;
+        float logicalY = (innerY + innerH / 2f) * inverseScale - (fontRenderer.FONT_HEIGHT / 2f);
+
+        float textX = Math.round(logicalX * scale) / scale;
+        float textY = Math.round(logicalY * scale) / scale;
 
         GlStateManager.pushMatrix();
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
         GlStateManager.scale(scale, scale, 1.0F);
 
+        String visibleText = fontRenderer.trimStringToWidth(fullText.substring(lineScrollOffset), scaledAvailableWidth);
+
         if (selectionEndPos < 0) selectionEndPos = 0;
         if (selectionEndPos > visibleText.length()) selectionEndPos = visibleText.length();
 
         boolean showCursor    = isFocused() && cursorCounter / 6 % 2 == 0 && cursorPos >= 0 && cursorPos <= visibleText.length();
-        boolean isCursorAtEnd = getCursorPosition() < getText().length() || getText().length() >= getMaxStringLength();
+        boolean isCursorAtEnd = getCursorPosition() < fullText.length() || fullText.length() >= getMaxStringLength();
 
-        float cursorX = textX;
-        if (!visibleText.isEmpty()) {
-            String textBeforeCursor =
-                    cursorPos >= 0 && cursorPos <= visibleText.length() ? visibleText.substring(0, cursorPos) : visibleText;
-            cursorX = textX + fontRenderer.getStringWidth(textBeforeCursor);
-        }
+        float  cursorX          = textX;
+        String textBeforeCursor = null;
+        if (!visibleText.isEmpty()) textBeforeCursor = cursorPos >= 0 && cursorPos <= visibleText.length()
+                ? visibleText.substring(0, cursorPos) : visibleText;
 
-        float maxTextWidth = calculatedInnerShape.width() * inverseScale;
+        if (!visibleText.isEmpty()) cursorX = textX + fontRenderer.getStringWidth(textBeforeCursor);
 
         if (cursorPos < 0) cursorX = textX;
-        else if (cursorPos > visibleText.length()) cursorX = textX + maxTextWidth;
+        else if (cursorPos > visibleText.length()) cursorX = textX + (float) scaledAvailableWidth;
         else if (isCursorAtEnd) cursorX--;
 
         if (!visibleText.isEmpty()) {
-            String textBeforeCursor =
-                    cursorPos >= 0 && cursorPos <= visibleText.length() ? visibleText.substring(0, cursorPos) : visibleText;
             float currentX = GuiRenderHelper.drawString(
                     fontRenderer, textBeforeCursor, textX, textY, textColor, fontSize != MPFontSize.SMALL
             );
 
-            if (cursorPos >= 0 && cursorPos < visibleText.length()) {
-                GuiRenderHelper.drawString(
-                        fontRenderer, visibleText.substring(cursorPos),
-                        currentX, textY, textColor, fontSize != MPFontSize.SMALL
-                );
-            }
+            if (cursorPos >= 0 && cursorPos < visibleText.length()) GuiRenderHelper.drawString(
+                    fontRenderer, visibleText.substring(cursorPos), currentX,
+                    textY, textColor, fontSize != MPFontSize.SMALL
+            );
         }
 
         if (showCursor) {
-            if (isCursorAtEnd) {
-                GuiRenderHelper.drawRect(
-                        cursorX, textY - 1, cursorX + 1, textY + 1 + fontRenderer.FONT_HEIGHT, -3092272
-                );
-            } else {
-                GuiRenderHelper.drawString(
-                        fontRenderer, "|", cursorX, textY, textColor, fontSize != MPFontSize.SMALL
-                );
-            }
+            if (isCursorAtEnd) GuiRenderHelper.drawRect(
+                    cursorX, textY - 1, cursorX + 1, textY + 1 + fontRenderer.FONT_HEIGHT, -3092272
+            );
+            else GuiRenderHelper.drawString(
+                    fontRenderer, "|", cursorX, textY, textColor, fontSize != MPFontSize.SMALL
+            );
         }
 
         if (selectionEndPos != cursorPos) {
             float selectionEndX = textX + fontRenderer.getStringWidth(visibleText.substring(0, selectionEndPos));
-            float maxX          = (calculatedInnerShape.x() + calculatedInnerShape.width()) * inverseScale;
+            float maxX          = textX + (float) scaledAvailableWidth;
             drawSelectionBox(
                     cursorX, textY - 1, selectionEndX - 1,
                     textY + 1 + fontRenderer.FONT_HEIGHT, textX, maxX
@@ -776,6 +778,36 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
             }
         }
         return "";
+    }
+
+    @Override
+    public void setSelectionPos(int position) {
+        int textLength = getText().length();
+
+        if (position > textLength) position = textLength;
+        if (position < 0) position = 0;
+
+        this.selectionEnd = position;
+
+        FontRenderer fr = getFontRenderer();
+        if (lineScrollOffset > textLength) {
+            lineScrollOffset = textLength;
+        }
+
+        float scale                = getFontSize().getScale() * getTextScaleMultiplayer();
+        int   scaledAvailableWidth = (int) (calculatedInnerShape.width() / scale);
+
+        String s = fr.trimStringToWidth(getText().substring(lineScrollOffset), scaledAvailableWidth);
+        int    k = s.length() + lineScrollOffset;
+
+        if (position == lineScrollOffset) {
+            lineScrollOffset -= fr.trimStringToWidth(getText(), scaledAvailableWidth, true).length();
+        }
+
+        if (position > k) lineScrollOffset += position - k;
+        else if (position <= lineScrollOffset) lineScrollOffset -= lineScrollOffset - position;
+
+        lineScrollOffset = net.minecraft.util.math.MathHelper.clamp(lineScrollOffset, 0, textLength);
     }
 
     @Override public boolean getVisible() { return isVisible(); }

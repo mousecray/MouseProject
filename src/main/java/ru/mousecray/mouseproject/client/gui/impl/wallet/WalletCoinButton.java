@@ -5,6 +5,8 @@
 
 package ru.mousecray.mouseproject.client.gui.impl.wallet;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
@@ -98,6 +100,8 @@ public class WalletCoinButton extends MPGuiSelectedButton<WalletCoinButton> {
         drawButtonTooltip(event);
     }
 
+    private ScaledResolution sc = new ScaledResolution(Minecraft.getMinecraft());
+
     protected void drawButtonTooltip(MPGuiTickEvent<WalletCoinButton> event) {
         int mouseX = event.getMouseX();
         int mouseY = event.getMouseY();
@@ -109,7 +113,7 @@ public class WalletCoinButton extends MPGuiSelectedButton<WalletCoinButton> {
                 GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
                 GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 
-                GuiRenderHelper.drawTooltip(cachedName + " " + coinValue, event.getMc(), mouseX, mouseY, fontSize);
+                GuiRenderHelper.drawTooltip(cachedName + " " + coinValue, event.getMc(), mouseX, mouseY, fontSize, sc);
 
                 GlStateManager.popMatrix();
             }
