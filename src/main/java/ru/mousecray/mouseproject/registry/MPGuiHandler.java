@@ -8,7 +8,7 @@ package ru.mousecray.mouseproject.registry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
-import ru.mousecray.mouseproject.client.gui.impl.wallet.GuiScreenWallet;
+import ru.mousecray.mouseproject.client.gui.wallet.GuiScreenWallet;
 import ru.mousecray.mouseproject.registry.constants.GuiIdentifiers;
 
 public class MPGuiHandler implements IGuiHandler {
