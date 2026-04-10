@@ -5,4 +5,4 @@
 
 package ru.mousecray.mouseproject.client.gui.core.dim;
 
-public enum MPLinPanelOrientation {HORIZONTAL, VERTICAL}
+public enum MPOrientation {HORIZONTAL, VERTICAL}

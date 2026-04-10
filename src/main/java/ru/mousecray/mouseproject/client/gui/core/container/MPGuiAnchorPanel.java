@@ -35,7 +35,7 @@ public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
     }
 
     @Override
-    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
+    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {
         for (MPGuiElement<?> child : children) {
             //1. Вручную считаем отступы, масштабируя их от экрана
             MPGuiMargin margin = getChildMargin(child);

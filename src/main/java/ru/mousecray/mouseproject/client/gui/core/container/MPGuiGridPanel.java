@@ -56,7 +56,7 @@ public class MPGuiGridPanel extends MPGuiPanel<MPGuiGridPanel> {
     }
 
     @Override
-    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
+    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {
         if (gridRows <= 0 || gridCols <= 0) return;
 
         float scaledGapX = calculateFlowComponentX(parentDefaultSize, parentContentSize, gridGapX);

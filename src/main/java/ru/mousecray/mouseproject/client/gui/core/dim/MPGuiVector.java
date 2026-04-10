@@ -29,7 +29,7 @@ public final class MPGuiVector implements IGuiVector {
 
     public MPGuiVector(IGuiVector v)                          { this(v.x(), v.y()); }
 
-    @Override public MutableGuiVector toMutable()             { return new MutableGuiVector(this); }
+    @Override public MPMutableGuiVector toMutable()           { return new MPMutableGuiVector(this); }
     @Override public MPGuiVector toImmutable()                { return this; }
 
     @Override public float x()                                { return x; }

@@ -36,7 +36,7 @@ public final class MPGuiShape implements IGuiShape {
     @Override public MPGuiVector pos()                     { return pos; }
     @Override public MPGuiVector size()                    { return size; }
 
-    @Override public MutableGuiShape toMutable()           { return new MutableGuiShape(this); }
+    @Override public MPMutableGuiShape toMutable()         { return new MPMutableGuiShape(this); }
     @Override public MPGuiShape toImmutable()              { return this; }
 
     @Override public MPGuiShape withX(float newX)          { return new MPGuiShape(newX, pos.y(), size.x(), size.y()); }

@@ -68,19 +68,19 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
 
     //Геометрия
     default void setShape(IGuiShape shape) { getShape().withShape(shape); }
-    MutableGuiShape getShape();
-    MutableGuiShape getCalculatedShape();
-    MutableGuiShape getCalculatedInnerShape();
+    MPMutableGuiShape getShape();
+    MPMutableGuiShape getCalculatedShape();
+    MPMutableGuiShape getCalculatedInnerShape();
 
     GuiScaleRules getScaleRules();
     void setScaleRules(GuiScaleRules scaleRules);
     MPGuiPadding getPadding();
     void setPadding(MPGuiPadding padding);
-    MutableGuiVector getTextOffset();
+    MPMutableGuiVector getTextOffset();
     default void setTextOffset(IGuiVector offset) { getTextOffset().withVector(offset); }
 
     default void calculate(IGuiVector pDefSize, IGuiVector pContentSize, IGuiShape available) {
-        MutableGuiShape calcShape = getCalculatedShape();
+        MPMutableGuiShape calcShape = getCalculatedShape();
 
         calculateFlowComponentShape(
                 calcShape, pDefSize, pContentSize, getShape(), getScaleRules(), available
@@ -94,7 +94,7 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
         float        padR = calculateFlowComponentX(pDefSize, pContentSize, pad.getRight());
         float        padB = calculateFlowComponentY(pDefSize, pContentSize, pad.getBottom());
 
-        MutableGuiShape calcInnerShape = getCalculatedInnerShape();
+        MPMutableGuiShape calcInnerShape = getCalculatedInnerShape();
         calcInnerShape.withShape(calcShape);
         calcInnerShape.grow(-padL, -padT, -padR, -padB);
 
@@ -105,7 +105,7 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
         onCalculated(pDefSize, pContentSize, calcInnerShape);
     }
 
-    default void measurePreferred(IGuiVector pDefSize, IGuiVector pContentSize, float sugX, float sugY, MutableGuiVector result) {
+    default void measurePreferred(IGuiVector pDefSize, IGuiVector pContentSize, float sugX, float sugY, MPMutableGuiVector result) {
         GuiScaleRules sr = getScaleRules();
         MPGuiRenderHelper.measurePreferredWithScaleRules(
                 pDefSize, pContentSize, sugX, sugY,
@@ -157,9 +157,9 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     default void performClickFromVanilla() {
         if (!isEnabled() || !isVisible()) return;
 
-        MutableGuiShape calcShape = getCalculatedShape();
-        int             centerX   = (int) (calcShape.x() + calcShape.width() / 2f);
-        int             centerY   = (int) (calcShape.y() + calcShape.height() / 2f);
+        MPMutableGuiShape calcShape = getCalculatedShape();
+        int               centerX   = (int) (calcShape.x() + calcShape.width() / 2f);
+        int               centerY   = (int) (calcShape.y() + calcShape.height() / 2f);
 
         Minecraft mc = Minecraft.getMinecraft();
         dispatchMousePressed(mc, centerX, centerY, 0);

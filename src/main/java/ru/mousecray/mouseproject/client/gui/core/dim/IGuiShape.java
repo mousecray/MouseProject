@@ -51,7 +51,7 @@ public interface IGuiShape {
     IGuiShape withSize(IGuiVector size);
     IGuiShape withShape(IGuiShape shape);
 
-    MutableGuiShape toMutable();
+    MPMutableGuiShape toMutable();
     MPGuiShape toImmutable();
 
     IGuiShape offset(float dx, float dy);

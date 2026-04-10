@@ -66,14 +66,14 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     private MPGuiPadding  padding    = new MPGuiPadding(0);
     private GuiScaleRules scaleRules = new GuiScaleRules(MPGuiScaleType.FLOW);
 
-    private final   MutableGuiShape shape;
-    private final   MutableGuiShape calculatedShape      = new MutableGuiShape();
-    protected final MutableGuiShape calculatedInnerShape = new MutableGuiShape();
+    private final   MPMutableGuiShape shape;
+    private final   MPMutableGuiShape calculatedShape      = new MPMutableGuiShape();
+    protected final MPMutableGuiShape calculatedInnerShape = new MPMutableGuiShape();
 
-    protected final MutableGuiVector measureTemp        = new MutableGuiVector();
-    protected final MutableGuiShape  childAvailableTemp = new MutableGuiShape();
-    protected final MutableGuiShape  innerShapeTemp     = new MutableGuiShape();
-    protected final float[]          marginTemp         = new float[4];
+    protected final MPMutableGuiVector measureTemp        = new MPMutableGuiVector();
+    protected final MPMutableGuiShape  childAvailableTemp = new MPMutableGuiShape();
+    protected final MPMutableGuiShape  innerShapeTemp     = new MPMutableGuiShape();
+    protected final float[]            marginTemp         = new float[4];
 
     private MPGuiScreen   screen;
     private MPGuiPanel<?> parent;
@@ -118,6 +118,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     //Идентификация и иерархия
     @Override public void setId(int id) { this.id = id; }
     @Override public int getId()                       { return id; }
+
     @Override @Nullable public MPGuiScreen getScreen() { return screen; }
 
     @Override
@@ -191,15 +192,15 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     }
 
     //Геометрия
-    @Override public MutableGuiShape getShape() { return shape; }
-    @Override public MutableGuiShape getCalculatedShape()         { return calculatedShape; }
-    @Override public MutableGuiShape getCalculatedInnerShape()    { return calculatedInnerShape; }
+    @Override public MPMutableGuiShape getShape() { return shape; }
+    @Override public MPMutableGuiShape getCalculatedShape()       { return calculatedShape; }
+    @Override public MPMutableGuiShape getCalculatedInnerShape()  { return calculatedInnerShape; }
 
     @Override public GuiScaleRules getScaleRules()                { return scaleRules; }
     @Override public void setScaleRules(GuiScaleRules scaleRules) { this.scaleRules = scaleRules; }
     @Override public MPGuiPadding getPadding()                    { return padding; }
     @Override public void setPadding(MPGuiPadding padding)        { this.padding = padding; }
-    @Override public MutableGuiVector getTextOffset()             { return new MutableGuiVector(); }
+    @Override public MPMutableGuiVector getTextOffset()           { return new MPMutableGuiVector(); }
 
     public void addChild(MPGuiElement<?> child, @Nullable MPGuiMargin margin, @Nullable MPGuiVector offset) {
         children.add(child);
@@ -233,7 +234,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
         layoutChildren(pDefSize, pContentSize, innerShapeTemp);
     }
 
-    protected abstract void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner);
+    protected abstract void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner);
 
     @Override
     public void offsetCalculatedShape(float dx, float dy) {
@@ -267,13 +268,11 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
         MPGuiElement<?> currentHovered = null;
 
-        if (calculatedShape.contains(mouseX, mouseY)) {
-            for (int k = children.size() - 1; k >= 0; k--) {
-                MPGuiElement<?> child = children.get(k);
-                if (child.getCalculatedShape().contains(mouseX, mouseY) && child.isVisible()) {
-                    currentHovered = child;
-                    break;
-                }
+        for (int k = children.size() - 1; k >= 0; k--) {
+            MPGuiElement<?> child = children.get(k);
+            if (child.mouseHover(mc, mouseX, mouseY) && child.isVisible()) {
+                currentHovered = child;
+                break;
             }
         }
 
@@ -315,15 +314,9 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
     @Override
     public final boolean dispatchMousePressed(Minecraft mc, int mouseX, int mouseY, int mouseButton) {
-        if (!calculatedShape.contains(mouseX, mouseY)) return false;
-
         if (!isEnabled() || !isVisible()) {
-            dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.DISABLED);
+            if (calculatedShape.contains(mouseX, mouseY)) dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.DISABLED);
             return false;
-        }
-
-        if (stateManager.has(MPGuiElementState.FAIL)) {
-            dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.FAIL);
         }
 
         MPGuiEventFactory.pushMouseClickEvent(pressEvent, mouseX, mouseY);
@@ -337,6 +330,10 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
                 return true;
             }
         }
+
+        if (!calculatedShape.contains(mouseX, mouseY)) return false;
+
+        if (stateManager.has(MPGuiElementState.FAIL)) dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.FAIL);
 
         tickDown = 0;
         stateManager.add(MPGuiElementState.PRESSED);
@@ -527,7 +524,7 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
 
     protected void onKeyTyped(MPGuiKeyEvent<T> event) {
         if (!event.isCancelled() && (event.getKeyCode() == Keyboard.KEY_RETURN || event.getKeyCode() == Keyboard.KEY_NUMPADENTER)) {
-            MutableGuiShape calcShape = getCalculatedShape();
+            MPMutableGuiShape calcShape = getCalculatedShape();
             dispatchMousePressed(event.getMc(), (int) (calcShape.x() + calcShape.width() / 2), (int) (calcShape.y() + calcShape.height() / 2), 0);
             dispatchMouseReleased(event.getMc(), (int) (calcShape.x() + calcShape.width() / 2), (int) (calcShape.y() + calcShape.height() / 2), 0);
             event.consume();

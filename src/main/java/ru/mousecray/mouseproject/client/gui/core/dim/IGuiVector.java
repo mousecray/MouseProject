@@ -24,7 +24,7 @@ public interface IGuiVector {
     IGuiVector mul(IGuiVector other);
     IGuiVector div(IGuiVector other);
 
-    MutableGuiVector toMutable();
+    MPMutableGuiVector toMutable();
     MPGuiVector toImmutable();
 
     default float lengthSq() { return x() * x() + y() * y(); }

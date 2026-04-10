@@ -3,7 +3,7 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.client.gui.core.control;
+package ru.mousecray.mouseproject.client.gui.core.control.base;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.relauncher.Side;
@@ -27,14 +27,17 @@ public abstract class MPGuiBaseTextField<T extends MPGuiBaseTextField<T>> extend
 
     public MPGuiBaseTextField(MPGuiShape shape) {
         super(shape);
-        setTexturePack(MPGuiTexturePack.Builder
+        setTexturePack(createTexturePack());
+    }
+
+    protected MPGuiTexturePack createTexturePack() {
+        return MPGuiTexturePack.Builder
                 .create(
                         MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
                         MPGuiVector.of(104, 0), MPGuiVector.of(80, 10)
                 )
                 .addTexture(0)
-                .build()
-        );
+                .build();
     }
 
     public T setOnTextTypedListener(@Nullable Consumer<MPGuiTextTypedEvent<T>> listener) {

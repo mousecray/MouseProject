@@ -9,32 +9,32 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public final class MutableGuiVector implements IGuiVector {
+public final class MPMutableGuiVector implements IGuiVector {
     private float x;
     private float y;
 
-    public MutableGuiVector() { this(0f, 0f); }
+    public MPMutableGuiVector() { this(0f, 0f); }
 
-    public MutableGuiVector(float x, float y) {
+    public MPMutableGuiVector(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
-    public MutableGuiVector(IGuiVector v)         { this(v.x(), v.y()); }
+    public MPMutableGuiVector(IGuiVector v)         { this(v.x(), v.y()); }
 
-    @Override public float x()                    { return x; }
-    @Override public float y()                    { return y; }
+    @Override public float x()                      { return x; }
+    @Override public float y()                      { return y; }
 
-    @Override public MutableGuiVector toMutable() { return this; }
-    @Override public MPGuiVector toImmutable()    { return new MPGuiVector(this); }
+    @Override public MPMutableGuiVector toMutable() { return this; }
+    @Override public MPGuiVector toImmutable()      { return new MPGuiVector(this); }
 
-    @Override public MutableGuiVector withX(float newX) {
+    @Override public MPMutableGuiVector withX(float newX) {
         x = newX;
         return this;
     }
 
     @Override
-    public MutableGuiVector withY(float newY) {
+    public MPMutableGuiVector withY(float newY) {
         y = newY;
         return this;
     }
@@ -47,59 +47,59 @@ public final class MutableGuiVector implements IGuiVector {
     }
 
     @Override
-    public MutableGuiVector add(IGuiVector v) {
+    public MPMutableGuiVector add(IGuiVector v) {
         x += v.x();
         y += v.y();
         return this;
     }
 
     @Override
-    public MutableGuiVector sub(IGuiVector v) {
+    public MPMutableGuiVector sub(IGuiVector v) {
         x -= v.x();
         y -= v.y();
         return this;
     }
 
     @Override
-    public MutableGuiVector mul(float s) {
+    public MPMutableGuiVector mul(float s) {
         x *= s;
         y *= s;
         return this;
     }
 
     @Override
-    public MutableGuiVector div(float s) {
+    public MPMutableGuiVector div(float s) {
         if (s == 0f) throw new ArithmeticException("Division by zero");
         x /= s;
         y /= s;
         return this;
     }
-    @Override public MutableGuiVector mul(IGuiVector v) {
+    @Override public MPMutableGuiVector mul(IGuiVector v) {
         x *= v.x();
         y *= v.y();
         return this;
     }
 
     @Override
-    public MutableGuiVector div(IGuiVector v) {
+    public MPMutableGuiVector div(IGuiVector v) {
         if (v.x() == 0f || v.y() == 0f) throw new ArithmeticException("Division by zero");
         x /= v.x();
         y /= v.y();
         return this;
     }
 
-    public MutableGuiVector add(float dx, float dy) {
+    public MPMutableGuiVector add(float dx, float dy) {
         x += dx;
         y += dy;
         return this;
     }
-    public MutableGuiVector sub(float dx, float dy) {
+    public MPMutableGuiVector sub(float dx, float dy) {
         x -= dx;
         y -= dy;
         return this;
     }
 
-    @Override public MutableGuiVector copy() { return new MutableGuiVector(x, y); }
+    @Override public MPMutableGuiVector copy() { return new MPMutableGuiVector(x, y); }
 
     @Override
     public boolean equals(Object o) {

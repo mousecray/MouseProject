@@ -60,11 +60,11 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
 
     protected final MPGuiElementStateManager stateManager = new MPGuiElementStateManager();
 
-    protected final MutableGuiShape
+    protected final MPMutableGuiShape
             shape,
-            calculatedShape      = new MutableGuiShape(),
-            calculatedInnerShape = new MutableGuiShape();
-    protected final MutableGuiVector calculatedTextOffsetTemp = new MutableGuiVector();
+            calculatedShape      = new MPMutableGuiShape(),
+            calculatedInnerShape = new MPMutableGuiShape();
+    protected final MPMutableGuiVector calculatedTextOffsetTemp = new MPMutableGuiVector();
 
     @Nullable protected FontRenderer     fontRenderer;
     @Nullable protected MPFontSize       fontSize;
@@ -73,10 +73,10 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     protected           MPGuiColorPack   colorPack   = MPGuiColorPack.CONTROL_SIMPLE();
     private             MPGuiSoundPack   soundPack   = MPGuiSoundPack.CONTROL_SIMPLE();
 
-    protected int              tickDown             = -1;
-    protected MutableGuiVector textOffset           = new MutableGuiVector();
-    protected float            textScaleMultiplayer = 1.0F;
-    private   GuiScaleRules    scaleRules           = new GuiScaleRules(MPGuiScaleType.FLOW);
+    protected int                tickDown             = -1;
+    protected MPMutableGuiVector textOffset           = new MPMutableGuiVector();
+    protected float              textScaleMultiplayer = 1.0F;
+    private   GuiScaleRules      scaleRules           = new GuiScaleRules(MPGuiScaleType.FLOW);
 
     private boolean centered;
 
@@ -215,15 +215,15 @@ public abstract class MPGuiLabel<T extends MPGuiLabel<T>> extends GuiLabel imple
     @Override public void setTextScaleMultiplayer(float multiplayer) { textScaleMultiplayer = multiplayer; }
 
     //Геометрия
-    @Override public MutableGuiShape getShape() { return shape; }
-    @Override public MutableGuiShape getCalculatedShape()         { return calculatedShape; }
-    @Override public MutableGuiShape getCalculatedInnerShape()    { return calculatedInnerShape; }
+    @Override public MPMutableGuiShape getShape() { return shape; }
+    @Override public MPMutableGuiShape getCalculatedShape()       { return calculatedShape; }
+    @Override public MPMutableGuiShape getCalculatedInnerShape()  { return calculatedInnerShape; }
 
     @Override public GuiScaleRules getScaleRules()                { return scaleRules; }
     @Override public void setScaleRules(GuiScaleRules scaleRules) { this.scaleRules = Objects.requireNonNull(scaleRules); }
     @Override public MPGuiPadding getPadding()                    { return padding; }
     @Override public void setPadding(MPGuiPadding padding)        { this.padding = Objects.requireNonNull(padding); }
-    @Override public MutableGuiVector getTextOffset()             { return textOffset; }
+    @Override public MPMutableGuiVector getTextOffset()           { return textOffset; }
 
     @Override
     public void calculateTextOffset(IGuiVector pDefSize, IGuiVector pContentSize) {

@@ -271,7 +271,7 @@ public class MPGuiRenderHelper {
     }
 
     public static void calculateFlowComponentVector(
-            MutableGuiVector target,
+            MPMutableGuiVector target,
             IGuiVector parentDefaultSize, IGuiVector parentContentSize, IGuiVector childSize
     ) {
         target.withX(calculateFlowComponentX(parentDefaultSize, parentContentSize, childSize.x()));
@@ -279,7 +279,7 @@ public class MPGuiRenderHelper {
     }
 
     public static void calculateFlowComponentShape(
-            MutableGuiShape target,
+            MPMutableGuiShape target,
             IGuiVector parentDefault, IGuiVector parentCurrent, IGuiShape childTemplate, GuiScaleRules rules, IGuiShape available
     ) {
         if (rules.isFixed()) {
@@ -314,7 +314,7 @@ public class MPGuiRenderHelper {
     public static void measureChildWithMargin(
             IGuiVector parentDefaultSize, IGuiVector innerSize,
             MPGuiElement<?> child, MPGuiMargin margin,
-            float[] marginResult, MutableGuiVector measureResult
+            float[] marginResult, MPMutableGuiVector measureResult
     ) {
         float ml = calculateFlowComponentX(parentDefaultSize, innerSize, margin.getLeft());
         float mt = calculateFlowComponentY(parentDefaultSize, innerSize, margin.getTop());
@@ -334,7 +334,7 @@ public class MPGuiRenderHelper {
         child.measurePreferred(parentDefaultSize, innerSize, availW, availH, measureResult);
     }
 
-    public static void checkFixedScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result, GuiScaleRules scaleRules, MutableGuiShape elementShape) {
+    public static void checkFixedScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MPMutableGuiVector result, GuiScaleRules scaleRules, MPMutableGuiShape elementShape) {
         if (scaleRules.isParent()) {
             result.withX(suggestedX);
             result.withY(suggestedY);
@@ -350,7 +350,7 @@ public class MPGuiRenderHelper {
         }
     }
 
-    public static void measurePreferredWithScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MutableGuiVector result, MutableGuiShape elementShape, GuiScaleRules scaleRules) {
+    public static void measurePreferredWithScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MPMutableGuiVector result, MPMutableGuiShape elementShape, GuiScaleRules scaleRules) {
         result.withX(elementShape.width());
         result.withY(elementShape.height());
 
@@ -366,7 +366,7 @@ public class MPGuiRenderHelper {
         }
     }
 
-    public static void addPaddingToPreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiVector result, MPGuiPadding pad, GuiScaleRules scaleRules) {
+    public static void addPaddingToPreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiVector result, MPGuiPadding pad, GuiScaleRules scaleRules) {
         if (pad != null) {
             float padL = calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getLeft());
             float padR = calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getRight());

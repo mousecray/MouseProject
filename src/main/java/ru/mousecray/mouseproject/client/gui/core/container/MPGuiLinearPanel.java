@@ -18,22 +18,22 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class MPGuiLinearPanel extends MPGuiPanel<MPGuiLinearPanel> {
-    private MPLinPanelOrientation linearOrientation;
+    private MPOrientation linearOrientation;
 
-    public MPGuiLinearPanel(MPGuiShape elementShape, MPLinPanelOrientation linearOrientation) {
+    public MPGuiLinearPanel(MPGuiShape elementShape, MPOrientation linearOrientation) {
         super(elementShape);
         this.linearOrientation = linearOrientation;
     }
 
-    public void setOrientation(MPLinPanelOrientation linearOrientation) { this.linearOrientation = linearOrientation; }
+    public void setOrientation(MPOrientation linearOrientation) { this.linearOrientation = linearOrientation; }
 
     @Override
-    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
-        if (linearOrientation == MPLinPanelOrientation.HORIZONTAL) layoutHorizontal(parentDefaultSize, parentContentSize, inner);
+    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {
+        if (linearOrientation == MPOrientation.HORIZONTAL) layoutHorizontal(parentDefaultSize, parentContentSize, inner);
         else layoutVertical(parentDefaultSize, parentContentSize, inner);
     }
 
-    private void layoutHorizontal(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
+    private void layoutHorizontal(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {
         float fixedSum  = 0f;
         int   fillCount = 0;
 
@@ -78,7 +78,7 @@ public class MPGuiLinearPanel extends MPGuiPanel<MPGuiLinearPanel> {
         }
     }
 
-    private void layoutVertical(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
+    private void layoutVertical(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {
         float fixedSum  = 0f;
         int   fillCount = 0;
 

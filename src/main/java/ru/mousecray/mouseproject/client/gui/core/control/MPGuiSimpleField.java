@@ -8,6 +8,7 @@ package ru.mousecray.mouseproject.client.gui.core.control;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import ru.mousecray.mouseproject.client.gui.core.control.base.MPGuiBaseTextField;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
 
 import javax.annotation.ParametersAreNonnullByDefault;

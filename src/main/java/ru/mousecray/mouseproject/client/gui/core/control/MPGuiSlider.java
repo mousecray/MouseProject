@@ -126,7 +126,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     }
 
     private void updateFromMouseX(int mouseX, int mouseY) {
-        MutableGuiShape inner = getCalculatedShape();
+        MPMutableGuiShape inner = getCalculatedShape();
 
         float knobW = knob.getCalculatedShape().width();
         float knobH = knob.getCalculatedShape().height();
@@ -194,7 +194,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     public boolean isVertical() { return isVertical; }
 
     @Override
-    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MutableGuiShape inner) {
+    protected void layoutChildren(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiShape inner) {
         childAvailableTemp.withShape(inner);
         track.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
 
@@ -202,7 +202,7 @@ public class MPGuiSlider<T extends MPGuiSlider<T>> extends MPGuiPanel<T> {
     }
 
     private void recalculateKnobPosition() {
-        MutableGuiShape inner = getCalculatedShape();
+        MPMutableGuiShape inner = getCalculatedShape();
         if (inner.width() <= 0 || inner.height() <= 0) return;
 
         float knobW = knob.getShape().width();

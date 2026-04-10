@@ -9,6 +9,7 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
+import ru.mousecray.mouseproject.client.gui.core.control.base.MPGuiBaseTextField;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPNumberMode;
@@ -26,7 +27,7 @@ public class MPGuiNumberField extends MPGuiBaseTextField<MPGuiNumberField> {
 
     public void setNumberMode(MPNumberMode numberMode) { this.numberMode = Objects.requireNonNull(numberMode); }
     public MPNumberMode getNumberMode()                { return numberMode; }
-    
+
     @Override
     protected void onTextTyped(MPGuiTextTypedEvent<MPGuiNumberField> event) {
         String newText = event.getNewText();
