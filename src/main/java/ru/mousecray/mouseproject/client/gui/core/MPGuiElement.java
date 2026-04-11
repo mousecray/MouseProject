@@ -26,6 +26,8 @@ import ru.mousecray.mouseproject.client.gui.core.misc.MPMoveDirection;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import static ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper.*;
+
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -72,8 +74,8 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     MPMutableGuiShape getCalculatedShape();
     MPMutableGuiShape getCalculatedInnerShape();
 
-    GuiScaleRules getScaleRules();
-    void setScaleRules(GuiScaleRules scaleRules);
+    MPGuiScaleRules getScaleRules();
+    void setScaleRules(MPGuiScaleRules scaleRules);
     MPGuiPadding getPadding();
     void setPadding(MPGuiPadding padding);
     MPMutableGuiVector getTextOffset();
@@ -106,7 +108,7 @@ public interface MPGuiElement<T extends MPGuiElement<T>> {
     }
 
     default void measurePreferred(IGuiVector pDefSize, IGuiVector pContentSize, float sugX, float sugY, MPMutableGuiVector result) {
-        GuiScaleRules sr = getScaleRules();
+        MPGuiScaleRules sr = getScaleRules();
         MPGuiRenderHelper.measurePreferredWithScaleRules(
                 pDefSize, pContentSize, sugX, sugY,
                 result, getShape(), sr

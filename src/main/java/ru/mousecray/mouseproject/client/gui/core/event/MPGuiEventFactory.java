@@ -81,4 +81,12 @@ public class MPGuiEventFactory {
         event.setSource(source);
         event.setHandler(handler);
     }
+
+    public static <T extends MPGuiElement<T>> void pushSliderChangedEvent(MPGuiSliderChangedEvent<T> event, int x, int y, int oldValue, int newValue) {
+        event.reset();
+        event.setMouseX(x);
+        event.setMouseY(y);
+        event.setOldValue(oldValue);
+        event.setNewValue(newValue);
+    }
 }

@@ -15,6 +15,7 @@ import ru.mousecray.mouseproject.Tags;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiPanel;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiScreen;
 import ru.mousecray.mouseproject.client.gui.core.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementState;
 import ru.mousecray.mouseproject.client.gui.core.container.*;
 import ru.mousecray.mouseproject.client.gui.core.control.*;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
@@ -64,24 +65,20 @@ public class GuiScreenWallet extends MPGuiScreen {
 
         long       maxCoinValue = 1_000_000;
         MPFontSize fontSize     = MPFontSize.NORMAL;
+        setFontSize(fontSize);
 
         MPGuiCloseButton closeButton = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "close_button", MPGuiCloseButton.class,
-                () -> new MPGuiCloseButton(
-                        new MPGuiShape(0, 0, 9, 9),
-                        event -> closeGui()
-                )
+                () -> new MPGuiCloseButton(new MPGuiShape(0, 0, 9, 9)),
+                t -> t.setOnClickListener(event -> closeGui())
         );
-        addButton(closeButton, MPGuiMargin.ZERO, MPAnchorPos.TOP_RIGHT, MPGuiVector.ZERO);
+        addButton(closeButton, MPGuiMargin.ZERO(), MPAnchorPos.TOP_RIGHT, MPGuiVector.ZERO);
 
         if (walletPipe == null) return;
 
         MPGuiStaticLabel titleLabel = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "title_label", MPGuiStaticLabel.class,
-                () -> new MPGuiStaticLabel(MPGuiString.simple(walletStack.getDisplayName()), fontRenderer,
-                        new MPGuiShape(0, 0, 80, 10),
-                        14737632, fontSize
-                ),
+                () -> new MPGuiStaticLabel(MPGuiString.simple(walletStack.getDisplayName()), new MPGuiShape(0, 0, 80, 10)),
                 null,
                 t -> t.setGuiString(MPGuiString.simple(walletStack.getDisplayName()))
         );
@@ -93,27 +90,21 @@ public class GuiScreenWallet extends MPGuiScreen {
 
         MPGuiActionButton takeAction = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "take_action", MPGuiActionButton.class,
-                () -> new MPGuiActionButton(
-                        MPGuiShape.ZERO,
-                        MPGuiString.localizedGuiTag("wallet.button.take"), fontSize,
-                        event -> { }
-                ),
+                () -> new MPGuiActionButton(MPGuiShape.ZERO, MPGuiString.localizedGuiTag("wallet.button.take")),
                 t -> {
-                    t.applyState(GuiElementPersistentState.DISABLED);
-                    t.setScaleRules(new GuiScaleRules(MPGuiScaleType.PARENT));
+                    t.getStateManager().add(MPGuiElementState.DISABLED);
+                    t.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT));
+                    t.setOnClickListener(event -> { /* TODO: Take action */ });
                 }
         );
 
         MPGuiActionButton putAction = MPGuiElementCache.INSTANCE.getOrCreate(
                 this, "put_action", MPGuiActionButton.class,
-                () -> new MPGuiActionButton(
-                        MPGuiShape.ZERO,
-                        MPGuiString.localizedGuiTag("wallet.button.put"), fontSize,
-                        event -> { }
-                ),
+                () -> new MPGuiActionButton(MPGuiShape.ZERO, MPGuiString.localizedGuiTag("wallet.button.put")),
                 t -> {
-                    t.applyState(GuiElementPersistentState.DISABLED);
-                    t.setScaleRules(new GuiScaleRules(MPGuiScaleType.PARENT));
+                    t.getStateManager().add(MPGuiElementState.DISABLED);
+                    t.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT));
+                    t.setOnClickListener(event -> { /* TODO: Put action */ });
                 }
         );
 
@@ -122,10 +113,15 @@ public class GuiScreenWallet extends MPGuiScreen {
                 () -> new WalletSliderControl(fontRenderer, fontSize, panelWidth, 16, maxCoinValue),
                 t -> {
                     t.onValidityChanged(isValid -> {
-                        takeAction.applyState(isValid ? GuiElementPersistentState.NORMAL : GuiElementPersistentState.DISABLED);
-                        putAction.applyState(isValid ? GuiElementPersistentState.NORMAL : GuiElementPersistentState.DISABLED);
+                        if (isValid) {
+                            takeAction.getStateManager().remove(MPGuiElementState.DISABLED);
+                            putAction.getStateManager().remove(MPGuiElementState.DISABLED);
+                        } else {
+                            takeAction.getStateManager().add(MPGuiElementState.DISABLED);
+                            putAction.getStateManager().add(MPGuiElementState.DISABLED);
+                        }
                     });
-                    t.setScaleRules(new GuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL));
+                    t.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL));
                 }
         );
 
@@ -149,7 +145,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         row1.addChild(createDynamicButton("btn_-1", "-1", fontSize, e -> walletSlider.addValue(-1)), null, null);
         row1.addChild(createDynamicButton("btn_-10", "-10", fontSize, e -> walletSlider.addValue(-10)), null, null);
         row1.addChild(createDynamicButton("btn_-50", "-50", fontSize, e -> walletSlider.addValue(-50)), null, null);
-        row1.setScaleRules(new GuiScaleRules(MPGuiScaleType.PARENT_VERTICAL));
+        row1.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_VERTICAL));
         controls.addChild(row1, null, null);
 
         MPGuiLinearPanel row2 = MPGuiElementCache.INSTANCE.getOrCreate(
@@ -164,7 +160,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         row2.addChild(createDynamicButton("btn_-100", "-100", fontSize, e -> walletSlider.addValue(-100)), null, null);
         row2.addChild(createDynamicButton("btn_-500", "-500", fontSize, e -> walletSlider.addValue(-500)), null, null);
         row2.addChild(createDynamicButton("btn_-1K", "-1K", fontSize, e -> walletSlider.addValue(-1000)), null, null);
-        row2.setScaleRules(new GuiScaleRules(MPGuiScaleType.PARENT_VERTICAL));
+        row2.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_VERTICAL));
         controls.addChild(row2, null, null);
 
         controls.addChild(walletSlider, new MPGuiMargin(0, 4f, 0, 2f), null);
@@ -216,7 +212,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                 () -> new MPGuiLinearPanel(
                         new MPGuiShape(0, 0, 222, 400), MPOrientation.HORIZONTAL
                 ),
-                t -> t.setScaleRules(new GuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL)),
+                t -> t.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL)),
                 MPGuiPanel::removeAllChildren
         );
 
@@ -230,8 +226,7 @@ public class GuiScreenWallet extends MPGuiScreen {
         if (activeGroups.isEmpty()) {
             MPGuiStaticLabel emptyLabel = MPGuiElementCache.INSTANCE.getOrCreate(
                     this, "empty_label", MPGuiStaticLabel.class,
-                    () -> new MPGuiStaticLabel(MPGuiString.localizedGuiTag("wallet.label.empty"),
-                            fontRenderer, new MPGuiShape(0, 0, 80, 10), 14737632, fontSize)
+                    () -> new MPGuiStaticLabel(MPGuiString.localizedGuiTag("wallet.label.empty"), new MPGuiShape(0, 0, 80, 10))
             );
             coinsPanel.addChild(emptyLabel, null, MPGuiVector.of(2, 0));
         } else {
@@ -241,7 +236,7 @@ public class GuiScreenWallet extends MPGuiScreen {
                 MPGuiLinearPanel columnPanel = MPGuiElementCache.INSTANCE.getOrCreate(
                         this, "column_panel_" + col, MPGuiLinearPanel.class,
                         () -> new MPGuiLinearPanel(new MPGuiShape(0, 0, colWidth, 115), MPOrientation.VERTICAL),
-                        t -> t.setScaleRules(new GuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL)),
+                        t -> t.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL)),
                         MPGuiPanel::removeAllChildren
                 );
                 coinsPanel.addChild(columnPanel, new MPGuiMargin(0, 3f, 0, 0), null);
@@ -292,9 +287,10 @@ public class GuiScreenWallet extends MPGuiScreen {
 
                     MPGuiStaticLabel groupTitle = MPGuiElementCache.INSTANCE.getOrCreate(
                             this, "group_title_" + idx, MPGuiStaticLabel.class,
-                            () -> new MPGuiStaticLabel(MPGuiString.localizedGuiTag(groupLabelKey.$()), fontRenderer,
-                                    new MPGuiShape(0, 0, colWidth - 15, 10), 14737632, fontSize),
-                            null, t -> t.setGuiString(MPGuiString.localizedGuiTag(groupLabelKey.$())), null
+                            () -> new MPGuiStaticLabel(MPGuiString.localizedGuiTag(groupLabelKey.$()), new MPGuiShape(0, 0, colWidth - 15, 10)),
+                            null,
+                            t -> t.setGuiString(MPGuiString.localizedGuiTag(groupLabelKey.$())),
+                            null
                     );
                     titlePanel.addChild(groupTitle, null, MPAnchorPos.MIDDLE_LEFT, null);
 
@@ -303,9 +299,12 @@ public class GuiScreenWallet extends MPGuiScreen {
                             () -> new MPGuiCheckButton(
                                     new MPGuiShape(0, 0, 8, 8),
                                     MPGuiString.localizedGuiTag("wallet.button.select_all"),
-                                    fontRenderer, fontSize,
-                                    e -> { }
-                            )
+                                    fontRenderer
+                            ),
+                            t -> {
+                                t.setFontSize(fontSize);
+                                t.setOnClickListener(e -> { /* TODO: Select All action */ });
+                            }
                     );
                     titlePanel.addChild(selectAll, null, MPAnchorPos.TOP_RIGHT, null);
 
@@ -329,11 +328,13 @@ public class GuiScreenWallet extends MPGuiScreen {
 
                         WalletCoinButton coinBtn = MPGuiElementCache.INSTANCE.getOrCreate(
                                 this, "coin_btn_" + idx + "_" + slotIndex, WalletCoinButton.class,
-                                () -> new WalletCoinButton(
-                                        new MPGuiShape(0, 0, coinW, coinH),
-                                        fontSize, coinValue, e -> { }
-                                ),
-                                null, t -> t.setCount(coinValue), null
+                                () -> new WalletCoinButton(new MPGuiShape(0, 0, coinW, coinH), coinValue),
+                                null,
+                                t -> {
+                                    t.setCount(coinValue);
+                                    t.setOnClickListener(e -> { /* TODO: Coin click logic */ });
+                                },
+                                null
                         );
                         coinsGrid.addChild(coinBtn, null, MPAnchorPos.MIDDLE_CENTER, null, new MPGridPos(gridRow, gridCol));
                         slotIndex++;
@@ -344,13 +345,15 @@ public class GuiScreenWallet extends MPGuiScreen {
         bake();
     }
 
-    private MPGuiDefaultButton createDynamicButton(String key, String text, MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiDefaultButton>> onClick) {
+    private MPGuiSimpleButton createDynamicButton(String key, String text, MPFontSize fontSize, Consumer<MPGuiMouseClickEvent<MPGuiSimpleButton>> onClick) {
         return MPGuiElementCache.INSTANCE.getOrCreate(
-                this, key, MPGuiDefaultButton.class,
-                () -> new MPGuiDefaultButton(
-                        new MPGuiShape(0, 0, 10, 13.0f), MPGuiString.simple(text), fontSize, onClick
-                ),
-                t -> t.setScaleRules(new GuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL))
+                this, key, MPGuiSimpleButton.class,
+                () -> new MPGuiSimpleButton(new MPGuiShape(0, 0, 10, 13.0f), MPGuiString.simple(text)),
+                t -> {
+                    t.setFontSize(fontSize);
+                    t.setOnClickListener(onClick);
+                    t.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL));
+                }
         );
     }
 

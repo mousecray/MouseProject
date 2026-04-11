@@ -9,10 +9,14 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
+import ru.mousecray.mouseproject.client.gui.core.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.core.control.base.MPGuiBaseTextField;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
+import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiVector;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPNumberMode;
+import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
@@ -21,9 +25,19 @@ import java.util.Objects;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class MPGuiNumberField extends MPGuiBaseTextField<MPGuiNumberField> {
-    private MPNumberMode numberMode = MPNumberMode.ANY;
+    private MPNumberMode numberMode;
 
-    public MPGuiNumberField(MPGuiShape shape)          { super(shape); }
+    public MPGuiNumberField(MPGuiShape shape, MPGuiString placeholder, MPNumberMode numberMode) {
+        super(shape, placeholder);
+        this.numberMode = Objects.requireNonNull(numberMode);
+        setTexturePack(MPGuiTexturePack.Builder
+                .create(
+                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                        MPGuiVector.of(104, 0), MPGuiVector.of(80, 10)
+                )
+                .addTexture(0)
+                .build());
+    }
 
     public void setNumberMode(MPNumberMode numberMode) { this.numberMode = Objects.requireNonNull(numberMode); }
     public MPNumberMode getNumberMode()                { return numberMode; }

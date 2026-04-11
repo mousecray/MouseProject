@@ -18,6 +18,10 @@ public class MPGuiColorPack {
         return Builder.create(0).build();
     }
 
+    public static MPGuiColorPack LABEL_SIMPLE() {
+        return Builder.create(14737632).addColor(7368816, MPGuiElementState.DISABLED).build();
+    }
+
     public static MPGuiColorPack CONTROL_SIMPLE() {
         return Builder.create(14737632).addColor(10526880, MPGuiElementState.DISABLED).build();
     }

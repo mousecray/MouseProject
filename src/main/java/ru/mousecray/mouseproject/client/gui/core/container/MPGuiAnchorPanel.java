@@ -24,7 +24,6 @@ import static ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHe
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
-
     private final Map<MPGuiElement<?>, MPAnchorPos> childAnchors = new HashMap<>();
 
     public MPGuiAnchorPanel(MPGuiShape elementShape) { super(elementShape); }
@@ -108,9 +107,5 @@ public class MPGuiAnchorPanel extends MPGuiPanel<MPGuiAnchorPanel> {
             child.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
         }
     }
-
-    @Override
-    protected void onChildrenCleared() {
-        childAnchors.clear();
-    }
+    @Override protected void onChildrenCleared() { childAnchors.clear(); }
 }

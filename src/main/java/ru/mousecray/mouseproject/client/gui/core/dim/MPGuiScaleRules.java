@@ -7,10 +7,10 @@ package ru.mousecray.mouseproject.client.gui.core.dim;
 
 import java.util.*;
 
-public class GuiScaleRules {
+public class MPGuiScaleRules {
     private final Set<MPGuiScaleType> scaleTypes = new HashSet<>();
 
-    public GuiScaleRules(MPGuiScaleType... types) { for (MPGuiScaleType type : types) addType(type); }
+    public MPGuiScaleRules(MPGuiScaleType... types) { for (MPGuiScaleType type : types) addType(type); }
 
     private void addType(MPGuiScaleType newType) {
         List<MPGuiScaleType> toRemove = new ArrayList<>();

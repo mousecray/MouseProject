@@ -23,7 +23,7 @@ import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementState;
 import ru.mousecray.mouseproject.client.gui.core.container.MPGuiAnchorPanel;
-import ru.mousecray.mouseproject.client.gui.core.control.MPGuiSlider;
+import ru.mousecray.mouseproject.client.gui.core.control.base.MPGuiBaseSlider;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
 
@@ -65,14 +65,15 @@ public abstract class MPGuiScreen extends GuiScreen {
         this.guiDefaultBound = guiDefaultBound;
     }
 
-    public List<GuiButton> getButtonList()       { return buttonList; }
-    public List<GuiLabel> getLabelList()         { return labelList; }
-    public List<GuiTextField> getFieldsList()    { return textFieldList; }
-    public String getScreenName()                { return screenName; }
-    public FontRenderer getFontRenderer()        { return fontRenderer; }
-    public MPFontSize getFontSize()              { return fontSize; }
-    public void setFontSize(MPFontSize fontSize) { this.fontSize = Objects.requireNonNull(fontSize); }
-    public int genNextElementID()                { return ++currentElementID; }
+    public List<GuiButton> getButtonList()                 { return buttonList; }
+    public List<GuiLabel> getLabelList()                   { return labelList; }
+    public List<GuiTextField> getFieldsList()              { return textFieldList; }
+    public String getScreenName()                          { return screenName; }
+    public FontRenderer getFontRenderer()                  { return fontRenderer; }
+    public MPFontSize getFontSize()                        { return fontSize; }
+    public void setFontSize(MPFontSize fontSize)           { this.fontSize = Objects.requireNonNull(fontSize); }
+    public void setFontRenderer(FontRenderer fontRenderer) { this.fontRenderer = Objects.requireNonNull(fontRenderer); }
+    public int genNextElementID()                          { return ++currentElementID; }
 
     @Override
     public void initGui() {
@@ -153,8 +154,8 @@ public abstract class MPGuiScreen extends GuiScreen {
         return label;
     }
 
-    public <T extends MPGuiSlider<T>> T addSlider(T slider) { return addSlider(slider, null, null, null); }
-    public <T extends MPGuiSlider<T>> T addSlider(T slider, @Nullable MPGuiMargin margin, @Nullable MPAnchorPos anchor, @Nullable MPGuiVector offset) {
+    public <T extends MPGuiBaseSlider<T>> T addSlider(T slider) { return addSlider(slider, null, null, null); }
+    public <T extends MPGuiBaseSlider<T>> T addSlider(T slider, @Nullable MPGuiMargin margin, @Nullable MPAnchorPos anchor, @Nullable MPGuiVector offset) {
         rootPanel.addChild(slider, margin, anchor, offset);
         return slider;
     }
@@ -188,7 +189,7 @@ public abstract class MPGuiScreen extends GuiScreen {
         currentElementID = 0;
         rootPanel = new MPGuiAnchorPanel(new MPGuiShape(0, 0, guiDefaultSize.x(), guiDefaultSize.y()));
         rootPanel.setScreen(this);
-        rootPanel.setScaleRules(new GuiScaleRules(MPGuiScaleType.FLOW));
+        rootPanel.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.FLOW));
         buttonList.clear();
         labelList.clear();
         textFieldList.clear();
@@ -228,7 +229,7 @@ public abstract class MPGuiScreen extends GuiScreen {
         this.width = width;
         this.height = height;
         int newSizeY = (int) (height / 1.15D);
-        int newSizeX = (int) (height / 0.8D);
+        int newSizeX = (int) Math.min(width, height / 0.8D);
         guiShape = new MPGuiShape((width - newSizeX) / 2f, (height - newSizeY - 20) / 2f, newSizeX, newSizeY);
         guiBound = MPGuiVector.of(
                 guiShape.width() * guiDefaultBound.x() / guiDefaultSize.x(),

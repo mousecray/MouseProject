@@ -7,6 +7,7 @@ package ru.mousecray.mouseproject.client.gui.core.misc;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import ru.mousecray.mouseproject.client.gui.core.event.MPGuiMouseMoveEvent;
 
 import javax.annotation.Nullable;
 
@@ -35,5 +36,12 @@ public enum MPMoveDirection {
             else direction = MPMoveDirection.DIAGONAL_LEFT;
         }
         return direction;
+    }
+
+    @Nullable
+    public static MPMoveDirection calculateMoveDirection(int newMouseX, int newMouseY, MPGuiMouseMoveEvent<?> moveEvent) {
+        int diffX = newMouseX - moveEvent.getMouseX();
+        int diffY = newMouseY - moveEvent.getMouseY();
+        return MPMoveDirection.getMoveDirection(diffX, diffY);
     }
 }

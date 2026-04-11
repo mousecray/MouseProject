@@ -10,6 +10,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class MPGuiPadding extends MPGuiMargin {
+    public static MPGuiPadding ZERO()                                     { return new MPGuiPadding(0); }
+
     public MPGuiPadding(float all)                                        { super(all); }
     public MPGuiPadding(float horizontal, float vertical)                 { super(horizontal, vertical); }
     public MPGuiPadding(float left, float top, float right, float bottom) { super(left, top, right, bottom); }

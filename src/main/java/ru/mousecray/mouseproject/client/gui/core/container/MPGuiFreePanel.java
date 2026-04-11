@@ -21,7 +21,6 @@ import static ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHe
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class MPGuiFreePanel extends MPGuiPanel<MPGuiFreePanel> {
-
     public MPGuiFreePanel(MPGuiShape elementShape) { super(elementShape); }
 
     @Override

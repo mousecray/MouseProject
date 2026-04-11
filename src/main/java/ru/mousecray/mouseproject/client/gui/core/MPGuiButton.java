@@ -79,7 +79,7 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
     protected int                tickDown             = -1;
     protected MPMutableGuiVector textOffset           = new MPMutableGuiVector();
     protected float              textScaleMultiplayer = 1.0F;
-    private   GuiScaleRules      scaleRules           = new GuiScaleRules(MPGuiScaleType.FLOW);
+    private   MPGuiScaleRules    scaleRules           = new MPGuiScaleRules(MPGuiScaleType.FLOW);
 
     @Nullable private MPGuiPanel<?> parent;
     private           MPGuiPadding  padding = new MPGuiPadding(0);
@@ -216,15 +216,15 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
 
     //Геометрия
     @Override public MPMutableGuiShape getShape() { return shape; }
-    @Override public MPMutableGuiShape getCalculatedShape()       { return calculatedShape; }
-    @Override public MPMutableGuiShape getCalculatedInnerShape()  { return calculatedInnerShape; }
+    @Override public MPMutableGuiShape getCalculatedShape()         { return calculatedShape; }
+    @Override public MPMutableGuiShape getCalculatedInnerShape()    { return calculatedInnerShape; }
 
-    @Override public GuiScaleRules getScaleRules()                { return scaleRules; }
-    @Override public void setScaleRules(GuiScaleRules scaleRules) { this.scaleRules = Objects.requireNonNull(scaleRules); }
-    @Override public MPGuiPadding getPadding()                    { return padding; }
-    @Override public void setPadding(MPGuiPadding padding)        { this.padding = Objects.requireNonNull(padding); }
-    @Override public MPMutableGuiVector getTextOffset()           { return textOffset; }
-    @Override public void setTextOffset(IGuiVector offset)        { }
+    @Override public MPGuiScaleRules getScaleRules()                { return scaleRules; }
+    @Override public void setScaleRules(MPGuiScaleRules scaleRules) { this.scaleRules = Objects.requireNonNull(scaleRules); }
+    @Override public MPGuiPadding getPadding()                      { return padding; }
+    @Override public void setPadding(MPGuiPadding padding)          { this.padding = Objects.requireNonNull(padding); }
+    @Override public MPMutableGuiVector getTextOffset()             { return textOffset; }
+    @Override public void setTextOffset(IGuiVector offset)          { }
 
     @Override
     public void calculateTextOffset(IGuiVector pDefSize, IGuiVector pContentSize) {
@@ -271,7 +271,9 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
     @Override
     public final void dispatchMouseEnter(Minecraft mc, int mouseX, int mouseY) {
         stateManager.add(MPGuiElementState.HOVERED);
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, null);
+        MPGuiEventFactory.pushMouseMoveEvent(
+                moveEvent, mouseX, mouseY, MPMoveDirection.calculateMoveDirection(mouseX, mouseY, moveEvent)
+        );
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
             dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.ENTER);
@@ -282,7 +284,9 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
     @Override
     public final void dispatchMouseLeave(Minecraft mc, int mouseX, int mouseY) {
         stateManager.remove(MPGuiElementState.HOVERED);
-        MPGuiEventFactory.pushMouseMoveEvent(moveEvent, mouseX, mouseY, null);
+        MPGuiEventFactory.pushMouseMoveEvent(
+                moveEvent, mouseX, mouseY, MPMoveDirection.calculateMoveDirection(mouseX, mouseY, moveEvent)
+        );
         onAnyEventFire(moveEvent);
         if (!moveEvent.isCancelled()) {
             dispatchPlaySound(mc, mc.getSoundHandler(), MPSoundSourceType.LEAVE);
@@ -413,28 +417,28 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
 
     //Рендеринг
     @Override
-    public void dispatchDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public final void dispatchDrawBackground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         MPGuiEventFactory.pushTickEvent(drawBGEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawBGEvent);
         if (!drawBGEvent.isCancelled()) onDrawBackground(drawBGEvent);
     }
 
     @Override
-    public void dispatchDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public final void dispatchDrawForeground(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         MPGuiEventFactory.pushTickEvent(drawFGEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawFGEvent);
         if (!drawFGEvent.isCancelled()) onDrawForeground(drawFGEvent);
     }
 
     @Override
-    public void dispatchDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public final void dispatchDrawText(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         MPGuiEventFactory.pushTickEvent(drawTextEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawTextEvent);
         if (!drawTextEvent.isCancelled()) onDrawText(drawTextEvent);
     }
 
     @Override
-    public void dispatchDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public final void dispatchDrawLast(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         MPGuiEventFactory.pushTickEvent(drawLastEvent, mouseX, mouseY, partialTicks);
         onAnyEventFire(drawLastEvent);
         if (!drawLastEvent.isCancelled()) onDrawLast(drawLastEvent);

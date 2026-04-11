@@ -280,7 +280,7 @@ public class MPGuiRenderHelper {
 
     public static void calculateFlowComponentShape(
             MPMutableGuiShape target,
-            IGuiVector parentDefault, IGuiVector parentCurrent, IGuiShape childTemplate, GuiScaleRules rules, IGuiShape available
+            IGuiVector parentDefault, IGuiVector parentCurrent, IGuiShape childTemplate, MPGuiScaleRules rules, IGuiShape available
     ) {
         if (rules.isFixed()) {
             target.withShape(childTemplate);
@@ -334,7 +334,7 @@ public class MPGuiRenderHelper {
         child.measurePreferred(parentDefaultSize, innerSize, availW, availH, measureResult);
     }
 
-    public static void checkFixedScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MPMutableGuiVector result, GuiScaleRules scaleRules, MPMutableGuiShape elementShape) {
+    public static void checkFixedScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MPMutableGuiVector result, MPGuiScaleRules scaleRules, MPMutableGuiShape elementShape) {
         if (scaleRules.isParent()) {
             result.withX(suggestedX);
             result.withY(suggestedY);
@@ -350,7 +350,7 @@ public class MPGuiRenderHelper {
         }
     }
 
-    public static void measurePreferredWithScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MPMutableGuiVector result, MPMutableGuiShape elementShape, GuiScaleRules scaleRules) {
+    public static void measurePreferredWithScaleRules(IGuiVector parentDefaultSize, IGuiVector parentContentSize, float suggestedX, float suggestedY, MPMutableGuiVector result, MPMutableGuiShape elementShape, MPGuiScaleRules scaleRules) {
         result.withX(elementShape.width());
         result.withY(elementShape.height());
 
@@ -366,7 +366,7 @@ public class MPGuiRenderHelper {
         }
     }
 
-    public static void addPaddingToPreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiVector result, MPGuiPadding pad, GuiScaleRules scaleRules) {
+    public static void addPaddingToPreferred(IGuiVector parentDefaultSize, IGuiVector parentContentSize, MPMutableGuiVector result, MPGuiPadding pad, MPGuiScaleRules scaleRules) {
         if (pad != null) {
             float padL = calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getLeft());
             float padR = calculateFlowComponentX(parentDefaultSize, parentContentSize, pad.getRight());

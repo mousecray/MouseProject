@@ -10,7 +10,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class MPGuiMargin {
-    public static final MPGuiMargin ZERO = new MPGuiMargin(0);
+    public static MPGuiMargin ZERO() { return new MPGuiMargin(0); }
 
     private float left, top, right, bottom;
 

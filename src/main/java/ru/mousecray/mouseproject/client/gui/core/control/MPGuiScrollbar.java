@@ -8,14 +8,12 @@ package ru.mousecray.mouseproject.client.gui.core.control;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import ru.mousecray.mouseproject.MouseProject;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiButton;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiPanel;
-import ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper;
-import ru.mousecray.mouseproject.client.gui.core.components.sound.MPGuiSoundPack;
 import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementState;
+import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTexture;
 import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTextureScaleRules;
-import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTextureScaleType;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiMouseDragEvent;
@@ -23,31 +21,20 @@ import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTickEvent;
 import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
-
-    // --- КОНСТАНТЫ ТЕКСТУР ---
-    private static final float TEX_W          = 10f;
-    private static final float TEX_H          = 10f;
-    private static final float STATE_V_OFFSET = 10f;
-
-    private static final float ARROW_UP_U = 0f, ARROW_UP_V = 0f;
-    private static final float ARROW_DOWN_U = 10f, ARROW_DOWN_V = 0f;
-    private static final float ARROW_LEFT_U = 20f, ARROW_LEFT_V = 0f;
-    private static final float ARROW_RIGHT_U = 30f, ARROW_RIGHT_V = 0f;
-
-    private static final float THUMB_BG_U = 40f, THUMB_BG_V = 0f;
-    private static final float THUMB_LINES_U = 50f, THUMB_LINES_V = 0f;
-
-    private final MPOrientation orientation;
+    private MPOrientation orientation = MPOrientation.VERTICAL;
 
     private final ScrollbarArrow minusButton;
     private final ScrollbarArrow plusButton;
     private final ScrollbarThumb thumb;
+
+    private MPGuiTexturePack thumbForegroundTexturePack = MPGuiTexturePack.EMPTY();
 
     private float contentSize  = 1f;
     private float viewportSize = 1f;
@@ -56,21 +43,8 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
 
     private Consumer<Float> onScroll;
 
-    public MPGuiScrollbar(MPGuiShape shape, MPOrientation orientation) {
+    public MPGuiScrollbar(MPGuiShape shape) {
         super(shape);
-        this.orientation = orientation;
-
-        boolean isVert = orientation == MPOrientation.VERTICAL;
-
-        MPGuiTextureScaleRules trackRules = isVert
-                ? new MPGuiTextureScaleRules(MPGuiTextureScaleType.FILL_VERTICAL, MPGuiTextureScaleType.SINGLE_HORIZONTAL_LEFT).setMultipliers(0.7f, 0.5f)
-                : new MPGuiTextureScaleRules(MPGuiTextureScaleType.FILL_HORIZONTAL, MPGuiTextureScaleType.SINGLE_VERTICAL_TOP).setMultipliers(0.5f, 0.7f);
-
-        setTexturePack(MPGuiTexturePack.Builder
-                .create(MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE, MPGuiVector.of(230, 0), MPGuiVector.of(18, 7))
-                .setScaleRules(trackRules)
-                .addTexture(0)
-                .build());
 
         minusButton = new ScrollbarArrow(true);
         plusButton = new ScrollbarArrow(false);
@@ -79,26 +53,119 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
         addChild(minusButton);
         addChild(plusButton);
         addChild(thumb);
+
+        updateOrientationState();
+    }
+
+    public MPOrientation getOrientation() { return orientation; }
+
+    public void setOrientation(MPOrientation orientation) {
+        if (getScreen() != null) {
+            MouseProject.LOGGER.warn(
+                    "Orientation cannot be setup immediately to MPGuiScrollbar that added to container." +
+                            " It set now, but actual element size will be updated on the next gui size calculation."
+            );
+        }
+        if (this.orientation != orientation) {
+            this.orientation = orientation;
+            updateOrientationState();
+        }
+    }
+
+    private void updateOrientationState() {
+        MPGuiScaleType scaleType = orientation == MPOrientation.VERTICAL ? MPGuiScaleType.PARENT_HORIZONTAL : MPGuiScaleType.PARENT_VERTICAL;
+        minusButton.setScaleRules(new MPGuiScaleRules(scaleType));
+        plusButton.setScaleRules(new MPGuiScaleRules(scaleType));
+        thumb.setScaleRules(new MPGuiScaleRules(scaleType));
+
+        boolean     isVert   = orientation == MPOrientation.VERTICAL;
+        MPGuiVector iconSize = MPGuiVector.of(10, 10);
+
+        setMinusArrowTexturePack(MPGuiTexturePack.Builder
+                .create(
+                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                        isVert ? MPGuiVector.of(0, 0) : MPGuiVector.of(20, 0), iconSize
+                )
+                .addTexture(0).addTexture(1, MPGuiElementState.HOVERED)
+                .addTexture(2, MPGuiElementState.PRESSED)
+                .build()
+        );
+
+        setPlusArrowTexturePack(MPGuiTexturePack.Builder
+                .create(
+                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                        isVert ? MPGuiVector.of(10, 0) : MPGuiVector.of(30, 0), iconSize
+                )
+                .addTexture(0).addTexture(1, MPGuiElementState.HOVERED)
+                .addTexture(2, MPGuiElementState.PRESSED)
+                .build()
+        );
+
+        setThumbTexturePack(MPGuiTexturePack.Builder
+                .create(
+                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                        MPGuiVector.of(40, 0), iconSize
+                )
+                .addTexture(0)
+                .addTexture(1, MPGuiElementState.HOVERED)
+                .addTexture(2, MPGuiElementState.PRESSED)
+                .build()
+        );
+
+        setThumbForegroundTexturePack(MPGuiTexturePack.Builder
+                .create(
+                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                        MPGuiVector.of(50, 0), iconSize
+                )
+                .addTexture(0)
+                .addTexture(1, MPGuiElementState.HOVERED)
+                .addTexture(2, MPGuiElementState.PRESSED)
+                .build()
+        );
+    }
+
+    public MPGuiTexturePack getMinusArrowTexturePack() { return minusButton.getTexturePack(); }
+
+    public void setMinusArrowTexturePack(MPGuiTexturePack pack) {
+        Objects.requireNonNull(pack, "texturePack cannot be null. Use MPGuiTexturePack.EMPTY() instead.");
+        minusButton.setTexturePack(pack);
+    }
+
+    public MPGuiTexturePack getPlusArrowTexturePack() { return plusButton.getTexturePack(); }
+
+    public void setPlusArrowTexturePack(MPGuiTexturePack pack) {
+        Objects.requireNonNull(pack, "texturePack cannot be null. Use MPGuiTexturePack.EMPTY() instead.");
+        plusButton.setTexturePack(pack);
+    }
+
+    public MPGuiTexturePack getThumbTexturePack() { return thumb.getTexturePack(); }
+
+    public void setThumbTexturePack(MPGuiTexturePack pack) {
+        Objects.requireNonNull(pack, "texturePack cannot be null. Use MPGuiTexturePack.EMPTY() instead.");
+        thumb.setTexturePack(pack);
+    }
+
+    public MPGuiTexturePack getThumbForegroundTexturePack() { return thumbForegroundTexturePack; }
+
+    public void setThumbForegroundTexturePack(MPGuiTexturePack pack) {
+        Objects.requireNonNull(pack, "texturePack cannot be null. Use MPGuiTexturePack.EMPTY() instead.");
+        thumbForegroundTexturePack = pack;
     }
 
     @Override
     public void onClick(MPGuiMouseClickEvent<MPGuiScrollbar> event) {
         boolean isVert   = orientation == MPOrientation.VERTICAL;
         float   clickPos = isVert ? (event.getMouseY() - getCalculatedShape().y()) : (event.getMouseX() - getCalculatedShape().x());
-        float   thumbPos = isVert ? (thumb.getCalculatedShape().y() - getCalculatedShape().y()) : (thumb.getCalculatedShape().x() - getCalculatedShape().x());
-        float   thumbEnd = thumbPos + (isVert ? thumb.getCalculatedShape().height() : thumb.getCalculatedShape().width());
+        float thumbPos = isVert ? (thumb.getCalculatedShape().y() - getCalculatedShape().y())
+                : (thumb.getCalculatedShape().x() - getCalculatedShape().x());
+        float thumbEnd = thumbPos + (isVert ? thumb.getCalculatedShape().height() : thumb.getCalculatedShape().width());
 
-        if (clickPos < thumbPos) {
-            setScrollValue(scrollValue - viewportSize, true);
-        } else if (clickPos > thumbEnd) {
-            setScrollValue(scrollValue + viewportSize, true);
-        }
+        if (clickPos < thumbPos) setScrollValue(scrollValue - viewportSize, true);
+        else if (clickPos > thumbEnd) setScrollValue(scrollValue + viewportSize, true);
     }
 
-    public MPGuiScrollbar setOnScroll(Consumer<Float> onScroll) {
-        this.onScroll = onScroll;
-        return this;
-    }
+    public void setOnScroll(Consumer<Float> onScroll) { this.onScroll = onScroll; }
+    public void setScrollStep(float step)             { scrollStep = step; }
 
     public void updateSizes(float viewportSize, float contentSize) {
         this.viewportSize = viewportSize;
@@ -137,18 +204,14 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
             thumb.getStateManager().remove(MPGuiElementState.DISABLED);
             thumb.getStateManager().remove(MPGuiElementState.HIDDEN);
 
-            float minThumbSize = thickness;
-            float thumbRatio   = viewportSize / contentSize;
-            float thumbLength  = Math.max(minThumbSize, trackSize * thumbRatio);
+            float thumbRatio  = viewportSize / contentSize;
+            float thumbLength = Math.max(thickness, trackSize * thumbRatio);
 
             float scrollRatio = scrollValue / maxScroll;
             float thumbOffset = thickness + (scrollRatio * (trackSize - thumbLength));
 
-            if (isVert) {
-                thumb.getShape().withWidth(thickness).withHeight(thumbLength).withX(0).withY(thumbOffset);
-            } else {
-                thumb.getShape().withWidth(thumbLength).withHeight(thickness).withX(thumbOffset).withY(0);
-            }
+            if (isVert) thumb.getShape().withWidth(thickness).withHeight(thumbLength).withX(0).withY(thumbOffset);
+            else thumb.getShape().withWidth(thumbLength).withHeight(thickness).withX(thumbOffset).withY(0);
         }
     }
 
@@ -162,11 +225,9 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
         minusButton.getShape().withWidth(thickness).withHeight(thickness);
         minusButton.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
 
-        if (isVert) {
-            childAvailableTemp.withX(inner.x()).withY(inner.y() + totalLength - thickness);
-        } else {
-            childAvailableTemp.withX(inner.x() + totalLength - thickness).withY(inner.y());
-        }
+        if (isVert) childAvailableTemp.withX(inner.x()).withY(inner.y() + totalLength - thickness);
+        else childAvailableTemp.withX(inner.x() + totalLength - thickness).withY(inner.y());
+
         plusButton.getShape().withWidth(thickness).withHeight(thickness);
         plusButton.calculate(parentDefaultSize, parentContentSize, childAvailableTemp);
 
@@ -184,53 +245,19 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
         public ScrollbarArrow(boolean isMinus) {
             super(new MPGuiShape(0, 0, 0, 0));
             this.isMinus = isMinus;
-            setSoundPack(MPGuiSoundPack.CONTROL_SIMPLE());
-            setScaleRules(new GuiScaleRules(MPGuiScaleType.FIXED));
         }
-
-        @Override public void setTexturePack(MPGuiTexturePack pack) { }
 
         @Override
         public void onClick(MPGuiMouseClickEvent<ScrollbarArrow> event) {
             if (isMinus) setScrollValue(scrollValue - scrollStep, true);
             else setScrollValue(scrollValue + scrollStep, true);
         }
-
-        @Override
-        protected void onDrawBackground(MPGuiTickEvent<ScrollbarArrow> event) {
-            event.getMc().getTextureManager().bindTexture(MPStaticData.CONTROLS_TEXTURES);
-
-            int stateIdx = 0;
-            if (getStateManager().has(MPGuiElementState.PRESSED)) stateIdx = 2;
-            else if (getStateManager().has(MPGuiElementState.HOVERED)) stateIdx = 1;
-
-            boolean isVert = orientation == MPOrientation.VERTICAL;
-            float   u, v;
-            if (isVert) {
-                u = isMinus ? ARROW_UP_U : ARROW_DOWN_U;
-                v = (isMinus ? ARROW_UP_V : ARROW_DOWN_V) + (stateIdx * STATE_V_OFFSET);
-            } else {
-                u = isMinus ? ARROW_LEFT_U : ARROW_RIGHT_U;
-                v = (isMinus ? ARROW_LEFT_V : ARROW_RIGHT_V) + (stateIdx * STATE_V_OFFSET);
-            }
-
-            MPGuiRenderHelper.drawTexture(
-                    getCalculatedShape().x(), getCalculatedShape().y(),
-                    u, v, TEX_W, TEX_H,
-                    getCalculatedShape().width(), getCalculatedShape().height(),
-                    MPStaticData.CONTROLS_TEXTURES_SIZE.x(), MPStaticData.CONTROLS_TEXTURES_SIZE.y()
-            );
-        }
     }
 
     private class ScrollbarThumb extends MPGuiButton<ScrollbarThumb> {
         public ScrollbarThumb() {
             super(new MPGuiShape(0, 0, 0, 0));
-            setSoundPack(MPGuiSoundPack.CONTROL_SIMPLE());
-            setScaleRules(new GuiScaleRules(MPGuiScaleType.FIXED));
         }
-
-        @Override public void setTexturePack(MPGuiTexturePack pack) { }
 
         @Override
         protected void onMouseDragged(MPGuiMouseDragEvent<ScrollbarThumb> e) {
@@ -239,13 +266,8 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
             float maxScroll = Math.max(0, contentSize - viewportSize);
             if (maxScroll <= 0) return;
 
-            boolean isVert           = orientation == MPOrientation.VERTICAL;
-            float   thickness        = isVert ? getCalculatedShape().width() : getCalculatedShape().height();
-            float   totalTrackLength = isVert ? MPGuiScrollbar.this.getCalculatedShape().height() : MPGuiScrollbar.this.getCalculatedShape().width();
-
-            float trackSize       = totalTrackLength - (thickness * 2);
-            float thumbLength     = isVert ? getCalculatedShape().height() : getCalculatedShape().width();
-            float scrollableTrack = trackSize - thumbLength;
+            boolean isVert          = orientation == MPOrientation.VERTICAL;
+            float   scrollableTrack = getScrollableTrack(isVert);
 
             if (scrollableTrack <= 0) return;
 
@@ -257,38 +279,35 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
             e.consume();
         }
 
+        private float getScrollableTrack(boolean isVert) {
+            float thickness = isVert ? getCalculatedShape().width() : getCalculatedShape().height();
+            float totalTrackLength = isVert ? MPGuiScrollbar.this.getCalculatedShape().height()
+                    : MPGuiScrollbar.this.getCalculatedShape().width();
+
+            float trackSize   = totalTrackLength - (thickness * 2);
+            float thumbLength = isVert ? getCalculatedShape().height() : getCalculatedShape().width();
+            return trackSize - thumbLength;
+        }
+
         @Override
         public void onClick(MPGuiMouseClickEvent<ScrollbarThumb> event) { }
 
         @Override
-        protected void onDrawBackground(MPGuiTickEvent<ScrollbarThumb> event) {
-            event.getMc().getTextureManager().bindTexture(MPStaticData.CONTROLS_TEXTURES);
+        protected void onDrawForeground(MPGuiTickEvent<ScrollbarThumb> event) {
+            super.onDrawForeground(event);
 
-            float x = getCalculatedShape().x();
-            float y = getCalculatedShape().y();
-            float w = getCalculatedShape().width();
-            float h = getCalculatedShape().height();
+            MPGuiTexture fgTex = thumbForegroundTexturePack.getCalculatedTexture(getStateManager());
+            if (fgTex != null) {
+                float   w      = getCalculatedShape().width();
+                float   h      = getCalculatedShape().height();
+                boolean isVert = orientation == MPOrientation.VERTICAL;
 
-            int stateIdx = 0;
-            if (getStateManager().has(MPGuiElementState.PRESSED)) stateIdx = 2;
-            else if (getStateManager().has(MPGuiElementState.HOVERED)) stateIdx = 1;
+                float linesSize = isVert ? w : h;
+                float linesX    = getCalculatedShape().x() + (w - linesSize) / 2f;
+                float linesY    = getCalculatedShape().y() + (h - linesSize) / 2f;
 
-            float vOffset = stateIdx * STATE_V_OFFSET;
-
-            MPGuiRenderHelper.drawTexture(
-                    x, y, THUMB_BG_U, THUMB_BG_V + vOffset, TEX_W, TEX_H, w, h,
-                    MPStaticData.CONTROLS_TEXTURES_SIZE.x(), MPStaticData.CONTROLS_TEXTURES_SIZE.y()
-            );
-
-            boolean isVert    = orientation == MPOrientation.VERTICAL;
-            float   linesSize = isVert ? w : h;
-            float   linesX    = x + (w - linesSize) / 2f;
-            float   linesY    = y + (h - linesSize) / 2f;
-
-            MPGuiRenderHelper.drawTexture(
-                    linesX, linesY, THUMB_LINES_U, THUMB_LINES_V + vOffset, TEX_W, TEX_H, linesSize, linesSize,
-                    MPStaticData.CONTROLS_TEXTURES_SIZE.x(), MPStaticData.CONTROLS_TEXTURES_SIZE.y()
-            );
+                fgTex.draw(event.getMc(), linesX, linesY, linesSize, linesSize);
+            }
         }
     }
 }

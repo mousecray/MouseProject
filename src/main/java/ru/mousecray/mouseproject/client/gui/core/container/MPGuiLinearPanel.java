@@ -14,6 +14,8 @@ import ru.mousecray.mouseproject.client.gui.core.dim.*;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import static ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper.*;
+
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
