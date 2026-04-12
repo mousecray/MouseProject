@@ -21,9 +21,9 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
-public class MPGuiSlider extends MPGuiBaseSlider<MPGuiSlider> {
+public class MPGuiSimpleSlider extends MPGuiBaseSlider<MPGuiSimpleSlider> {
 
-    public MPGuiSlider(MPGuiShape shape, float knobWidth, float knobHeight, int min, int max, MPOrientation orientation) {
+    public MPGuiSimpleSlider(MPGuiShape shape, float knobWidth, float knobHeight, int min, int max, MPOrientation orientation) {
         super(shape, knobWidth, knobHeight, min, max, orientation);
         updateTextures();
     }

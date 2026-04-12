@@ -12,11 +12,9 @@ import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
 
 @SideOnly(Side.CLIENT)
-public class MPGuiStaticLabel extends MPGuiLabel<MPGuiStaticLabel> {
-    public MPGuiStaticLabel(MPGuiString text, MPGuiShape shape) {
+public class MPGuiSimpleLabel extends MPGuiLabel<MPGuiSimpleLabel> {
+    public MPGuiSimpleLabel(MPGuiString text, MPGuiShape shape) {
         super(shape);
         setGuiString(text);
     }
-
-    public MPGuiStaticLabel(String text, MPGuiShape shape) { this(MPGuiString.simple(text), shape); }
 }

@@ -16,8 +16,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
-public abstract class MPGuiSelectedButton<T extends MPGuiSelectedButton<T>> extends MPGuiBaseButton<T> {
-    public MPGuiSelectedButton(MPGuiShape shape, MPGuiString text) {
+public abstract class MPGuiSelectableButton<T extends MPGuiSelectableButton<T>> extends MPGuiBaseButton<T> {
+    public MPGuiSelectableButton(MPGuiShape shape, MPGuiString text) {
         super(shape, text);
     }
 

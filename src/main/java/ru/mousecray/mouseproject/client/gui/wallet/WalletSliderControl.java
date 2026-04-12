@@ -6,7 +6,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.core.container.MPGuiFreePanel;
 import ru.mousecray.mouseproject.client.gui.core.control.MPGuiNumberField;
-import ru.mousecray.mouseproject.client.gui.core.control.MPGuiSlider;
+import ru.mousecray.mouseproject.client.gui.core.control.MPGuiSimpleSlider;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
@@ -16,8 +16,8 @@ import java.util.function.Consumer;
 
 @SideOnly(Side.CLIENT)
 public class WalletSliderControl extends MPGuiFreePanel {
-    private final MPGuiNumberField field;
-    private final MPGuiSlider      slider;
+    private final MPGuiNumberField  field;
+    private final MPGuiSimpleSlider slider;
 
     private final long maxCoinValue;
 
@@ -48,7 +48,7 @@ public class WalletSliderControl extends MPGuiFreePanel {
         float sliderH = height * 0.5f;
         float knobW   = sliderH * (5f / 7f);
 
-        slider = new MPGuiSlider(new MPGuiShape(0, 0, width, sliderH), knobW, sliderH, 0, 100, MPOrientation.HORIZONTAL);
+        slider = new MPGuiSimpleSlider(new MPGuiShape(0, 0, width, sliderH), knobW, sliderH, 0, 100, MPOrientation.HORIZONTAL);
         slider.setScaleRules(new MPGuiScaleRules(MPGuiScaleType.PARENT_HORIZONTAL));
 
         slider.setOnSliderChangedListener(event -> {

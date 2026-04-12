@@ -76,9 +76,9 @@ public class GuiScreenWallet extends MPGuiScreen {
 
         if (walletPipe == null) return;
 
-        MPGuiStaticLabel titleLabel = MPGuiElementCache.INSTANCE.getOrCreate(
-                this, "title_label", MPGuiStaticLabel.class,
-                () -> new MPGuiStaticLabel(MPGuiString.simple(walletStack.getDisplayName()), new MPGuiShape(0, 0, 80, 10)),
+        MPGuiSimpleLabel titleLabel = MPGuiElementCache.INSTANCE.getOrCreate(
+                this, "title_label", MPGuiSimpleLabel.class,
+                () -> new MPGuiSimpleLabel(MPGuiString.simple(walletStack.getDisplayName()), new MPGuiShape(0, 0, 80, 10)),
                 null,
                 t -> t.setGuiString(MPGuiString.simple(walletStack.getDisplayName()))
         );
@@ -224,9 +224,9 @@ public class GuiScreenWallet extends MPGuiScreen {
         addPanel(coinsContainer, null, MPAnchorPos.TOP_LEFT, MPGuiVector.of(4, 10));
 
         if (activeGroups.isEmpty()) {
-            MPGuiStaticLabel emptyLabel = MPGuiElementCache.INSTANCE.getOrCreate(
-                    this, "empty_label", MPGuiStaticLabel.class,
-                    () -> new MPGuiStaticLabel(MPGuiString.localizedGuiTag("wallet.label.empty"), new MPGuiShape(0, 0, 80, 10))
+            MPGuiSimpleLabel emptyLabel = MPGuiElementCache.INSTANCE.getOrCreate(
+                    this, "empty_label", MPGuiSimpleLabel.class,
+                    () -> new MPGuiSimpleLabel(MPGuiString.localizedGuiTag("wallet.label.empty"), new MPGuiShape(0, 0, 80, 10))
             );
             coinsPanel.addChild(emptyLabel, null, MPGuiVector.of(2, 0));
         } else {
@@ -285,18 +285,18 @@ public class GuiScreenWallet extends MPGuiScreen {
                     );
                     groupPanel.addChild(titlePanel, new MPGuiMargin(0, 3f), null);
 
-                    MPGuiStaticLabel groupTitle = MPGuiElementCache.INSTANCE.getOrCreate(
-                            this, "group_title_" + idx, MPGuiStaticLabel.class,
-                            () -> new MPGuiStaticLabel(MPGuiString.localizedGuiTag(groupLabelKey.$()), new MPGuiShape(0, 0, colWidth - 15, 10)),
+                    MPGuiSimpleLabel groupTitle = MPGuiElementCache.INSTANCE.getOrCreate(
+                            this, "group_title_" + idx, MPGuiSimpleLabel.class,
+                            () -> new MPGuiSimpleLabel(MPGuiString.localizedGuiTag(groupLabelKey.$()), new MPGuiShape(0, 0, colWidth - 15, 10)),
                             null,
                             t -> t.setGuiString(MPGuiString.localizedGuiTag(groupLabelKey.$())),
                             null
                     );
                     titlePanel.addChild(groupTitle, null, MPAnchorPos.MIDDLE_LEFT, null);
 
-                    MPGuiCheckButton selectAll = MPGuiElementCache.INSTANCE.getOrCreate(
-                            this, "select_all_" + idx, MPGuiCheckButton.class,
-                            () -> new MPGuiCheckButton(
+                    MPGuiSimpleCheckbox selectAll = MPGuiElementCache.INSTANCE.getOrCreate(
+                            this, "select_all_" + idx, MPGuiSimpleCheckbox.class,
+                            () -> new MPGuiSimpleCheckbox(
                                     new MPGuiShape(0, 0, 8, 8),
                                     MPGuiString.localizedGuiTag("wallet.button.select_all"),
                                     fontRenderer

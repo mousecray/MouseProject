@@ -15,7 +15,7 @@ import ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementState;
 import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.core.control.base.MPGuiSelectedButton;
+import ru.mousecray.mouseproject.client.gui.core.control.base.MPGuiSelectableButton;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiScaleRules;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiScaleType;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
@@ -25,7 +25,7 @@ import ru.mousecray.mouseproject.common.economy.CoinValue;
 
 import javax.annotation.Nonnull;
 
-public class WalletCoinButton extends MPGuiSelectedButton<WalletCoinButton> {
+public class WalletCoinButton extends MPGuiSelectableButton<WalletCoinButton> {
     private       CoinValue coinValue;
     private final String    cachedName;
 

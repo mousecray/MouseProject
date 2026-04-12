@@ -79,12 +79,12 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
         thumb.setScaleRules(new MPGuiScaleRules(scaleType));
 
         boolean     isVert   = orientation == MPOrientation.VERTICAL;
-        MPGuiVector iconSize = MPGuiVector.of(10, 10);
+        MPGuiVector iconSize = MPGuiVector.of(11);
 
         setMinusArrowTexturePack(MPGuiTexturePack.Builder
                 .create(
                         MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                        isVert ? MPGuiVector.of(0, 0) : MPGuiVector.of(20, 0), iconSize
+                        isVert ? MPGuiVector.of(192, 0) : MPGuiVector.of(20, 0), iconSize
                 )
                 .addTexture(0).addTexture(1, MPGuiElementState.HOVERED)
                 .addTexture(2, MPGuiElementState.PRESSED)
@@ -94,7 +94,7 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
         setPlusArrowTexturePack(MPGuiTexturePack.Builder
                 .create(
                         MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                        isVert ? MPGuiVector.of(10, 0) : MPGuiVector.of(30, 0), iconSize
+                        isVert ? MPGuiVector.of(192, 0) : MPGuiVector.of(30, 0), iconSize
                 )
                 .addTexture(0).addTexture(1, MPGuiElementState.HOVERED)
                 .addTexture(2, MPGuiElementState.PRESSED)

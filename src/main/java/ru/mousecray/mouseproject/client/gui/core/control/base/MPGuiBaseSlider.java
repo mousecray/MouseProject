@@ -149,9 +149,7 @@ public class MPGuiBaseSlider<T extends MPGuiBaseSlider<T>> extends MPGuiPanel<T>
         if (Float.compare(progress, newProgress) == 0) return;
 
         int newValue = min + Math.round(newProgress * range);
-        if (value != newValue) {
-            setValueInternal(newValue, true, mouseX, mouseY);
-        }
+        if (value != newValue) setValueInternal(newValue, true, mouseX, mouseY);
     }
 
     public void setOnSliderChangedListener(@Nullable Consumer<MPGuiSliderChangedEvent<T>> listener) {
