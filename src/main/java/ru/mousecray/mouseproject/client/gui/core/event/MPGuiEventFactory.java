@@ -10,7 +10,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiElement;
-import ru.mousecray.mouseproject.client.gui.core.components.sound.MPSoundSourceType;
+import ru.mousecray.mouseproject.client.gui.core.component.sound.MPSoundSourceType;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPMoveDirection;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPScrollDirection;
 

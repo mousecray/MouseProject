@@ -3,8 +3,16 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.client.gui.core.components.sound;
+package ru.mousecray.mouseproject.client.gui.core.component.state;
 
-public enum MPSoundSourceType {
-    CLICK, PRESS, RELEASE, ENTER, LEAVE, DRAG, DISABLED, FAIL, KEY_TYPED, SCROLL
+public enum MPGuiElementState {
+    HOVERED,
+    PRESSED,
+    FOCUSED,
+    SELECTED,
+    FAIL,
+    DISABLED,
+    HIDDEN;
+
+    public final int mask = 1 << ordinal();
 }

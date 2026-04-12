@@ -9,7 +9,7 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiButton;
-import ru.mousecray.mouseproject.client.gui.core.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiMouseClickEvent;
 

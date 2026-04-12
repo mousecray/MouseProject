@@ -7,8 +7,8 @@ package ru.mousecray.mouseproject.client.gui.core.control;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.client.gui.core.components.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTexturePack;
+import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.core.control.base.MPGuiBaseTextField;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiVector;

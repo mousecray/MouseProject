@@ -3,7 +3,7 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.client.gui.core.components.lang;
+package ru.mousecray.mouseproject.client.gui.core.component.lang;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

@@ -17,8 +17,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper.calculateFlowComponentX;
-import static ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper.calculateFlowComponentY;
+import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentX;
+import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentY;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault

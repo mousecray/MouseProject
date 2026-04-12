@@ -17,7 +17,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper.*;
+import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.*;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault

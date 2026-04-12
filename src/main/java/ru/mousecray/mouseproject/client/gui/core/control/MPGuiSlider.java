@@ -7,10 +7,10 @@ package ru.mousecray.mouseproject.client.gui.core.control;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementState;
-import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTexturePack;
-import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTextureScaleRules;
-import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTextureScaleType;
+import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementState;
+import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexturePack;
+import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTextureScaleRules;
+import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTextureScaleType;
 import ru.mousecray.mouseproject.client.gui.core.control.base.MPGuiBaseSlider;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiVector;

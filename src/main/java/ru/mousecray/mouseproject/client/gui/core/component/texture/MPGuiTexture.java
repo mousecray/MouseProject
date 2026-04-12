@@ -3,7 +3,7 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.client.gui.core.components.texture;
+package ru.mousecray.mouseproject.client.gui.core.component.texture;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.core.dim.IGuiVector;
 
 @SideOnly(Side.CLIENT)

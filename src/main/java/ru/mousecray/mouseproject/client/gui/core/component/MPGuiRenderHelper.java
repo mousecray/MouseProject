@@ -3,7 +3,7 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.client.gui.core.components;
+package ru.mousecray.mouseproject.client.gui.core.component;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;

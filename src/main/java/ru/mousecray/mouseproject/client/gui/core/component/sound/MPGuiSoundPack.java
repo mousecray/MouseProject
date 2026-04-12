@@ -3,7 +3,7 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.client.gui.core.components.sound;
+package ru.mousecray.mouseproject.client.gui.core.component.sound;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;

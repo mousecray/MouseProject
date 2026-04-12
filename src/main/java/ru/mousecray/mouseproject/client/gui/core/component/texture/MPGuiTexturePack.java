@@ -3,15 +3,15 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.client.gui.core.components.texture;
+package ru.mousecray.mouseproject.client.gui.core.component.texture;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementState;
-import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementStateManager;
+import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementState;
+import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementStateManager;
 import ru.mousecray.mouseproject.client.gui.core.dim.IGuiVector;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiVector;
 

@@ -3,7 +3,7 @@ package ru.mousecray.mouseproject.client.gui.wallet;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.client.gui.core.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.core.container.MPGuiFreePanel;
 import ru.mousecray.mouseproject.client.gui.core.control.MPGuiNumberField;
 import ru.mousecray.mouseproject.client.gui.core.control.MPGuiSlider;

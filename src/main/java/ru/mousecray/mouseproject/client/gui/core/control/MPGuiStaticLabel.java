@@ -8,7 +8,7 @@ package ru.mousecray.mouseproject.client.gui.core.control;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import ru.mousecray.mouseproject.client.gui.core.MPGuiLabel;
-import ru.mousecray.mouseproject.client.gui.core.components.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
 
 @SideOnly(Side.CLIENT)

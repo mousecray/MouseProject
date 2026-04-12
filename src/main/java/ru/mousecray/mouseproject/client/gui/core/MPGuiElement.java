@@ -11,14 +11,14 @@ import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper;
-import ru.mousecray.mouseproject.client.gui.core.components.color.MPGuiColorPack;
-import ru.mousecray.mouseproject.client.gui.core.components.lang.MPGuiString;
-import ru.mousecray.mouseproject.client.gui.core.components.sound.MPGuiSoundPack;
-import ru.mousecray.mouseproject.client.gui.core.components.sound.MPSoundSourceType;
-import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementState;
-import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementStateManager;
-import ru.mousecray.mouseproject.client.gui.core.components.texture.MPGuiTexturePack;
+import ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper;
+import ru.mousecray.mouseproject.client.gui.core.component.color.MPGuiColorPack;
+import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
+import ru.mousecray.mouseproject.client.gui.core.component.sound.MPGuiSoundPack;
+import ru.mousecray.mouseproject.client.gui.core.component.sound.MPSoundSourceType;
+import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementState;
+import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementStateManager;
+import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexturePack;
 import ru.mousecray.mouseproject.client.gui.core.dim.*;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPMoveDirection;
@@ -26,7 +26,7 @@ import ru.mousecray.mouseproject.client.gui.core.misc.MPMoveDirection;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import static ru.mousecray.mouseproject.client.gui.core.components.MPGuiRenderHelper.*;
+import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.*;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault

@@ -3,14 +3,14 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mouseproject.client.gui.core.components.color;
+package ru.mousecray.mouseproject.client.gui.core.component.color;
 
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementState;
-import ru.mousecray.mouseproject.client.gui.core.components.state.MPGuiElementStateManager;
+import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementState;
+import ru.mousecray.mouseproject.client.gui.core.component.state.MPGuiElementStateManager;
 
 @SideOnly(Side.CLIENT)
 public class MPGuiColorPack {
