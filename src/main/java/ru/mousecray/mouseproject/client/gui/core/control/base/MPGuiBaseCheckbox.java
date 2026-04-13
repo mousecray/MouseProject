@@ -9,17 +9,18 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
 import ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper;
 import ru.mousecray.mouseproject.client.gui.core.component.lang.MPGuiString;
 import ru.mousecray.mouseproject.client.gui.core.component.texture.MPGuiTexture;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiScaleRules;
-import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiScaleType;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTickEvent;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import static org.lwjgl.opengl.GL11.*;
+import static ru.mousecray.mouseproject.client.gui.core.dim.MPGuiScaleType.ORIGIN_VERTICAL;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -36,7 +37,7 @@ public abstract class MPGuiBaseCheckbox<T extends MPGuiBaseCheckbox<T>> extends 
                 Math.max(shape.height(), fontRenderer.FONT_HEIGHT)
         ));
         boxOriginalWidth = shape.width();
-        setScaleRules(new MPGuiScaleRules(MPGuiScaleType.ORIGIN_VERTICAL));
+        setScaleRules(new MPGuiScaleRules(ORIGIN_VERTICAL));
         setGuiString(text);
     }
 
@@ -69,14 +70,15 @@ public abstract class MPGuiBaseCheckbox<T extends MPGuiBaseCheckbox<T>> extends 
             float inverseScale = 1.0F / scale;
 
             GlStateManager.pushMatrix();
-            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-            GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            GlStateManager.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            GlStateManager.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
             GlStateManager.scale(scale, scale, 1.0F);
             MPGuiRenderHelper.drawString(
                     fontrenderer, displayString,
                     (calculatedInnerShape.x()) * inverseScale + calculatedTextOffsetTemp.x() * inverseScale,
-                    calculatedInnerShape.y() * inverseScale + calculatedInnerShape.height() * inverseScale / 2f - (fontrenderer.FONT_HEIGHT) / 2f + calculatedTextOffsetTemp.y() * inverseScale,
+                    calculatedInnerShape.y() * inverseScale + calculatedInnerShape.height() * inverseScale /
+                            2f - (fontrenderer.FONT_HEIGHT) / 2f + calculatedTextOffsetTemp.y() * inverseScale,
                     color, getFontSize() != MPFontSize.SMALL
             );
             GlStateManager.popMatrix();

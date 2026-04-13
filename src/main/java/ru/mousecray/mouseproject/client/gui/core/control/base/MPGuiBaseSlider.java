@@ -40,6 +40,9 @@ public class MPGuiBaseSlider<T extends MPGuiBaseSlider<T>> extends MPGuiPanel<T>
     private MPOrientation orientation;
     private float         progress = 0f;
 
+    private final float originalKnobWidth;
+    private final float originalKnobHeight;
+
     private final MPGuiSliderChangedEvent<T> sliderChangedEvent = new MPGuiSliderChangedEvent<>();
 
     private Consumer<MPGuiSliderChangedEvent<T>> onSliderChangedListener = null;
@@ -52,6 +55,9 @@ public class MPGuiBaseSlider<T extends MPGuiBaseSlider<T>> extends MPGuiPanel<T>
         this.min = min;
         this.max = Math.max(max, min);
         range = this.max - min;
+
+        originalKnobWidth = knobWidth;
+        originalKnobHeight = knobHeight;
 
         Minecraft mc = Minecraft.getMinecraft();
         sliderChangedEvent.bind(mc, self());
@@ -126,6 +132,10 @@ public class MPGuiBaseSlider<T extends MPGuiBaseSlider<T>> extends MPGuiPanel<T>
 
     private void updateOrientationState() {
         boolean isVert = orientation == MPOrientation.VERTICAL;
+        float   kw     = isVert ? originalKnobHeight : originalKnobWidth;
+        float   kh     = isVert ? originalKnobWidth : originalKnobHeight;
+
+        knob.getShape().withWidth(kw).withHeight(kh);
         knob.setScaleRules(new MPGuiScaleRules(isVert ? MPGuiScaleType.ORIGIN_HORIZONTAL : MPGuiScaleType.ORIGIN_VERTICAL));
         recalculateKnobPosition();
     }
@@ -133,19 +143,24 @@ public class MPGuiBaseSlider<T extends MPGuiBaseSlider<T>> extends MPGuiPanel<T>
     protected void onOrientationChanged() { }
 
     private void updateFromMouse(int mouseX, int mouseY) {
-        MPMutableGuiShape inner = getCalculatedShape();
+        MPMutableGuiShape inner  = getCalculatedShape();
+        boolean           isVert = orientation == MPOrientation.VERTICAL;
 
-        float   knobW  = knob.getCalculatedShape().width();
-        float   knobH  = knob.getCalculatedShape().height();
-        boolean isVert = orientation == MPOrientation.VERTICAL;
+        float knobW = knob.getCalculatedShape().width();
+        float knobH = knob.getCalculatedShape().height();
 
         float trackLength = isVert ? inner.height() - knobH : inner.width() - knobW;
-
         if (trackLength <= 0) return;
 
-        float rel = isVert ? (mouseY - inner.y()) - knobH / 2f : (mouseX - inner.x()) - knobW / 2f;
+        float rel, newProgress;
+        if (isVert) {
+            rel = (mouseY - inner.y()) - knobH / 2f;
+            newProgress = 1.0f - MathHelper.clamp(rel / trackLength, 0f, 1f);
+        } else {
+            rel = (mouseX - inner.x()) - knobW / 2f;
+            newProgress = MathHelper.clamp(rel / trackLength, 0f, 1f);
+        }
 
-        float newProgress = MathHelper.clamp(rel / trackLength, 0f, 1f);
         if (Float.compare(progress, newProgress) == 0) return;
 
         int newValue = min + Math.round(newProgress * range);
@@ -220,7 +235,10 @@ public class MPGuiBaseSlider<T extends MPGuiBaseSlider<T>> extends MPGuiPanel<T>
             trackLength = 0;
         }
 
-        float knobPrimary   = progress * trackLength;
+        float knobPrimary;
+        if (isVert) knobPrimary = (1f - progress) * trackLength;
+        else knobPrimary = progress * trackLength;
+
         float knobSecondary = isVert ? (inner.width() - knobW) / 2f : (inner.height() - knobH) / 2f;
 
         float knobX = inner.x() + (isVert ? knobSecondary : knobPrimary);
@@ -231,9 +249,11 @@ public class MPGuiBaseSlider<T extends MPGuiBaseSlider<T>> extends MPGuiPanel<T>
         if (lastParentDefaultSize != null && lastParentContentSize != null) {
             knob.calculate(lastParentDefaultSize, lastParentContentSize, childAvailableTemp);
         } else {
-            knob.calculate(MPGuiVector.of(inner.width(), inner.height()),
+            knob.calculate(
                     MPGuiVector.of(inner.width(), inner.height()),
-                    childAvailableTemp);
+                    MPGuiVector.of(inner.width(), inner.height()),
+                    childAvailableTemp
+            );
         }
     }
 

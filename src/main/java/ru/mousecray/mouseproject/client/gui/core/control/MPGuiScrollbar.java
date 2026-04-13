@@ -18,11 +18,13 @@ import ru.mousecray.mouseproject.client.gui.core.dim.*;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiMouseClickEvent;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiMouseDragEvent;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTickEvent;
-import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 import java.util.function.Consumer;
+
+import static ru.mousecray.mouseproject.utils.MPStaticData.CONTROLS_TEXTURES;
+import static ru.mousecray.mouseproject.utils.MPStaticData.CONTROLS_TEXTURES_SIZE;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -73,39 +75,43 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
     }
 
     private void updateOrientationState() {
-        MPGuiScaleType scaleType = orientation == MPOrientation.VERTICAL ? MPGuiScaleType.PARENT_HORIZONTAL : MPGuiScaleType.PARENT_VERTICAL;
+        boolean isVert = orientation == MPOrientation.VERTICAL;
+
+        MPGuiScaleType scaleType = isVert ? MPGuiScaleType.PARENT_HORIZONTAL : MPGuiScaleType.PARENT_VERTICAL;
         minusButton.setScaleRules(new MPGuiScaleRules(scaleType));
         plusButton.setScaleRules(new MPGuiScaleRules(scaleType));
         thumb.setScaleRules(new MPGuiScaleRules(scaleType));
 
-        boolean     isVert   = orientation == MPOrientation.VERTICAL;
-        MPGuiVector iconSize = MPGuiVector.of(11);
+        IGuiVector minusPos  = isVert ? MPGuiVector.of(203, 0) : MPGuiVector.of(203, 22);
+        IGuiVector minusSize = isVert ? MPGuiVector.of(11, 7) : MPGuiVector.of(7, 11);
+
+        IGuiVector plusPos  = isVert ? MPGuiVector.of(214, 0) : MPGuiVector.of(214, 22);
+        IGuiVector plusSize = isVert ? MPGuiVector.of(11, 7) : MPGuiVector.of(7, 11);
+
+        IGuiVector thumbPos  = isVert ? MPGuiVector.of(192, 0) : MPGuiVector.of(192, 31);
+        IGuiVector thumbSize = isVert ? MPGuiVector.of(11, 10) : MPGuiVector.of(10, 11);
+
+        IGuiVector fgPos  = isVert ? MPGuiVector.of(224, 0) : MPGuiVector.of(224, 7);
+        IGuiVector fgSize = isVert ? MPGuiVector.of(5, 2) : MPGuiVector.of(2, 5);
 
         setMinusArrowTexturePack(MPGuiTexturePack.Builder
-                .create(
-                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                        isVert ? MPGuiVector.of(192, 0) : MPGuiVector.of(20, 0), iconSize
-                )
-                .addTexture(0).addTexture(1, MPGuiElementState.HOVERED)
+                .create(CONTROLS_TEXTURES, CONTROLS_TEXTURES_SIZE, minusPos, minusSize)
+                .addTexture(0)
+                .addTexture(1, MPGuiElementState.HOVERED)
                 .addTexture(2, MPGuiElementState.PRESSED)
                 .build()
         );
 
         setPlusArrowTexturePack(MPGuiTexturePack.Builder
-                .create(
-                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                        isVert ? MPGuiVector.of(192, 0) : MPGuiVector.of(30, 0), iconSize
-                )
-                .addTexture(0).addTexture(1, MPGuiElementState.HOVERED)
+                .create(CONTROLS_TEXTURES, CONTROLS_TEXTURES_SIZE, plusPos, plusSize)
+                .addTexture(0)
+                .addTexture(1, MPGuiElementState.HOVERED)
                 .addTexture(2, MPGuiElementState.PRESSED)
                 .build()
         );
 
         setThumbTexturePack(MPGuiTexturePack.Builder
-                .create(
-                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                        MPGuiVector.of(40, 0), iconSize
-                )
+                .create(CONTROLS_TEXTURES, CONTROLS_TEXTURES_SIZE, thumbPos, thumbSize)
                 .addTexture(0)
                 .addTexture(1, MPGuiElementState.HOVERED)
                 .addTexture(2, MPGuiElementState.PRESSED)
@@ -113,10 +119,7 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
         );
 
         setThumbForegroundTexturePack(MPGuiTexturePack.Builder
-                .create(
-                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
-                        MPGuiVector.of(50, 0), iconSize
-                )
+                .create(CONTROLS_TEXTURES, CONTROLS_TEXTURES_SIZE, fgPos, fgSize)
                 .addTexture(0)
                 .addTexture(1, MPGuiElementState.HOVERED)
                 .addTexture(2, MPGuiElementState.PRESSED)
@@ -281,7 +284,8 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
 
         private float getScrollableTrack(boolean isVert) {
             float thickness = isVert ? getCalculatedShape().width() : getCalculatedShape().height();
-            float totalTrackLength = isVert ? MPGuiScrollbar.this.getCalculatedShape().height()
+            float totalTrackLength = isVert
+                    ? MPGuiScrollbar.this.getCalculatedShape().height()
                     : MPGuiScrollbar.this.getCalculatedShape().width();
 
             float trackSize   = totalTrackLength - (thickness * 2);
@@ -298,11 +302,9 @@ public class MPGuiScrollbar extends MPGuiPanel<MPGuiScrollbar> {
 
             MPGuiTexture fgTex = thumbForegroundTexturePack.getCalculatedTexture(getStateManager());
             if (fgTex != null) {
-                float   w      = getCalculatedShape().width();
-                float   h      = getCalculatedShape().height();
-                boolean isVert = orientation == MPOrientation.VERTICAL;
-
-                float linesSize = isVert ? w : h;
+                float w         = getCalculatedShape().width();
+                float h         = getCalculatedShape().height();
+                float linesSize = Math.min(w, h);
                 float linesX    = getCalculatedShape().x() + (w - linesSize) / 2f;
                 float linesY    = getCalculatedShape().y() + (h - linesSize) / 2f;
 

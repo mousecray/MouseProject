@@ -16,10 +16,12 @@ import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiShape;
 import ru.mousecray.mouseproject.client.gui.core.dim.MPGuiVector;
 import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTextTypedEvent;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPNumberMode;
-import ru.mousecray.mouseproject.utils.MPStaticData;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
+
+import static ru.mousecray.mouseproject.utils.MPStaticData.CONTROLS_TEXTURES;
+import static ru.mousecray.mouseproject.utils.MPStaticData.CONTROLS_TEXTURES_SIZE;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -32,7 +34,7 @@ public class MPGuiNumberField extends MPGuiBaseTextField<MPGuiNumberField> {
         this.numberMode = Objects.requireNonNull(numberMode);
         setTexturePack(MPGuiTexturePack.Builder
                 .create(
-                        MPStaticData.CONTROLS_TEXTURES, MPStaticData.CONTROLS_TEXTURES_SIZE,
+                        CONTROLS_TEXTURES, CONTROLS_TEXTURES_SIZE,
                         MPGuiVector.of(104, 0), MPGuiVector.of(80, 10)
                 )
                 .addTexture(0)
