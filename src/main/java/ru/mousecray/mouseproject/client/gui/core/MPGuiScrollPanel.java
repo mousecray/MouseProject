@@ -35,7 +35,11 @@ import ru.mousecray.mouseproject.client.gui.core.misc.MPScrollDirection;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 import java.util.Objects;
+
+import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentX;
+import static ru.mousecray.mouseproject.client.gui.core.component.MPGuiRenderHelper.calculateFlowComponentY;
 
 @SideOnly(Side.CLIENT)
 @ParametersAreNonnullByDefault
@@ -254,14 +258,16 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
             MPMutableGuiShape contentAvail = calculatedShape.copy().toMutable();
             boolean           isVert       = orientation == MPOrientation.VERTICAL;
 
-            float sbThickness = scrollbar != null ? (isVert ? scrollbar.getShape().width() : scrollbar.getShape().height()) : 0f;
+            float scaledSbThickness = isVert
+                    ? calculateFlowComponentX(pDefSize, pContentSize, scrollbarThickness)
+                    : calculateFlowComponentY(pDefSize, pContentSize, scrollbarThickness);
 
             if (isVert) {
                 contentAvail.withHeight(99999f);
-                if (scrollEnabled && scrollbar != null) contentAvail.withWidth(contentAvail.width() - sbThickness);
+                if (scrollEnabled && scrollbar != null) contentAvail.withWidth(contentAvail.width() - scaledSbThickness);
             } else {
                 contentAvail.withWidth(99999f);
-                if (scrollEnabled && scrollbar != null) contentAvail.withHeight(contentAvail.height() - sbThickness);
+                if (scrollEnabled && scrollbar != null) contentAvail.withHeight(contentAvail.height() - scaledSbThickness);
             }
 
             content.calculate(pDefSize, pContentSize, contentAvail);
@@ -280,12 +286,21 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
                 scrollbar.updateSizes(viewportSize, contentSize);
                 scrollbar.setScrollValue(scrollValue, false);
 
-                if (isVert) {
-                    scrollbar.getShape().withX(shape.width() - sbThickness).withY(0).withHeight(shape.height());
-                } else {
-                    scrollbar.getShape().withX(0).withY(shape.height() - sbThickness).withWidth(shape.width());
-                }
+                scrollbar.getShape().withX(0).withY(0);
+                if (isVert) scrollbar.getShape().withWidth(scrollbarThickness).withHeight(shape.height());
+                else scrollbar.getShape().withWidth(shape.width()).withHeight(scrollbarThickness);
+
                 scrollbar.calculate(pDefSize, pContentSize, calculatedShape);
+
+                if (isVert) {
+                    float dx = calculatedShape.x() + calculatedShape.width() - scrollbar.getCalculatedShape().width()
+                            - scrollbar.getCalculatedShape().x();
+                    scrollbar.offsetCalculatedShape(dx, 0);
+                } else {
+                    float dy = calculatedShape.y() + calculatedShape.height() - scrollbar.getCalculatedShape().height()
+                            - scrollbar.getCalculatedShape().y();
+                    scrollbar.offsetCalculatedShape(0, dy);
+                }
             }
         }
     }
@@ -649,8 +664,8 @@ public abstract class MPGuiScrollPanel<T extends MPGuiScrollPanel<T>> implements
 
     //Обработчики событий
     protected void onDrawBackground(MPGuiTickEvent<T> event) {
-        MPGuiTexture texture = texturePack.getCalculatedTexture(stateManager);
-        if (texture != null) {
+        List<MPGuiTexture> textures = texturePack.getCalculatedTextures(stateManager);
+        for (MPGuiTexture texture : textures) {
             texture.draw(
                     event.getMc(),
                     calculatedShape.x(), calculatedShape.y(),

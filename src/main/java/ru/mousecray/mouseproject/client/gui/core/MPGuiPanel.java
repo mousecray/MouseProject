@@ -505,8 +505,8 @@ public abstract class MPGuiPanel<T extends MPGuiPanel<T>> implements MPGuiElemen
     }
 
     protected void onDrawBackground(MPGuiTickEvent<T> event) {
-        MPGuiTexture texture = texturePack.getCalculatedTexture(stateManager);
-        if (texture != null) {
+        List<MPGuiTexture> textures = texturePack.getCalculatedTextures(stateManager);
+        for (MPGuiTexture texture : textures) {
             texture.draw(
                     event.getMc(),
                     calculatedShape.x(), calculatedShape.y(),

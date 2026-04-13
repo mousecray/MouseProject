@@ -39,6 +39,7 @@ import ru.mousecray.mouseproject.client.gui.core.misc.MPScrollDirection;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
@@ -446,8 +447,8 @@ public abstract class MPGuiButton<T extends MPGuiButton<T>> extends GuiButton im
 
     //Обработчики событий
     protected void onDrawBackground(MPGuiTickEvent<T> event) {
-        MPGuiTexture texture = texturePack.getCalculatedTexture(stateManager);
-        if (texture != null) {
+        List<MPGuiTexture> textures = texturePack.getCalculatedTextures(stateManager);
+        for (MPGuiTexture texture : textures) {
             texture.draw(
                     event.getMc(),
                     calculatedShape.x(), calculatedShape.y(),

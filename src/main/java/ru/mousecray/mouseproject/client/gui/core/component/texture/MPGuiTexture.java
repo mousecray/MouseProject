@@ -75,14 +75,14 @@ public class MPGuiTexture {
         for (int i = 0; i < quadCount; i++) {
             int idx = i * 8;
             MPGuiRenderHelper.drawTexture(
-                    x + bakedQuads[idx],        //drawX
-                    y + bakedQuads[idx + 1],       //drawY
-                    startX + bakedQuads[idx + 2],  //uvX
-                    startY + bakedQuads[idx + 3],  //uvY
-                    bakedQuads[idx + 4],           //uvW
-                    bakedQuads[idx + 5],           //uvH
-                    bakedQuads[idx + 6],           //drawW
-                    bakedQuads[idx + 7],           //drawH
+                    x + bakedQuads[idx],           //drawX
+                    y + bakedQuads[idx + 1],          //drawY
+                    startX + bakedQuads[idx + 2],     //uvX
+                    startY + bakedQuads[idx + 3],     //uvY
+                    bakedQuads[idx + 4],              //uvW
+                    bakedQuads[idx + 5],              //uvH
+                    bakedQuads[idx + 6],              //drawW
+                    bakedQuads[idx + 7],              //drawH
                     texW, texH
             );
         }
@@ -112,8 +112,8 @@ public class MPGuiTexture {
         float uvRatioX   = 1.0f / multX;
         float uvRatioY   = 1.0f / multY;
 
-        int stepsX            = (modeX == MPGuiTextureScaleRules.ScaleMode.FILL && scaledTexW > 0) ? (int) Math.ceil(width / scaledTexW) : 1;
-        int stepsY            = (modeY == MPGuiTextureScaleRules.ScaleMode.FILL && scaledTexH > 0) ? (int) Math.ceil(height / scaledTexH) : 1;
+        int stepsX            = (modeX == MPGuiTextureScaleRules.ScaleMode.FILL && scaledTexW > 0) ? (int) Math.ceil(width / (scaledTexW + scaleRules.getGapX())) : 1;
+        int stepsY            = (modeY == MPGuiTextureScaleRules.ScaleMode.FILL && scaledTexH > 0) ? (int) Math.ceil(height / (scaledTexH + scaleRules.getGapY())) : 1;
         int requiredArraySize = stepsX * stepsY * 8;
 
         if (bakedQuads.length < requiredArraySize) bakedQuads = new float[requiredArraySize];
@@ -129,7 +129,7 @@ public class MPGuiTexture {
             } else if (modeX == MPGuiTextureScaleRules.ScaleMode.FILL) {
                 drawW = Math.min(scaledTexW, width - xCursor);
                 uvW = drawW * uvRatioX;
-                xCursor += scaledTexW;
+                xCursor += scaledTexW + scaleRules.getGapX();
             } else {
                 float boxStart = 0;
                 if (anchorX == MPGuiTextureScaleRules.TextureAnchor.CENTER) boxStart = (width - scaledTexW) / 2f;
@@ -159,7 +159,7 @@ public class MPGuiTexture {
                     } else if (modeY == MPGuiTextureScaleRules.ScaleMode.FILL) {
                         drawH = Math.min(scaledTexH, height - yCursor);
                         uvH = drawH * uvRatioY;
-                        yCursor += scaledTexH;
+                        yCursor += scaledTexH + scaleRules.getGapY();
                     } else {
                         float boxStart = 0;
                         if (anchorY == MPGuiTextureScaleRules.TextureAnchor.CENTER) boxStart = (height - scaledTexH) / 2f;

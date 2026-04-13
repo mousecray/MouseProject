@@ -40,6 +40,7 @@ import ru.mousecray.mouseproject.client.gui.core.misc.MPScrollDirection;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 import java.util.Objects;
 
 @SideOnly(Side.CLIENT)
@@ -513,9 +514,14 @@ public abstract class MPGuiTextField<T extends MPGuiTextField<T>> extends GuiTex
 
     //Обработчики событий
     protected void onDrawBackground(MPGuiTickEvent<T> event) {
-        MPGuiTexture texture = texturePack.getCalculatedTexture(stateManager);
-        if (texture != null)
-            texture.draw(event.getMc(), calculatedShape.x(), calculatedShape.y(), calculatedShape.width(), calculatedShape.height());
+        List<MPGuiTexture> textures = texturePack.getCalculatedTextures(stateManager);
+        for (MPGuiTexture texture : textures) {
+            texture.draw(
+                    event.getMc(),
+                    calculatedShape.x(), calculatedShape.y(),
+                    calculatedShape.width(), calculatedShape.height()
+            );
+        }
     }
 
     protected void onDrawForeground(MPGuiTickEvent<T> event) { }

@@ -18,6 +18,7 @@ import ru.mousecray.mouseproject.client.gui.core.event.MPGuiTickEvent;
 import ru.mousecray.mouseproject.client.gui.core.misc.MPFontSize;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static ru.mousecray.mouseproject.client.gui.core.dim.MPGuiScaleType.ORIGIN_VERTICAL;
@@ -43,8 +44,8 @@ public abstract class MPGuiBaseCheckbox<T extends MPGuiBaseCheckbox<T>> extends 
 
     @Override
     protected void onDrawBackground(MPGuiTickEvent<T> event) {
-        MPGuiTexture texture = getTexturePack().getCalculatedTexture(stateManager);
-        if (texture != null) {
+        List<MPGuiTexture> textures = getTexturePack().getCalculatedTextures(stateManager);
+        for (MPGuiTexture texture : textures) {
             float scaleY  = calculatedShape.height() / Math.max(1f, shape.height());
             float curBoxW = boxOriginalWidth * scaleY;
 
@@ -61,7 +62,6 @@ public abstract class MPGuiBaseCheckbox<T extends MPGuiBaseCheckbox<T>> extends 
 
     @Override
     protected void onDrawText(MPGuiTickEvent<T> event) {
-        super.onDrawText(event);
         if (displayString != null) {
             FontRenderer fontrenderer = event.getMc().fontRenderer;
             int          color        = colorPack.getCalculatedColor(stateManager, packedFGColour);

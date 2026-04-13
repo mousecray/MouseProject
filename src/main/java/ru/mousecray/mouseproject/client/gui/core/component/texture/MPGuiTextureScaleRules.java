@@ -11,6 +11,8 @@ public class MPGuiTextureScaleRules {
     private final Set<MPGuiTextureScaleType> scaleTypes  = new HashSet<>();
     private       float                      multiplierX = 1.0f;
     private       float                      multiplierY = 1.0f;
+    private       float                      gapX        = 0f;
+    private       float                      gapY        = 0f;
 
     public MPGuiTextureScaleRules(MPGuiTextureScaleType... types) {
         for (MPGuiTextureScaleType type : types) addType(type);
@@ -56,36 +58,44 @@ public class MPGuiTextureScaleRules {
         return this;
     }
 
+    public MPGuiTextureScaleRules setGaps(float gapX, float gapY) {
+        this.gapX = gapX;
+        this.gapY = gapY;
+        return this;
+    }
+
     public MPGuiTextureScaleRules setMultiplayerX(float multiplierX) {
         this.multiplierX = multiplierX;
         return this;
     }
-
     public MPGuiTextureScaleRules setMultiplayerY(float multiplierY) {
         this.multiplierY = multiplierY;
         return this;
     }
+    public MPGuiTextureScaleRules setMultiplier(float multiplier) { return setMultipliers(multiplier, multiplier); }
 
-    public MPGuiTextureScaleRules setMultiplier(float multiplier) {
-        return setMultipliers(multiplier, multiplier);
-    }
-
-    public float getMultiplierX() { return multiplierX; }
-    public float getMultiplierY() { return multiplierY; }
+    public float getMultiplierX()                                 { return multiplierX; }
+    public float getMultiplierY()                                 { return multiplierY; }
+    public float getGapX()                                        { return gapX; }
+    public float getGapY()                                        { return gapY; }
 
     public ScaleMode getModeX() {
         if (scaleTypes.contains(MPGuiTextureScaleType.FILL) || scaleTypes.contains(MPGuiTextureScaleType.FILL_HORIZONTAL))
             return ScaleMode.FILL;
-        if (scaleTypes.stream().anyMatch(t -> t.getCategory() == MPGuiTextureScaleType.Category.SINGLE && t.getAxes().contains(MPGuiTextureScaleType.Axes.HORIZONTAL)))
-            return ScaleMode.SINGLE;
+        if (scaleTypes.stream().anyMatch(
+                t -> t.getCategory() == MPGuiTextureScaleType.Category.SINGLE
+                        && t.getAxes().contains(MPGuiTextureScaleType.Axes.HORIZONTAL)
+        )) return ScaleMode.SINGLE;
         return ScaleMode.STRETCH;
     }
 
     public ScaleMode getModeY() {
         if (scaleTypes.contains(MPGuiTextureScaleType.FILL) || scaleTypes.contains(MPGuiTextureScaleType.FILL_VERTICAL))
             return ScaleMode.FILL;
-        if (scaleTypes.stream().anyMatch(t -> t.getCategory() == MPGuiTextureScaleType.Category.SINGLE && t.getAxes().contains(MPGuiTextureScaleType.Axes.VERTICAL)))
-            return ScaleMode.SINGLE;
+        if (scaleTypes.stream().anyMatch(
+                t -> t.getCategory() == MPGuiTextureScaleType.Category.SINGLE
+                        && t.getAxes().contains(MPGuiTextureScaleType.Axes.VERTICAL)
+        )) return ScaleMode.SINGLE;
         return ScaleMode.STRETCH;
     }
 

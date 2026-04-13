@@ -62,13 +62,22 @@ public class MPGuiColorPack {
     public int getCalculatedColor(MPGuiElementStateManager stateManager) { return getCalculatedColor(stateManager, 0); }
 
     public int getCalculatedColor(MPGuiElementStateManager stateManager, int packedFGColour) {
-        int color = -1;
-        if (packedFGColour != 0) color = packedFGColour;
+        if (packedFGColour != 0) return packedFGColour;
+        int color    = defaultColor;
+        int maxBits  = -1;
+        int bestMask = -1;
         for (Int2IntMap.Entry e : colors.int2IntEntrySet()) {
-            if (stateManager.satisfies(e.getIntKey())) color = e.getIntValue();
+            int mask = e.getIntKey();
+            if (stateManager.satisfies(mask)) {
+                int bits = Integer.bitCount(mask);
+                if (bits > maxBits || (bits == maxBits && mask > bestMask)) {
+                    maxBits = bits;
+                    bestMask = mask;
+                    color = e.getIntValue();
+                }
+            }
         }
-
-        return color == -1 ? defaultColor : color;
+        return color;
     }
 
     public static class Builder {

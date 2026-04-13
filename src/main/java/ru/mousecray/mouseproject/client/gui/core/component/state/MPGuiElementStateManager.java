@@ -42,6 +42,15 @@ public class MPGuiElementStateManager {
         if (oldStates != states) notifyChange();
     }
 
+    public void clearStates() {
+        int maskToClear = MPGuiElementState.HOVERED.mask | MPGuiElementState.PRESSED.mask |
+                MPGuiElementState.FOCUSED.mask | MPGuiElementState.SELECTED.mask |
+                MPGuiElementState.FAIL.mask;
+        int oldStates = states;
+        states &= ~maskToClear;
+        if (oldStates != states) notifyChange();
+    }
+
     public boolean has(MPGuiElementState state) { return (states & state.mask) != 0; }
 
     public void setForbidden(MPGuiElementState state, boolean isForbidden) {

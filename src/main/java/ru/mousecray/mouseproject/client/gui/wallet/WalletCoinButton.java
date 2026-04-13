@@ -46,7 +46,7 @@ public class WalletCoinButton extends MPGuiSelectableButton<WalletCoinButton> {
         );
         this.coinValue = coinValue;
         cachedName = new ItemStack(coinValue.getType().getItem(), 1).getDisplayName();
-        setTextOffset(MPGuiVector.of(0, getShape().height() / 3.5f));
+        setTextOffset(MPGuiVector.of(0, getShape().height() / 2.3f));
         int length = coinValue.getFormattedValue(CoinValue.FormatType.SHORT).length();
         if (length > 4) setTextScaleMultiplayer((float) Math.max(0.5, 4d / length));
         setScaleRules(new MPGuiScaleRules(MPGuiScaleType.ORIGIN_VERTICAL));
